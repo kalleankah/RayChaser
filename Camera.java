@@ -14,7 +14,7 @@ public class Camera  {
         eye2 = new Vector3d(-2.0,0.0,0.0);
     }
     void createPixels(Scene S){
-        double PixelSize = 2/Width;
+        double PixelSize = 2.0/Width;
         Vector3d endPoint;
         Ray r;
         Pixel p;
@@ -34,11 +34,19 @@ public class Camera  {
         File file = new File(filename);
         try{
             PrintWriter writer = new PrintWriter(file, "UTF-8");
-            writer.println("P6");
+            writer.println("P3");
             writer.println(Width + " " + Height);
             writer.println("255");
-            for(int i = 0; i < Width*Height; ++i){
-                writer.print(pixelList.elementAt(i).color.printForImage());
+            for(int j = 0; j < Height; ++j){
+              for(int i = 0; i < Width; ++i){
+                writer.print(pixelList.elementAt(i+j*Width  ).color.printForImage());
+                if(i != Width-1){
+                  writer.print(" ");
+                }
+              }
+              if(j != Height-1){
+              writer.print("\n");
+            }
             }
             writer.close();
         }
