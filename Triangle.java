@@ -55,11 +55,9 @@ public class Triangle{
         Vector3d v3 = new Vector3d(1.0,0.0,0.0);
         ColorDbl c = new ColorDbl(1.0,0.0,1.0);
         Triangle Tri = new Triangle(v1,v2,v3,c);
-        Tri.print();
         Vector3d s = new Vector3d(0.5,0.20,-1.0);
         Vector3d e = new Vector3d(0.5,5.20,-1.0);
         Ray r = new Ray(s,e);
-        r.print();
         double t = Tri.rayIntersection(r);
         System.out.println(t);
 

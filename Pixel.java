@@ -35,12 +35,12 @@ public class Pixel{
         p2.setColor(C2);
         p2.color.print();
 
-        Ray r1 = new Ray(v1,v2);
+        /*Ray r1 = new Ray(v1,v2);
         r1.rayColor.print();
         r1.rayColor.setColor(C2);  // this method it throws a NullPointerException on line 22
         p1.addRay(r1);
         p1.setColorDoubleFromRayList();
-        p1.color.print();
+        p1.color.print();*/
 
     }
 }

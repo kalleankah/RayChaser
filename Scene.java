@@ -68,13 +68,9 @@ public class Scene{
         double t = 0.0;
         for (Triangle Tri : triangleList){
             t = Tri.rayIntersection(r);
-            System.out.println("t: " +t);
-            Tri.print();
             if(t > 1.0 && t < Double.POSITIVE_INFINITY){
-                System.out.println("TRUE");
                 r.rayColor = Tri.color;
             }
-            System.out.println("\n\n\n\n");
         }
     }
     public static void main(String[] args) {
