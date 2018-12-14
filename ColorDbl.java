@@ -17,6 +17,12 @@ public class ColorDbl{
     void print(){
         System.out.println("Color: ("+R+", "+G+", "+B+" );");
     }
+    String printForImage(){
+        int r = (int)(R*255);
+        int g =(int)( G*255);
+        int b = (int)(B*255);
+        return r + " " + g + " " + b;
+    }
     void setColor(ColorDbl Cd){
         R = Cd.R;
         G = Cd.G;
@@ -32,9 +38,10 @@ public class ColorDbl{
         ColorDbl C2 = new ColorDbl(1.0,0.5,0.1);
         ColorDbl C3 = new ColorDbl(2.0,3.0,2.0);
         C3.setColor(C1);
-        C1.print();
+        //C1.print();
         C2.print();
-        C3.print();
+        System.out.println(C2.printForImage());
+        //C3.print();
 
     }
 }

@@ -24,6 +24,7 @@ public class Camera  {
                 r = new Ray(eye1, endPoint);
                 S.triangleIntersect(r);
                 p = new Pixel();
+                p.addRay(r);
                 p.setColorDoubleFromRayList();
                 pixelList.add(p);
             }
@@ -37,9 +38,7 @@ public class Camera  {
             writer.println(Width + " " + Height);
             writer.println("255");
             for(int i = 0; i < Width*Height; ++i){
-                writer.print(pixelList.elementAt(i).color.R*255);
-                writer.print(pixelList.elementAt(i).color.G*255);
-                writer.print(pixelList.elementAt(i).color.B*255);
+                writer.print(pixelList.elementAt(i).color.printForImage());
             }
             writer.close();
         }
@@ -52,10 +51,9 @@ public class Camera  {
 
     }
     public static void main(String[] args) throws IOException{
-        Camera c = new Camera(2,2);
+        Camera c = new Camera(800,800);
         Scene s = new Scene();
         c.createPixels(s);
-        c.pixelList.elementAt(1).color.print();
         c.render("bild.ppm");
 
     }
