@@ -6,7 +6,6 @@ public class Pixel{
     ColorDbl color = new ColorDbl();
     Pixel(){}
     Pixel(ColorDbl Cd){
-        rayList = new Vector<Ray>(); // Add Ray
         color = Cd;
     }
     void setColor(ColorDbl Cd){

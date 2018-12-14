@@ -68,7 +68,7 @@ public class Scene{
         double t = 0.0;
         for (Triangle Tri : triangleList){
             t = Tri.rayIntersection(r);
-            System.out.println(t);
+            System.out.println("t: " +t);
             Tri.print();
             if(t > 1.0 && t < Double.POSITIVE_INFINITY){
                 System.out.println("TRUE");
@@ -79,7 +79,7 @@ public class Scene{
     }
     public static void main(String[] args) {
         Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
-        Vector3d v2 = new Vector3d(0.0,1.0,0.0);
+        Vector3d v2 = new Vector3d(0.0,0.21,0.1);
         Ray r1 = new Ray(v1,v2);
         Scene s = new Scene();
         r1.rayColor.print();

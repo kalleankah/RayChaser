@@ -16,7 +16,6 @@ public class Triangle{
         normal.cross(edge1, edge2);
         normal.normalize();
         color = c;
-
     }
     void print(){
         System.out.println("vertex0: ( " +vertex0.x+", "+vertex0.y+", "+vertex0.z+" )");
@@ -37,9 +36,17 @@ public class Triangle{
         D.sub(r.end,r.start);
         P.cross(D,edge2);
 
-        double upper = Q.dot(edge2);
-        double down = P.dot(edge1);
-        double t = upper/down;
+        double QE1 = Q.dot(edge2);
+        double PE1 = P.dot(edge1);
+        double PT = P.dot(T);
+        double QD = Q.dot(D);
+        double t = QE1/PE1;
+        double u = PT/PE1;
+        double v = QD/PE1;
+        if(u < 0.0 || v < 0.0 || u+v > 1.0){
+            t = Double.POSITIVE_INFINITY;
+        }
+        //System.out.println("U: " + u + " V: " +v);
         return t;
     }
     public static void main(String[] args) {
