@@ -2,10 +2,13 @@ import javax.vecmath.Vector3d;
 public class Ray{
     Vector3d start;
     Vector3d end;
+    Vector3d direction = new Vector3d(0.0, 0.0, 0.0);
     ColorDbl rayColor = new ColorDbl();
     Ray(Vector3d s, Vector3d e){
         start = s;
         end = e;
+        direction.sub(e, s);
+        direction.normalize();
     }
     void print(){
         System.out.println("Start vector: ( " +start.x+", "+start.y+", "+start.z+" ) \nEnd vector: ( "+end.x+", "+end.y+", "+end.z+" )");

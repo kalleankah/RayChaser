@@ -20,7 +20,7 @@ public class Camera  {
         Pixel p;
         for(int j = 0; j < Height; ++j){
             for(int i = 0; i < Width; ++i){
-                endPoint= new Vector3d(0.0,1-0.5*PixelSize-i*PixelSize, 1-0.5*PixelSize-j*PixelSize );
+                endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
                 r = new Ray(eye1, endPoint);
                 S.triangleIntersect(r);
                 p = new Pixel();
@@ -61,11 +61,12 @@ public class Camera  {
     public static void main(String[] args) throws IOException{
         Camera c = new Camera(800,800);
         Scene s = new Scene();
-        s.addTetrahedron(new Vector3d(9.0, 0.0, -2.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
+        Sphere ball = new Sphere(new Vector3d(5.0, 0.0, 2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
+        s.addSphere(ball);
+        s.addTetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
         s.addTetrahedron(new Vector3d(9.0, 4.0, -4.0), 4.0, new ColorDbl(0.6, 0.7, 0.3));
-        s.addTetrahedron(new Vector3d(3.0, -0.5, -2.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        s.addTetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
         c.createPixels(s);
         c.render("bild.ppm");
-
     }
 }

@@ -1,0 +1,40 @@
+import javax.vecmath.Vector3d;
+
+public class Sphere {
+  Vector3d center;
+  double radius;
+  ColorDbl color;
+
+  Sphere(Vector3d c, double r, ColorDbl col){
+    center = c;
+    radius = r;
+    color = col;
+  }
+
+//Checks for intersection between a ray and a sphere
+double sphereIntersect(Ray r){
+    //Create a vector with the direction of ray origin to sphere center
+    Vector3d oc = new Vector3d(0.0, 0.0, 0.0);
+    oc.sub(r.start, center);
+    //System.out.println(oc);
+    //Create function vars
+    double b = 2.0 * r.direction.dot(oc);
+    double c = oc.dot(oc) - (radius*radius);
+
+    double d0 = Double.POSITIVE_INFINITY; //Direction to entry intersection of sphere
+    double d1 = Double.POSITIVE_INFINITY; //Direction to exit intersection of sphere
+    Vector3d x = new Vector3d(0.0, 0.0, 0.0);
+    double rootarg = 0.25*b*b - c; //Pre-calculate argument of square root
+    double epsilon = 0.0001;
+
+    //Non-tangental intersection with sphere
+    if (rootarg > epsilon){
+        d0 = -0.5 * b - Math.sqrt(rootarg);
+        d1 = -0.5 * b + Math.sqrt(rootarg);
+        //The point of intersection is x
+        x.scaleAdd(d0, r.direction, r.start);
+    }
+    return d0;
+}
+
+}

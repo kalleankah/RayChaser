@@ -1,7 +1,9 @@
 import javax.vecmath.Vector3d;
+import java.lang.Math;
 import java.util.*;
 public class Scene{
     Vector<Triangle> triangleList= new Vector<Triangle>();
+    Vector<Sphere> sphereList = new Vector<Sphere>();
     Scene(){
         ColorDbl white = new ColorDbl(1.0,1.0,1.0);
         ColorDbl red = new ColorDbl(1.0,0.0,0.0);
@@ -64,6 +66,9 @@ public class Scene{
     void addTriangle(Triangle t){
         triangleList.add(t);
     }
+    void addSphere(Sphere s){
+        sphereList.add(s);
+    }
     void addTetrahedron(Vector3d origin, double size, ColorDbl shapeColor){
       //Calculate vertex distances
       double d1 = size * 0.942809041582063365867792482806465385713114583584632048; //sqrt(8/9)
@@ -86,14 +91,35 @@ public class Scene{
       triangleList.add( new Triangle( v1, v3, v4, shapeColor) );// Right side
       triangleList.add( new Triangle( v3, v2, v4, shapeColor) );// Back side
     }
+    void addSphere(){
+
+    }
     void triangleIntersect(Ray r){
         double t = 0.0;
+        double d = 0.0;
+        //Check for intersection with all triangles
         for (Triangle Tri : triangleList){
-            t = Tri.rayIntersection(r);
+            t = Tri.rayIntersection(r); //Distance to triangle intersection
+            //Check for intersection with all spheres
+            for(Sphere Sph : sphereList){
+                d = Sph.sphereIntersect(r); //Distance to sphere intersection
+
+            // The color of the ray is the closest of t and d,
+            //so long as they are larger than 1
             if(t > 1.0 && t < Double.POSITIVE_INFINITY){
-                r.rayColor = Tri.color;
+                if(d > 1.0 && d < Double.POSITIVE_INFINITY && d < t){
+                    r.rayColor = Sph.color; //Triangle hit but sphere is closer
+                }
+                else{
+                    r.rayColor = Tri.color; //Sphere hit but triangle is closer
+                }
             }
-        }
+            else if(d > 1.0 && d < Double.POSITIVE_INFINITY){
+                // -- CANNOT HAPPEN IN CLOSED ROOM
+                r.rayColor = Sph.color; //Only sphere hit, no triangle hit
+            }
+          }
+          }
     }
     public static void main(String[] args) {
         Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
