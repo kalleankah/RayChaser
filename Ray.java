@@ -10,6 +10,12 @@ public class Ray{
         direction.sub(e, s);
         direction.normalize();
     }
+    Ray raybounce(Vector3d Z){
+      Vector3d ortho_z = new Vector3d(0.0, 0.0, 0.0);
+      double IZ = Z.dot(direction);
+      Z.scale(IZ);
+      ortho_z.sub(direction, )
+    }
     void print(){
         System.out.println("Start vector: ( " +start.x+", "+start.y+", "+start.z+" ) \nEnd vector: ( "+end.x+", "+end.y+", "+end.z+" )");
     }
