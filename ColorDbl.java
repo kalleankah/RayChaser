@@ -23,6 +23,12 @@ public class ColorDbl{
         int b = (int)(B*255);
         return r + " " + g + " " + b;
     }
+    int RGBForImage(){
+        int r = (int)(R*255);
+        int g =(int)( G*255);
+        int b = (int)(B*255);
+        return (((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff));
+    }
     void setColor(ColorDbl Cd){
         R = Cd.R;
         G = Cd.G;

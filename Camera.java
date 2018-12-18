@@ -1,4 +1,6 @@
 import javax.vecmath.Vector3d;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
 public class Camera  {
@@ -31,31 +33,21 @@ public class Camera  {
         }
     }
     void render(String filename){
-        File file = new File(filename);
+        File file = null;
+        BufferedImage img = new BufferedImage(Width,Height, BufferedImage.TYPE_INT_RGB);
+        for(int y = 0; y < Height; y++){
+            for(int x = 0; x < Width; x++){
+                int rgb = pixelList.elementAt(x+y*Width).color.RGBForImage();
+                img.setRGB(x,y,rgb);
+            }
+        }
         try{
-            PrintWriter writer = new PrintWriter(file, "UTF-8");
-            writer.println("P3");
-            writer.println(Width + " " + Height);
-            writer.println("255");
-            for(int j = 0; j < Height; ++j){
-              for(int i = 0; i < Width; ++i){
-                writer.print(pixelList.elementAt(i+j*Width  ).color.printForImage());
-                if(i != Width-1){
-                  writer.print(" ");
-                }
-              }
-              if(j != Height-1){
-              writer.print("\n");
-            }
-            }
-            writer.close();
+            file = new File(filename + ".png");
+            ImageIO.write(img,"png",file);
         }
         catch(IOException e){
-            System.out.println(e);
+            System.out.println("Error: " +e );
         }
-
-    }
-    void print(){
 
     }
     public static void main(String[] args) throws IOException{
@@ -63,13 +55,13 @@ public class Camera  {
         Scene s = new Scene();
         Sphere ball = new Sphere(new Vector3d(5.0, 0.0, 2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
         s.addObject(ball);
-        //Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
+        Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
         Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new ColorDbl(1.0, 0.0, 0.3));
-        //Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
-        //s.addObject(T1);
+        Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        s.addObject(T1);
         s.addObject(T2);
-        //s.addObject(T3);
+        s.addObject(T3);
         c.createPixels(s);
-        c.render("bild.ppm");
+        c.render("bild");
     }
 }
