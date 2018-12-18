@@ -62,10 +62,13 @@ public class Camera  {
         Camera c = new Camera(800,800);
         Scene s = new Scene();
         Sphere ball = new Sphere(new Vector3d(5.0, 0.0, 2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
-        s.addSphere(ball);
-        s.addTetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
-        s.addTetrahedron(new Vector3d(9.0, 4.0, -4.0), 4.0, new ColorDbl(0.6, 0.7, 0.3));
-        s.addTetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        s.addObject(ball);
+        //Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
+        Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new ColorDbl(1.0, 0.0, 0.3));
+        //Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        //s.addObject(T1);
+        s.addObject(T2);
+        //s.addObject(T3);
         c.createPixels(s);
         c.render("bild.ppm");
     }
