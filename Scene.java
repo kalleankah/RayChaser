@@ -4,6 +4,7 @@ import java.util.*;
 public class Scene{
     Vector<Triangle> triangleList= new Vector<Triangle>();
     Vector<Sphere> sphereList = new Vector<Sphere>();
+    Vector<Ligh> lightList = new Vector<Light>();
     Scene(){
         ColorDbl white = new ColorDbl(1.0,1.0,1.0);
         ColorDbl red = new ColorDbl(1.0,0.0,0.0);
@@ -68,6 +69,9 @@ public class Scene{
     }
     void addSphere(Sphere s){
         sphereList.add(s);
+    }
+    void addLight(Light l){
+        lightList.add(l);
     }
     void addTetrahedron(Vector3d origin, double size, ColorDbl shapeColor){
       //Calculate vertex distances

@@ -62,6 +62,8 @@ public class Camera  {
         Camera c = new Camera(800,800);
         Scene s = new Scene();
         Sphere ball = new Sphere(new Vector3d(5.0, 0.0, 2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
+        Light lamp = new Light(new Vector3d(4.0, 2.0, 4.0), new ColorDbl(1.0, 1.0, 1.0));
+        s.addLight(lamp);
         s.addSphere(ball);
         s.addTetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
         s.addTetrahedron(new Vector3d(9.0, 4.0, -4.0), 4.0, new ColorDbl(0.6, 0.7, 0.3));
