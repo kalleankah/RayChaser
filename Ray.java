@@ -14,9 +14,9 @@ public class Ray{
     }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)
     void raybounce(Vector3d Z, Vector3d intersection){
-        Vector3d I_o = vecSub(direction, vecScale(Z, vecDot(direction, Z)));
-        Vector3d X = vecScale(I_o, 1.0/vecNorm(I_o));
-        Vector3d Y = vecCross(vecScale(X,-1.0), Z);
+        Vector3d I_o = Utilities.vecSub(direction, Utilities.vecScale(Z, Utilities.vecDot(direction, Z)));
+        Vector3d X = Utilities.vecScale(I_o, 1.0/Utilities.vecNorm(I_o));
+        Vector3d Y = Utilities.vecCross(Utilities.vecScale(X,-1.0), Z);
 
         //Create coordinate system transformation matrices
         Matrix4d rotation_mat = new Matrix4d(
@@ -31,74 +31,14 @@ public class Ray{
         0.0, 0.0, 0.0, 1.0);
         Matrix4d world2local = new Matrix4d();
         world2local.mul(rotation_mat, translation_mat);
-        Matrix4d local2world = invertMat(world2local);
+        Matrix4d local2world = Utilities.invertMat(world2local);
 
         //Incoming ray in local coords
-        Vector3d direction_local = mulMatVec(world2local, direction);
+        Vector3d direction_local = Utilities.mulMatVec(world2local, direction);
     }
     void calculateShadowRay(Light L, Vector3d P_hit){
 
     }
-
-    //Vector and matrix functions that don't modify the object ***************
-    double vecDot(Vector3d a, Vector3d b){
-      return (a.x*b.x + a.y*b.y + a.z*b.z);
-    }
-    Vector3d vecCross(Vector3d vec1, Vector3d vec2){
-      Vector3d copy = new Vector3d();
-      copy.cross(vec1, vec2);
-      return copy;
-    }
-    Vector3d vecScale(Vector3d vec, double scale){
-      Vector3d copy = new Vector3d(vec);
-      copy.x *= scale;
-      copy.y *= scale;
-      copy.z *= scale;
-      return copy;
-    }
-    Vector3d vecAdd(Vector3d vec1, Vector3d vec2){
-      Vector3d copy = new Vector3d(vec1);
-      copy.x += vec2.x;
-      copy.y += vec2.y;
-      copy.z += vec2.z;
-      return copy;
-    }
-    Vector3d vecAdd(Vector3d vec, double add){
-      Vector3d copy = new Vector3d(vec);
-      copy.x += add;
-      copy.y += add;
-      copy.z += add;
-      return copy;
-    }
-    Vector3d vecSub(Vector3d vec1, Vector3d vec2){
-      Vector3d copy = new Vector3d(vec1);
-      copy.x -= vec2.x;
-      copy.y -= vec2.y;
-      copy.z -= vec2.z;
-      return copy;
-    }
-    Vector3d vecSub(Vector3d vec, double sub){
-      Vector3d copy = new Vector3d(vec);
-      copy.x -= sub;
-      copy.y -= sub;
-      copy.z -= sub;
-      return copy;
-    }
-    double vecNorm(Vector3d vec){
-      return Math.sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
-    }
-    Matrix4d invertMat(Matrix4d mat){
-      Matrix4d copy = new Matrix4d(mat);
-      copy.invert();
-      return copy;
-    }
-    Vector3d mulMatVec(Matrix4d mat, Vector3d vec){
-      Vector3d result = new Vector3d();
-      result.x = mat.m00*vec.x + mat.m01*vec.y + mat.m02*vec.z;
-      result.y = mat.m10*vec.x + mat.m11*vec.y + mat.m12*vec.z;
-      result.z = mat.m20*vec.x + mat.m21*vec.y + mat.m22*vec.z;
-      return result;
-    }//End of utility functions **********************************************
 
     void print(){
         System.out.println("Start vector: ( " +start.x+", "+start.y+", "+start.z+" ) \nEnd vector: ( "+end.x+", "+end.y+", "+end.z+" )");
