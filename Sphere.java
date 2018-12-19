@@ -1,18 +1,18 @@
 import javax.vecmath.Vector3d;
 
-public class Sphere {
+public class Sphere extends Object3D {
   Vector3d center;
   double radius;
-  ColorDbl color;
 
   Sphere(Vector3d c, double r, ColorDbl col){
+    super(col);
     center = c;
     radius = r;
-    color = col;
   }
 
 //Checks for intersection between a ray and a sphere
-double sphereIntersect(Ray r){
+@Override
+double rayIntersection(Ray r){
     //Create a vector with the direction of ray origin to sphere center
     Vector3d oc = new Vector3d(0.0, 0.0, 0.0);
     oc.sub(r.start, center);

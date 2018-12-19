@@ -1,10 +1,10 @@
 import javax.vecmath.Vector3d;
-public class Triangle{
+public class Triangle extends Object3D{
     Vector3d vertex0, vertex1,vertex2;
     Vector3d edge1,edge2;
     Vector3d normal;
-    ColorDbl color = new ColorDbl();
     Triangle(Vector3d v0,Vector3d v1,Vector3d v2, ColorDbl c){
+        super(c);
         vertex0 = new Vector3d(v0);
         vertex1 = new Vector3d(v1);
         vertex2 = new Vector3d(v2);
@@ -15,7 +15,6 @@ public class Triangle{
         normal = new Vector3d();
         normal.cross(edge1, edge2);
         normal.normalize();
-        color = c;
     }
     void print(){
         System.out.println("vertex0: ( " +vertex0.x+", "+vertex0.y+", "+vertex0.z+" )");
@@ -26,6 +25,7 @@ public class Triangle{
         System.out.println("normal: ( " +normal.x+", "+normal.y+", "+normal.z+" )");
         color.print();
     }
+    @Override
     double rayIntersection(Ray r){
         Vector3d T = new Vector3d();
         Vector3d P = new Vector3d();
