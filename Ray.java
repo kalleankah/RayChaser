@@ -5,6 +5,7 @@ public class Ray{
     Vector3d end;
     Vector3d direction = new Vector3d(0.0, 0.0, 0.0);
     ColorDbl rayColor = new ColorDbl();
+    Ray ShadowRay;
     Ray(Vector3d s, Vector3d e){
         start = s;
         end = e;
@@ -34,6 +35,9 @@ public class Ray{
 
         //Incoming ray in local coords
         Vector3d direction_local = mulMatVec(world2local, direction);
+    }
+    void calculateShadowRay(Light L, Vector3d P_hit){
+
     }
 
     //Vector and matrix functions that don't modify the object ***************
