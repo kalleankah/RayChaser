@@ -1,3 +1,4 @@
+import javax.vecmath.*;
 public class Light{
   Vector3d center;
   ColorDbl color;
