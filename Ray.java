@@ -4,8 +4,10 @@ public class Ray{
     Vector3d start;
     Vector3d end;
     Vector3d direction = new Vector3d(0.0, 0.0, 0.0);
+    Vector3d P_hit;
     ColorDbl rayColor = new ColorDbl();
     Ray ShadowRay;
+    Boolean inShadow = false;
     Ray(Vector3d s, Vector3d e){
         start = s;
         end = e;
@@ -36,8 +38,17 @@ public class Ray{
         //Incoming ray in local coords
         Vector3d direction_local = Utilities.mulMatVec(world2local, direction);
     }
-    void calculateShadowRay(Light L, Vector3d P_hit){
-
+    void calculateShadowRay(Light L){
+        ShadowRay = new Ray(P_hit,L.position );
+    }
+    void calculatePhit(double t){
+        P_hit = new Vector3d();
+        P_hit = Utilities.vecSub(end,start);
+        P_hit.scale(t);
+        P_hit = Utilities.vecAdd(P_hit, start);
+    }
+    void isInShadow(){
+        inShadow = true;
     }
 
     void print(){

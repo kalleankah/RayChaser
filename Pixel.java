@@ -18,10 +18,19 @@ public class Pixel{
         double _r = 0.0;
         double _g = 0.0;
         double _b = 0.0;
+        double Brightness = 1.0;
+
+
         for(Ray ray : rayList){
-            _r += ray.rayColor.R;
-            _g += ray.rayColor.G;
-            _b += ray.rayColor.B;
+            if(ray.inShadow){
+                Brightness = 0.5;
+            }
+            else{
+                Brightness = 1.0;
+            }
+            _r += ray.rayColor.R*Brightness;
+            _g += ray.rayColor.G*Brightness;
+            _b += ray.rayColor.B*Brightness;
         }
         color.setColor( _r/rayList.size(), _g/rayList.size(), _b/rayList.size() );
     }

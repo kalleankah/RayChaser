@@ -81,6 +81,17 @@ public class Scene{
                 temp = t;
             }
         }
+        r.calculatePhit(temp);
+        r.calculateShadowRay(lightList.get(0));
+        double tshadowray = 0.0;
+        for (Object3D obj : object3DList){
+            tshadowray = obj.rayIntersection(r.ShadowRay);
+            if(tshadowray > 0.000001 && tshadowray < 1.0){
+                r.isInShadow();
+                break;
+            }
+        }
+
     }
     public static void main(String[] args) {
         Vector3d v1 = new Vector3d(-1.0,0.0,0.0);

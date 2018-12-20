@@ -1,11 +1,14 @@
 import javax.vecmath.*;
 public class Light{
-  Vector3d center;
+  Vector3d position;
   ColorDbl color;
   double Luminance;
-  Light(Vector3d cen, ColorDbl col, double lum){
-    center = cen;
+  double Brightness;
+  Light(Vector3d pos, ColorDbl col, double lum, double b){
+
+    position = new Vector3d(pos);
     color = col;
     Luminance = lum;
+    Brightness = b;
   }
 }
