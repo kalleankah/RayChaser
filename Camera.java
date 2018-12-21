@@ -51,6 +51,7 @@ public class Camera  {
 
     }
     public static void main(String[] args) throws IOException{
+        long startTime = System.nanoTime();
         Camera c = new Camera(800,800);
         Scene s = new Scene();
         //Sphere ball = new Sphere(new Vector3d(8.0, 4.0, -2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
@@ -65,5 +66,7 @@ public class Camera  {
         //s.addObject(T3);
         c.createPixels(s);
         c.render("bild");
+        long endTime = System.nanoTime();
+        System.out.println("Execution time: " + (endTime-startTime)/1000000000.0+"s");
     }
 }
