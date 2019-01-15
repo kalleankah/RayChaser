@@ -73,16 +73,19 @@ public class Scene{
     void triangleIntersect(Ray r){
         double t = 0.0;
         double temp = Double.POSITIVE_INFINITY;
+        //Object3D tempObj = new Object3D(new ColorDbl(0.0,0.0,0.0));
         //Check for intersection with all Objects
         for (Object3D obj : object3DList){
             t = obj.rayIntersection(r); //Distance to object3D intersection
             if(t > 1.0 && t < Double.POSITIVE_INFINITY && t < temp){
                 r.rayColor = obj.color;
                 temp = t;
+                r.calculatePhit(temp);
+                r.P_Normal = obj.CalculateNormal(r.P_hit);
+                r.calculateShadowRay(lightList.get(0));
             }
         }
-        r.calculatePhit(temp);
-        r.calculateShadowRay(lightList.get(0));
+
         double tshadowray = 0.0;
         for (Object3D obj : object3DList){
             tshadowray = obj.rayIntersection(r.ShadowRay);

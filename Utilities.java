@@ -47,6 +47,11 @@ static Vector3d vecSub(Vector3d vec, double sub){
 static double vecNorm(Vector3d vec){
   return Math.sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
+static Vector3d vecNormalize(Vector3d vec){
+    Vector3d temp = new Vector3d(vec);
+    temp.normalize();
+    return temp;
+}
 static Matrix4d invertMat(Matrix4d mat){
   Matrix4d copy = new Matrix4d(mat);
   copy.invert();

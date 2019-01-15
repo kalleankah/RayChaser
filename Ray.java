@@ -6,6 +6,7 @@ public class Ray{
     public double RayLength;
     Vector3d direction = new Vector3d(0.0, 0.0, 0.0);
     Vector3d P_hit;
+    Vector3d P_Normal;
     ColorDbl rayColor = new ColorDbl();
     Ray ShadowRay;
     Boolean inShadow = false;

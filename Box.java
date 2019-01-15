@@ -60,4 +60,25 @@ public class Box extends Object3D{
         }
         return t;
     }
+    @Override
+    Vector3d CalculateNormal(Vector3d P){
+        for(Triangle tri : Triangles){
+            double PlaneValue = tri.normal.x*(P.x-tri.vertex0.x) + tri.normal.y*(P.y-tri.vertex0.y) + tri.normal.z*(P.z-tri.vertex0.z);
+            if(Math.abs(PlaneValue) < 0.0000001)
+            {
+                double Area = Utilities.vecNorm(Utilities.vecCross(tri.edge1,tri.edge2))/2.0;
+                Vector3d PA = Utilities.vecSub(tri.vertex0, P);
+                Vector3d PB = Utilities.vecSub(tri.vertex1, P);
+                Vector3d PC = Utilities.vecSub(tri.vertex2, P);
+                double alpha = Utilities.vecNorm(Utilities.vecCross(PB,PC))/(2.0*Area);
+                double beta = Utilities.vecNorm(Utilities.vecCross(PC,PA))/(2.0*Area);
+                double gamma = 1 - alpha - beta;
+                if(alpha >= 0.0 && alpha <= 1.0 && beta >= 0.0 && beta <= 1.0 && gamma >= 0.0 && gamma <= 1.0){
+                    return tri.normal;
+                }
+            }
+        }
+        System.out.println("CalculateNormal for box returned null");
+        return null;
+    }
 }

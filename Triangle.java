@@ -15,6 +15,9 @@ public class Triangle extends Object3D{
         normal = new Vector3d();
         normal.cross(edge1, edge2);
         normal.normalize();
+        if(normal == null){
+            System.out.println("Null normal in triangle");
+        }
     }
     void print(){
         System.out.println("vertex0: ( " +vertex0.x+", "+vertex0.y+", "+vertex0.z+" )");
@@ -43,11 +46,15 @@ public class Triangle extends Object3D{
         double t = QE1/PE1;
         double u = PT/PE1;
         double v = QD/PE1;
-        if(u < 0.0 || v < 0.0 || u+v > 1.0){
+        if(u < -0.00000000001 || v < -0.00000000001|| u+v > 1.00000000001){
             t = Double.POSITIVE_INFINITY;
         }
         //System.out.println("U: " + u + " V: " +v);
         return t;
+    }
+    @Override
+    Vector3d CalculateNormal(Vector3d P){
+        return normal;
     }
     public static void main(String[] args) {
         Vector3d v1 = new Vector3d(0.0,0.0,0.0);

@@ -22,11 +22,12 @@ public class Pixel{
 
 
         for(Ray ray : rayList){
-            if(ray.inShadow){
-                Brightness = 0.5;
+            Brightness = Utilities.vecDot(ray.ShadowRay.direction, ray.P_Normal);
+            if(Brightness < 0.0){
+                Brightness = 0.0;
             }
-            else{
-                Brightness = 1.0;
+            if(ray.inShadow){
+                Brightness = 0.0;
             }
             _r += ray.rayColor.R*Brightness;
             _g += ray.rayColor.G*Brightness;

@@ -37,5 +37,9 @@ double rayIntersection(Ray r){
     double t = d0/r.RayLength;
     return t;
 }
+@Override
+Vector3d CalculateNormal(Vector3d P){
+    return Utilities.vecNormalize(Utilities.vecSub(P,center));
+}
 
 }
