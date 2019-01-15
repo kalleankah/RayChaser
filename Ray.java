@@ -3,6 +3,7 @@ import java.lang.Math;
 public class Ray{
     Vector3d start;
     Vector3d end;
+    public double RayLength;
     Vector3d direction = new Vector3d(0.0, 0.0, 0.0);
     Vector3d P_hit;
     ColorDbl rayColor = new ColorDbl();
@@ -12,6 +13,7 @@ public class Ray{
         start = s;
         end = e;
         direction.sub(e, s);
+        RayLength = Utilities.vecNorm(direction);
         direction.normalize();
     }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)

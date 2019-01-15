@@ -34,7 +34,8 @@ double rayIntersection(Ray r){
         //The point of intersection is x
         x.scaleAdd(d0, r.direction, r.start);
     }
-    return d0;
+    double t = d0/r.RayLength;
+    return t;
 }
 
 }
