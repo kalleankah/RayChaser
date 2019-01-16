@@ -70,7 +70,7 @@ public class Scene{
         lightList.add(l);
     }
 
-    void triangleIntersect(Ray r){
+    void triangleIntersect(Ray r, int RayBounces){
         double t = 0.0;
         double temp = Double.POSITIVE_INFINITY;
         //Object3D tempObj = new Object3D(new ColorDbl(0.0,0.0,0.0));
@@ -85,7 +85,6 @@ public class Scene{
                 r.calculateShadowRay(lightList.get(0));
             }
         }
-
         double tshadowray = 0.0;
         for (Object3D obj : object3DList){
             tshadowray = obj.rayIntersection(r.ShadowRay);
@@ -94,15 +93,21 @@ public class Scene{
                 break;
             }
         }
+        if(RayBounces > 0){
+            r.raybounce();
+            for (Ray rChild : r.Children){
+                this.triangleIntersect(rChild, RayBounces-1);
+            }
+        }
 
     }
     public static void main(String[] args) {
-        Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
+        /*Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
         Vector3d v2 = new Vector3d(0.0,0.21,0.1);
         Ray r1 = new Ray(v1,v2);
         Scene s = new Scene();
         r1.rayColor.print();
         s.triangleIntersect(r1);
-        r1.rayColor.print();
+        r1.rayColor.print();*/
     }
 }

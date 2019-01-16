@@ -22,6 +22,7 @@ public class Pixel{
 
 
         for(Ray ray : rayList){
+            ray.CalculateColor();
             Brightness = Utilities.vecDot(ray.ShadowRay.direction, ray.P_Normal);
             if(Brightness < 0.0){
                 Brightness = 0.0;

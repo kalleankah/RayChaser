@@ -17,6 +17,16 @@ public class ColorDbl{
     void print(){
         System.out.println("Color: ("+R+", "+G+", "+B+" );");
     }
+    void sumColor(ColorDbl C){
+        R += C.R;
+        G += C.G;
+        B += C.B;
+    }
+    void divide(int i){
+        R = R/i;
+        G = G/i;
+        B = B/i;
+    }
     String printForImage(){
         int r = (int)(R*255);
         int g =(int)( G*255);

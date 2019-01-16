@@ -1,5 +1,6 @@
 import javax.vecmath.*;
 import java.lang.Math;
+import java.util.*;
 public class Ray{
     Vector3d start;
     Vector3d end;
@@ -10,6 +11,7 @@ public class Ray{
     ColorDbl rayColor = new ColorDbl();
     Ray ShadowRay;
     Boolean inShadow = false;
+    Vector<Ray> Children = new Vector<>();
     Ray(Vector3d s, Vector3d e){
         start = s;
         end = e;
@@ -17,8 +19,20 @@ public class Ray{
         RayLength = Utilities.vecNorm(direction);
         direction.normalize();
     }
+    ColorDbl CalculateColor(){
+        if(Children.isEmpty() == true){
+            return rayColor;
+        }
+        ColorDbl C = new ColorDbl();
+        for(Ray r : Children){
+            C.sumColor(r.CalculateColor());
+        }
+        C.divide(Children.size());
+        return C;
+    }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)
-    void raybounce(Vector3d Z, Vector3d intersection){
+    void raybounce(){
+        Vector3d Z = P_Normal;
         Vector3d I_o = Utilities.vecSub(direction, Utilities.vecScale(Z, Utilities.vecDot(direction, Z)));
         Vector3d X = Utilities.vecScale(I_o, 1.0/Utilities.vecNorm(I_o));
         Vector3d Y = Utilities.vecCross(Utilities.vecScale(X,-1.0), Z);
@@ -30,16 +44,38 @@ public class Ray{
         Z.x, Z.y, Z.z, 0.0,
         0.0, 0.0, 0.0, 1.0);
         Matrix4d translation_mat = new Matrix4d(
-        0.0, 0.0, 0.0, -intersection.x,
-        0.0, 0.0, 0.0, -intersection.y,
-        0.0, 0.0, 0.0, -intersection.z,
+        1.0, 0.0, 0.0, -P_hit.x,
+        0.0, 1.0, 0.0, -P_hit.y,
+        0.0, 0.0, 1.0, -P_hit.z,
         0.0, 0.0, 0.0, 1.0);
         Matrix4d world2local = new Matrix4d();
         world2local.mul(rotation_mat, translation_mat);
+        //System.out.println(world2local);
+        //System.out.println(Y);
+        //System.out.println(Z);
         Matrix4d local2world = Utilities.invertMat(world2local);
 
         //Incoming ray in local coords
         Vector3d direction_local = Utilities.mulMatVec(world2local, direction);
+        double Azimuth = 0; //phi
+        double Altitude = 0; //theta
+        double x,y,z = 0;
+        Vector3d LocalEndPoint, EndPoint;
+        Ray Child;
+        Random random = new Random();
+        for(int i = 0; i<4; ++i){
+            Azimuth = random.nextDouble()*2*Math.PI;
+            Altitude = random.nextDouble()*0.5*Math.PI;
+            x = Math.sin(Altitude)*Math.sin(Azimuth);
+            y = Math.sin(Altitude)*Math.cos(Azimuth);
+            z = Math.cos(Altitude); // up
+
+            LocalEndPoint = new Vector3d(x,y,z);
+            EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
+            Child = new Ray(P_hit, EndPoint);
+            Children.add(Child);
+        }
+
     }
     void calculateShadowRay(Light L){
         ShadowRay = new Ray(P_hit,L.position );
