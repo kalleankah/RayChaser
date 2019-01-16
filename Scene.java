@@ -78,7 +78,7 @@ public class Scene{
         for (Object3D obj : object3DList){
             t = obj.rayIntersection(r); //Distance to object3D intersection
             if(t > 1.0 && t < Double.POSITIVE_INFINITY && t < temp){
-                r.rayColor = obj.color;
+                r.rayColor.setColor(obj.color);
                 temp = t;
                 r.calculatePhit(temp);
                 r.P_Normal = obj.CalculateNormal(r.P_hit);

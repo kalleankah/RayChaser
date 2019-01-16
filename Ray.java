@@ -21,6 +21,17 @@ public class Ray{
     }
     ColorDbl CalculateColor(){
         if(Children.isEmpty() == true){
+            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal);
+
+            if(Brightness < 0.0){
+                Brightness = 0.0;
+            }
+            if(inShadow){
+                Brightness = 0.0;
+            }
+            //rayColor.print();
+            rayColor.multiply(Brightness);
+
             return rayColor;
         }
         ColorDbl C = new ColorDbl();
@@ -28,6 +39,7 @@ public class Ray{
             C.sumColor(r.CalculateColor());
         }
         C.divide(Children.size());
+
         return C;
     }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)

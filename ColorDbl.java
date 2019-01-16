@@ -27,6 +27,11 @@ public class ColorDbl{
         G = G/i;
         B = B/i;
     }
+    void multiply(double d){
+        R *= d;
+        G *= d;
+        B *= d;
+    }
     String printForImage(){
         int r = (int)(R*255);
         int g =(int)( G*255);

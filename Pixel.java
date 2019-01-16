@@ -18,21 +18,13 @@ public class Pixel{
         double _r = 0.0;
         double _g = 0.0;
         double _b = 0.0;
-        double Brightness = 1.0;
 
-
+        ColorDbl c = new ColorDbl();
         for(Ray ray : rayList){
-            ray.CalculateColor();
-            Brightness = Utilities.vecDot(ray.ShadowRay.direction, ray.P_Normal);
-            if(Brightness < 0.0){
-                Brightness = 0.0;
-            }
-            if(ray.inShadow){
-                Brightness = 0.0;
-            }
-            _r += ray.rayColor.R*Brightness;
-            _g += ray.rayColor.G*Brightness;
-            _b += ray.rayColor.B*Brightness;
+            c = ray.CalculateColor();
+            _r += c.R;
+            _g += c.G;
+            _b += c.B;
         }
         color.setColor( _r/rayList.size(), _g/rayList.size(), _b/rayList.size() );
     }

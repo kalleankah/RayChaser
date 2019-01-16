@@ -52,7 +52,7 @@ public class Camera  {
     }
     public static void main(String[] args) throws IOException{
         long startTime = System.nanoTime();
-        Camera c = new Camera(1000,1000);
+        Camera c = new Camera(500,500);
         Scene s = new Scene();
         Sphere ball = new Sphere(new Vector3d(8.0, 4.0, -2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
         Light lamp = new Light(new Vector3d(10.0, 0.0, -3.0), new ColorDbl(1.0, 1.0, 1.0), 1.0,1.0);
