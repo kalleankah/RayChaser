@@ -6,12 +6,12 @@ public class Scene{
     Vector<Light> lightList = new Vector<Light>();
     Scene(){
         ColorDbl white = new ColorDbl(1.0,1.0,1.0);
-        ColorDbl red = new ColorDbl(1.0,0.0,0.0);
-        ColorDbl green = new ColorDbl(0.0,1.0,0.0);
-        ColorDbl blue = new ColorDbl(0.0,0.0,1.0);
-        ColorDbl yellow = new ColorDbl(1.0,1.0,0.0);
-        ColorDbl cyan = new ColorDbl(0.0,1.0,1.0);
-        ColorDbl magenta = new ColorDbl(1.0,0.0,1.0);
+        ColorDbl red = new ColorDbl(1.0,0.1,0.1);
+        ColorDbl green = new ColorDbl(0.1,1.0,0.1);
+        ColorDbl blue = new ColorDbl(0.1,0.1,1.0);
+        ColorDbl yellow = new ColorDbl(1.0,1.0,0.1);
+        ColorDbl cyan = new ColorDbl(0.1,1.0,1.0);
+        ColorDbl magenta = new ColorDbl(1.0,0.1,1.0);
 
         Vector3d CeilingLM = new Vector3d(-3.0,0.0,5.0);
         Vector3d CeilingLU = new Vector3d(0.0,6.0,5.0);
@@ -75,18 +75,31 @@ public class Scene{
         double temp = Double.POSITIVE_INFINITY;
         //Object3D tempObj = new Object3D(new ColorDbl(0.0,0.0,0.0));
         //Check for intersection with all Objects
+        double BiggerThan;
+        if(r.MotherNode){
+            BiggerThan = 1.0;
+        }
+        else{
+            BiggerThan = 0.0;
+        }
         for (Object3D obj : object3DList){
             t = obj.rayIntersection(r); //Distance to object3D intersection
-            if(t > 1.0 && t < Double.POSITIVE_INFINITY && t < temp){
+            if(t > BiggerThan && t < Double.POSITIVE_INFINITY && t < temp){
                 r.rayColor.setColor(obj.color);
                 temp = t;
                 r.calculatePhit(temp);
                 r.P_Normal = obj.CalculateNormal(r.P_hit);
-                r.calculateShadowRay(lightList.get(0));
             }
+        }
+        r.calculateShadowRay(lightList.get(0));
+        if(r.ShadowRay == null){
+            System.out.println("ShadowRay == null");
         }
         double tshadowray = 0.0;
         for (Object3D obj : object3DList){
+            if(r.ShadowRay == null){
+                System.out.println("2 ShadowRay == null");
+            }
             tshadowray = obj.rayIntersection(r.ShadowRay);
             if(tshadowray > 0.000001 && tshadowray < 1.0){
                 r.isInShadow();

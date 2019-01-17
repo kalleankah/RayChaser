@@ -12,14 +12,16 @@ public class Ray{
     Ray ShadowRay;
     Boolean inShadow = false;
     Vector<Ray> Children = new Vector<>();
-    Ray(Vector3d s, Vector3d e){
+    Boolean MotherNode;
+    Ray(Vector3d s, Vector3d e, Boolean MN){
         start = s;
         end = e;
+        this.MotherNode = MN;
         direction.sub(e, s);
         RayLength = Utilities.vecNorm(direction);
         direction.normalize();
     }
-    ColorDbl CalculateColor(){
+    ColorDbl CalculateColor(double Importance){
         if(Children.isEmpty() == true){
             double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal);
 
@@ -31,15 +33,30 @@ public class Ray{
             }
             //rayColor.print();
             rayColor.multiply(Brightness);
+            rayColor.multiply(Importance);
 
             return rayColor;
         }
         ColorDbl C = new ColorDbl();
         for(Ray r : Children){
-            C.sumColor(r.CalculateColor());
+            C.sumColor(r.CalculateColor(Importance/Children.size()));
         }
-        C.divide(Children.size());
+        C.multiply(rayColor);
+        if(Importance == 1.0){
 
+            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal);
+
+            if(Brightness < 0.0){
+                Brightness = 0.0;
+            }
+            if(inShadow){
+                Brightness = 0.0;
+            }
+            rayColor.multiply(Brightness);
+            rayColor.multiply(0.8);
+            C.multiply(0.2);
+            C.sumColor(rayColor);
+        }
         return C;
     }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)
@@ -75,7 +92,7 @@ public class Ray{
         Vector3d LocalEndPoint, EndPoint;
         Ray Child;
         Random random = new Random();
-        for(int i = 0; i<4; ++i){
+        for(int i = 0; i < 16; ++i){
             Azimuth = random.nextDouble()*2*Math.PI;
             Altitude = random.nextDouble()*0.5*Math.PI;
             x = Math.sin(Altitude)*Math.sin(Azimuth);
@@ -84,13 +101,13 @@ public class Ray{
 
             LocalEndPoint = new Vector3d(x,y,z);
             EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
-            Child = new Ray(P_hit, EndPoint);
+            Child = new Ray(P_hit, EndPoint, false);
             Children.add(Child);
         }
 
     }
     void calculateShadowRay(Light L){
-        ShadowRay = new Ray(P_hit,L.position );
+        ShadowRay = new Ray(this.P_hit,L.position,false);
     }
     void calculatePhit(double t){
         P_hit = new Vector3d();
@@ -108,7 +125,7 @@ public class Ray{
     public static void main(String[] args) {
         Vector3d v1 = new Vector3d(1.0,2.0,3.0);
         Vector3d v2 = new Vector3d(2.0,1.0,2.0);
-        Ray r1 = new Ray(v1,v2);
+        Ray r1 = new Ray(v1,v2,true);
         r1.print();
     }
 }

@@ -59,9 +59,9 @@ static Matrix4d invertMat(Matrix4d mat){
 }
 static Vector3d mulMatVec(Matrix4d mat, Vector3d vec){
   Vector3d result = new Vector3d();
-  result.x = mat.m00*vec.x + mat.m01*vec.y + mat.m02*vec.z;
-  result.y = mat.m10*vec.x + mat.m11*vec.y + mat.m12*vec.z;
-  result.z = mat.m20*vec.x + mat.m21*vec.y + mat.m22*vec.z;
+  result.x = mat.m00*vec.x + mat.m01*vec.y + mat.m02*vec.z + mat.m03;
+  result.y = mat.m10*vec.x + mat.m11*vec.y + mat.m12*vec.z + mat.m13;
+  result.z = mat.m20*vec.x + mat.m21*vec.y + mat.m22*vec.z + mat.m23;
   return result;
 }//End of utility functions **********************************************
 }
