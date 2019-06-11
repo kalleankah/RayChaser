@@ -91,15 +91,9 @@ public class Scene{
                 r.P_Normal = obj.CalculateNormal(r.P_hit);
             }
         }
-        r.calculateShadowRay(lightList.get(0));
-        if(r.ShadowRay == null){
-            System.out.println("ShadowRay == null");
-        }
+        r.calculateShadowRay(lightList.get(0)); // Problem i hörn 
         double tshadowray = 0.0;
         for (Object3D obj : object3DList){
-            if(r.ShadowRay == null){
-                System.out.println("2 ShadowRay == null");
-            }
             tshadowray = obj.rayIntersection(r.ShadowRay);
             if(tshadowray > 0.000001 && tshadowray < 1.0){
                 r.isInShadow();
