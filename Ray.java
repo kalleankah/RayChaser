@@ -1,7 +1,12 @@
 import javax.vecmath.*;
 import java.lang.Math;
 import java.util.*;
+
+
+
 public class Ray{
+    private static final int CHILDS = 16;
+
     Vector3d start;
     Vector3d end;
     public double RayLength;
@@ -92,7 +97,7 @@ public class Ray{
         Vector3d LocalEndPoint, EndPoint;
         Ray Child;
         Random random = new Random();
-        for(int i = 0; i < 16; ++i){
+        for(int i = 0; i < CHILDS; ++i){
             Azimuth = random.nextDouble()*2*Math.PI;
             Altitude = random.nextDouble()*0.5*Math.PI;
             x = Math.sin(Altitude)*Math.sin(Azimuth);

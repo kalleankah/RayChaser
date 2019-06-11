@@ -1,5 +1,7 @@
 import javax.vecmath.Vector3d;
 public class Triangle extends Object3D{
+    private static final double SMALLESTDOUBLE = 0.000000000001;
+
     Vector3d vertex0, vertex1,vertex2;
     Vector3d edge1,edge2;
     Vector3d normal;
@@ -53,10 +55,10 @@ public class Triangle extends Object3D{
         double u = PT/PE1;
         double v = QD/PE1;
         if(u < -0.00000000001 || v < -0.00000000001|| u+v > 1.00000000001){
-            t = Double.POSITIVE_INFINITY;
+            return Double.POSITIVE_INFINITY;
         }
         //System.out.println("U: " + u + " V: " +v);
-        return t;
+        return t - SMALLESTDOUBLE;
     }
     @Override
     Vector3d CalculateNormal(Vector3d P){
