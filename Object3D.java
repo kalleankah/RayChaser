@@ -10,4 +10,7 @@ public class Object3D{
     Vector3d CalculateNormal(Vector3d P){
         return null;
     }
+    Vector3d CalculateNormal(){
+        return null;
+    }
 }

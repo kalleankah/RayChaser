@@ -12,10 +12,11 @@ public class Camera  {
     Camera(int w, int h){
         Width = w;
         Height = h;
-        eye1 = new Vector3d(-1.0,0.0,0.0);
+        eye1 = new Vector3d(-1,0.0,0.0);
         eye2 = new Vector3d(-2.0,0.0,0.0);
     }
-    void createPixels(Scene S, int TotalBounces){
+    void createPixels(Scene S){
+        long endTime;
         double PixelSize = 2.0/Width;
         Vector3d endPoint;
         Ray r;
@@ -24,15 +25,31 @@ public class Camera  {
             for(int i = 0; i < Width; ++i){
                 endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
                 r = new Ray(eye1, endPoint, true);
-                S.triangleIntersect(r, TotalBounces);
+                S.triangleIntersect(r, 1);
                 p = new Pixel();
                 p.addRay(r);
                 p.setColorDoubleFromRayList();
                 pixelList.add(p.color);
                 p = null;
             }
+            updateProgress( (double) j/Height);
         }
     }
+
+    static void updateProgress(double progressPercentage) {
+        final int width = 50; // progress bar width in chars
+
+        System.out.print("\r[");
+        int i = 0;
+        for (; i <= (int)(progressPercentage*width); i++) {
+          System.out.print(".");
+        }
+        for (; i < width; i++) {
+          System.out.print(" ");
+        }
+        System.out.print("]" + (int)(progressPercentage*100) + "%");
+    }
+
     void render(String filename){
         File file = null;
         BufferedImage img = new BufferedImage(Width,Height, BufferedImage.TYPE_INT_RGB);
@@ -49,9 +66,28 @@ public class Camera  {
         catch(IOException e){
             System.out.println("Error: " +e );
         }
-
     }
-    public static void main(String[] args) throws IOException{
 
+    public static void main(String[] args) throws IOException{
+        long startTime = System.nanoTime();
+        Camera c = new Camera(800,800);
+        Scene s = new Scene();
+        Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new ColorDbl(1.0, 1.0, 1.0));
+        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new ColorDbl(1.0, 1.0, 1.0));
+        Light lamp = new Light(new Vector3d(5.0, 0.0, -2.0), new ColorDbl(1.0, 1.0, 1.0), 1.0, 1.0);
+        s.addLight(lamp);
+        s.addObject(ball1);
+        s.addObject(ball2);
+        Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
+        Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new ColorDbl(1.0, 0.0, 0.3));
+        Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        //s.addObject(T1);
+        //s.addObject(T2);
+        //s.addObject(T3);
+        c.createPixels(s);
+        c.render("bild");
+        long endTime = System.nanoTime();
+        updateProgress( 1.0 ); //Program ends here, set progress to 100%
+        System.out.println("\nExecution time: " + (endTime-startTime)/1000000000.0+"s");
     }
 }

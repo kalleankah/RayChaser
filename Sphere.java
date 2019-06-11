@@ -41,5 +41,10 @@ double rayIntersection(Ray r){
 Vector3d CalculateNormal(Vector3d P){
     return Utilities.vecNormalize(Utilities.vecSub(P,center));
 }
+@Override
+Vector3d CalculateNormal(){
+    Vector3d temp = new Vector3d(-0.01, -0.01, -0.01);
+    return temp;
+}
 
 }

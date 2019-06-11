@@ -1,12 +1,7 @@
 import javax.vecmath.*;
 import java.lang.Math;
 import java.util.*;
-
-
-
 public class Ray{
-    private static final int CHILDS = 16;
-
     Vector3d start;
     Vector3d end;
     public double RayLength;
@@ -27,8 +22,9 @@ public class Ray{
         direction.normalize();
     }
     ColorDbl CalculateColor(double Importance){
+        double lightDistance = Utilities.vecNorm( Utilities.vecSub(new Vector3d(5.0, 0.0, -2.0), start) );
         if(Children.isEmpty() == true){
-            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal);
+            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal)/(0.25*lightDistance);
 
             if(Brightness < 0.0){
                 Brightness = 0.0;
@@ -49,7 +45,7 @@ public class Ray{
         C.multiply(rayColor);
         if(Importance == 1.0){
 
-            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal);
+            double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal)/(0.25*lightDistance);
 
             if(Brightness < 0.0){
                 Brightness = 0.0;
@@ -65,7 +61,7 @@ public class Ray{
         return C;
     }
     // Takes the normal of the surface bounced on (and assigns it as Z immediately)
-    void raybounce(){
+    void raybounce(Boolean specular){
         Vector3d Z = P_Normal;
         Vector3d I_o = Utilities.vecSub(direction, Utilities.vecScale(Z, Utilities.vecDot(direction, Z)));
         Vector3d X = Utilities.vecScale(I_o, 1.0/Utilities.vecNorm(I_o));
@@ -84,9 +80,6 @@ public class Ray{
         0.0, 0.0, 0.0, 1.0);
         Matrix4d world2local = new Matrix4d();
         world2local.mul(rotation_mat, translation_mat);
-        //System.out.println(world2local);
-        //System.out.println(Y);
-        //System.out.println(Z);
         Matrix4d local2world = Utilities.invertMat(world2local);
 
         //Incoming ray in local coords
@@ -96,20 +89,39 @@ public class Ray{
         double x,y,z = 0;
         Vector3d LocalEndPoint, EndPoint;
         Ray Child;
-        Random random = new Random();
-        for(int i = 0; i < CHILDS; ++i){
-            Azimuth = random.nextDouble()*2*Math.PI;
-            Altitude = random.nextDouble()*0.5*Math.PI;
-            x = Math.sin(Altitude)*Math.sin(Azimuth);
-            y = Math.sin(Altitude)*Math.cos(Azimuth);
-            z = Math.cos(Altitude); // up
+        Vector3d localnormal = new Vector3d(0.0, 0.0, 1.0);
 
-            LocalEndPoint = new Vector3d(x,y,z);
+        if(specular){
+          LocalEndPoint = Utilities.vecSub( Utilities.vecScale(localnormal, Utilities.vecDot(localnormal, direction_local)), direction_local);
+          Random random = new Random();
+          for(int i = 0; i < 3096; ++i){
+              Azimuth = Math.PI - (random.nextDouble()*2.0*Math.PI)/3.0;
+              Altitude = 0.25*Math.PI- (random.nextDouble()*0.5*Math.PI)/3.0;
+              LocalEndPoint.x += Math.sin(Altitude)*Math.sin(Azimuth);
+              LocalEndPoint.y += Math.sin(Altitude)*Math.cos(Azimuth);
+              LocalEndPoint.z += Math.cos(Altitude); // up
+
             EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
             Child = new Ray(P_hit, EndPoint, false);
             Children.add(Child);
+          }
         }
+        else{
+            Random random = new Random();
+            for(int i = 0; i < 8; ++i){
+                Azimuth = random.nextDouble()*2*Math.PI;
+                Altitude = random.nextDouble()*0.5*Math.PI;
+                x = Math.sin(Altitude)*Math.sin(Azimuth);
+                y = Math.sin(Altitude)*Math.cos(Azimuth);
+                z = Math.cos(Altitude); // up
 
+                LocalEndPoint = new Vector3d(x,y,z);
+                EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
+                Child = new Ray(P_hit, EndPoint, false);
+                //System.out.println( "Child ray direction = " + Utilities.vecSub( EndPoint, P_hit ));
+                Children.add(Child);
+            }
+        }
     }
     void calculateShadowRay(Light L){
         ShadowRay = new Ray(this.P_hit,L.position,false);

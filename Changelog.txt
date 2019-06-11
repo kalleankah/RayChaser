@@ -1,0 +1,32 @@
+1. Distance to light source determines brightness.
+
+<----- Ray.java
+double lightDistance = Utilities.vecNorm( Utilities.vecSub(new Vector3d(5.0, 0.0, -2.0), start) );
+							position of lamp^^^^^^^^^^^^^^
+double Brightness = WHATEVER/(0.25*lightDistance);
+			      ^^^^^^^^^^^^^^^^^^Inverse linear times a factor. (can also use inverse square)
+-----> Ray.java
+
+2. Striped pattern fix
+
+Child-rays (secondary bounces) sometimes originate slightly (10e-15 units) from behind the surface its parent ray.
+For this reason, we have to prevent them from intersecting with the surface they originate from.
+Solution: Remove all objects in the object3DList facing away from the ray.
+Note: Requires access to normals of all surfaces in scene (works for triangles, but spheres need a fake normal).
+
+<----- Scene.java
+*void triangleIntersect(Ray r, int RayBounces){....
+.
+. //Create a new object3d list with only front side-facing objects
+.
+Vector<Object3D> newObject3DList = new Vector<>();
+        for (Object3D obj : object3DList){
+            Vector3d objNormal = obj.CalculateNormal();
+            if(Utilities.vecDot(objNormal, r.direction) < 0.0){
+                newObject3DList.add(obj);
+            }
+        }
+-----> Scene.java
+
+Create a function --Vector3d CalculateNormal(){}-- in object3d.java
+Override it in sphere.java and triangle.java
