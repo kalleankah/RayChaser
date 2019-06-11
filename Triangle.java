@@ -34,6 +34,12 @@ public class Triangle extends Object3D{
         Vector3d P = new Vector3d();
         Vector3d Q = new Vector3d();
         Vector3d D = new Vector3d();
+        if(r == null){
+            System.out.println("r == null");
+        }
+        if(r.start == null){
+            System.out.println ("r.start == null");
+        }
         T.sub(r.start,vertex0);
         Q.cross(T,edge1);
         D.sub(r.end,r.start);
@@ -64,7 +70,7 @@ public class Triangle extends Object3D{
         Triangle Tri = new Triangle(v1,v2,v3,c);
         Vector3d s = new Vector3d(0.5,0.20,-1.0);
         Vector3d e = new Vector3d(0.5,5.20,-1.0);
-        Ray r = new Ray(s,e);
+        Ray r = new Ray(s,e,true);
         double t = Tri.rayIntersection(r);
         System.out.println(t);
 

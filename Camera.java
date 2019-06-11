@@ -8,7 +8,7 @@ public class Camera  {
     int Height;
     Vector3d eye1;
     Vector3d eye2;
-    Vector<Pixel> pixelList= new Vector<Pixel>();
+    Vector<ColorDbl> pixelList= new Vector<ColorDbl>();
     Camera(int w, int h){
         Width = w;
         Height = h;
@@ -23,12 +23,13 @@ public class Camera  {
         for(int j = 0; j < Height; ++j){
             for(int i = 0; i < Width; ++i){
                 endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
-                r = new Ray(eye1, endPoint);
+                r = new Ray(eye1, endPoint, true);
                 S.triangleIntersect(r, 1);
                 p = new Pixel();
                 p.addRay(r);
                 p.setColorDoubleFromRayList();
-                pixelList.add(p);
+                pixelList.add(p.color);
+                p = null;
             }
         }
     }
@@ -37,7 +38,7 @@ public class Camera  {
         BufferedImage img = new BufferedImage(Width,Height, BufferedImage.TYPE_INT_RGB);
         for(int y = 0; y < Height; y++){
             for(int x = 0; x < Width; x++){
-                int rgb = pixelList.elementAt(x+y*Width).color.RGBForImage();
+                int rgb = pixelList.elementAt(x+y*Width).RGBForImage();
                 img.setRGB(x,y,rgb);
             }
         }
@@ -54,7 +55,7 @@ public class Camera  {
         long startTime = System.nanoTime();
         Camera c = new Camera(500,500);
         Scene s = new Scene();
-        Sphere ball = new Sphere(new Vector3d(8.0, 4.0, -2.0), 1.0, new ColorDbl(0.9, 0.4, 0.4));
+        Sphere ball = new Sphere(new Vector3d(8.0, -4.0, -2.0), 1.0, new ColorDbl(1.0, 1.0, 1.0));
         Light lamp = new Light(new Vector3d(10.0, 0.0, -3.0), new ColorDbl(1.0, 1.0, 1.0), 1.0,1.0);
         s.addLight(lamp);
         s.addObject(ball);

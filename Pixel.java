@@ -21,7 +21,7 @@ public class Pixel{
 
         ColorDbl c = new ColorDbl();
         for(Ray ray : rayList){
-            c = ray.CalculateColor();
+            c = ray.CalculateColor(1.0);
             _r += c.R;
             _g += c.G;
             _b += c.B;
