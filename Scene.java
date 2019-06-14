@@ -70,7 +70,7 @@ public class Scene{
         lightList.add(l);
     }
 
-    void triangleIntersect(Ray r, int RayBounces){
+    void triangleIntersect(Ray r, int bounceIndex, int maxBounces){
         Boolean is_specular = false;
         double t = 0.0;
         double temp = Double.POSITIVE_INFINITY;
@@ -138,10 +138,11 @@ public class Scene{
             }
         }
         //Call the function recursively for the bounce-depth
-        if(RayBounces > 0){
+        if(bounceIndex < maxBounces){
             r.raybounce(is_specular);
             for (Ray rChild : r.Children){
-                this.triangleIntersect(rChild, RayBounces-1);
+                Random randomInt = new Random();
+                this.triangleIntersect(rChild, bounceIndex + randomInt.nextInt(maxBounces) + 1, maxBounces);
             }
         }
 

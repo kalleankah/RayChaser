@@ -1,7 +1,10 @@
 import javax.vecmath.*;
 import java.lang.Math;
 import java.util.*;
+
 public class Ray{
+    private static final int CHILDREN = 8;
+    private static final int CHILDREN_SPECULAR = 32;
     Vector3d start;
     Vector3d end;
     public double RayLength;
@@ -22,7 +25,8 @@ public class Ray{
         direction.normalize();
     }
     ColorDbl CalculateColor(double Importance){
-        double lightDistance = Utilities.vecNorm( Utilities.vecSub(new Vector3d(5.0, 0.0, -2.0), start) );
+        //Notice that position of light is HARD CODED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        double lightDistance = Utilities.vecNorm( Utilities.vecSub(new Vector3d(5.0, 5.0, -2.0), start) );
         if(Children.isEmpty() == true){
             double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal)/(0.25*lightDistance);
 
@@ -38,11 +42,14 @@ public class Ray{
 
             return rayColor;
         }
+        //If it's not a leaf node
         ColorDbl C = new ColorDbl();
         for(Ray r : Children){
             C.sumColor(r.CalculateColor(Importance/Children.size()));
         }
+        //Multiply color of incoming light with color of surface
         C.multiply(rayColor);
+        //Only mother node has importance 1.0
         if(Importance == 1.0){
 
             double Brightness = Utilities.vecDot(this.ShadowRay.direction, this.P_Normal)/(0.25*lightDistance);
@@ -53,9 +60,11 @@ public class Ray{
             if(inShadow){
                 Brightness = 0.0;
             }
+            //Direct light
             rayColor.multiply(Brightness);
-            rayColor.multiply(0.8);
-            C.multiply(0.2);
+            rayColor.multiply(0.5);
+            //Indirect light
+            C.multiply(0.5);
             C.sumColor(rayColor);
         }
         return C;
@@ -94,9 +103,9 @@ public class Ray{
         if(specular){
           LocalEndPoint = Utilities.vecSub( Utilities.vecScale(localnormal, Utilities.vecDot(localnormal, direction_local)), direction_local);
           Random random = new Random();
-          for(int i = 0; i < 3096; ++i){
-              Azimuth = Math.PI - (random.nextDouble()*2.0*Math.PI)/3.0;
-              Altitude = 0.25*Math.PI- (random.nextDouble()*0.5*Math.PI)/3.0;
+          for(int i = 0; i < CHILDREN_SPECULAR; ++i){
+              Azimuth = Math.PI - (random.nextDouble()*2.0*Math.PI)/1.0;
+              Altitude = 0.25*Math.PI- (random.nextDouble()*0.5*Math.PI)/1.0;
               LocalEndPoint.x += Math.sin(Altitude)*Math.sin(Azimuth);
               LocalEndPoint.y += Math.sin(Altitude)*Math.cos(Azimuth);
               LocalEndPoint.z += Math.cos(Altitude); // up
@@ -108,7 +117,7 @@ public class Ray{
         }
         else{
             Random random = new Random();
-            for(int i = 0; i < 8; ++i){
+            for(int i = 0; i < CHILDREN; ++i){
                 Azimuth = random.nextDouble()*2*Math.PI;
                 Altitude = random.nextDouble()*0.5*Math.PI;
                 x = Math.sin(Altitude)*Math.sin(Azimuth);
