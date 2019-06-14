@@ -7,7 +7,7 @@ public class Scene{
     int MAX_DEPTH;
     double DEPTH_DECAY;
     Scene(){
-        MAX_DEPTH = 3;
+        MAX_DEPTH = 2;
         DEPTH_DECAY = 0.5;
         Material white = new Material(new ColorDbl(0.95,0.95,0.95));
         Material red = new Material(new ColorDbl(0.95,0.2,0.2));
@@ -109,7 +109,7 @@ public class Scene{
         double t = -1.0;
         for(Object3D obj : object3DList){
             t = obj.rayIntersection(r);
-            if(t > 0.0 && t <= 1.0){
+            if(t > 0.01 && t <= 1.0){
                 return true;
             }
         }
