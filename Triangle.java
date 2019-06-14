@@ -3,8 +3,8 @@ public class Triangle extends Object3D{
     Vector3d vertex0, vertex1,vertex2;
     Vector3d edge1,edge2;
     Vector3d normal;
-    Triangle(Vector3d v0,Vector3d v1,Vector3d v2, ColorDbl c){
-        super(c);
+    Triangle(Vector3d v0,Vector3d v1,Vector3d v2, Material m){
+        super(m);
         vertex0 = new Vector3d(v0);
         vertex1 = new Vector3d(v1);
         vertex2 = new Vector3d(v2);
@@ -26,7 +26,7 @@ public class Triangle extends Object3D{
         System.out.println("edge1: ( " +edge1.x+", "+edge1.y+", "+edge1.z+" )");
         System.out.println("edge2: ( " +edge2.x+", "+edge2.y+", "+edge2.z+" )");
         System.out.println("normal: ( " +normal.x+", "+normal.y+", "+normal.z+" )");
-        color.print();
+        mat.color.print();
     }
     @Override
     double rayIntersection(Ray r){
@@ -65,18 +65,5 @@ public class Triangle extends Object3D{
     @Override
     Vector3d CalculateNormal(){
         return normal;
-    }
-    public static void main(String[] args) {
-        Vector3d v1 = new Vector3d(0.0,0.0,0.0);
-        Vector3d v2 = new Vector3d(1.0,1.0,0.0);
-        Vector3d v3 = new Vector3d(1.0,0.0,0.0);
-        ColorDbl c = new ColorDbl(1.0,0.0,1.0);
-        Triangle Tri = new Triangle(v1,v2,v3,c);
-        Vector3d s = new Vector3d(0.5,0.20,-1.0);
-        Vector3d e = new Vector3d(0.5,5.20,-1.0);
-        Ray r = new Ray(s,e,true);
-        double t = Tri.rayIntersection(r);
-        System.out.println(t);
-
     }
 }

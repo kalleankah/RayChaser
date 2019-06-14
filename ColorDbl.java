@@ -1,3 +1,4 @@
+import javax.vecmath.Vector3d;
 import java.lang.*;
 
 public class ColorDbl{
@@ -58,6 +59,9 @@ public class ColorDbl{
         R = Math.min(a,1.0);
         G = Math.min(b,1.0);
         B = Math.min(c,1.0);
+    }
+    Vector3d toVector3d() {
+        return new Vector3d(R,G,B);
     }
     public static void main(String[] args) {
         ColorDbl C1 = new ColorDbl();

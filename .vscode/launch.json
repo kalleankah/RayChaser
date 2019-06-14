@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Scene",
+            "request": "launch",
+            "mainClass": "Scene"
+        }
+    ]
+}

@@ -1,8 +1,11 @@
 import javax.vecmath.Vector3d;
 public class Object3D{
-    ColorDbl color;
-    public Object3D(ColorDbl c){
-        color = c;
+    Material mat;
+    public Object3D(){
+        mat = new Material();
+    }
+    public Object3D(Material m){
+        mat = m;
     }
     double rayIntersection(Ray r){
         return Double.POSITIVE_INFINITY;

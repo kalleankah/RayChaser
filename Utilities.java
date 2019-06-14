@@ -1,3 +1,5 @@
+import java.util.Random;
+
 import javax.vecmath.*;
 public class Utilities{
 //Vector and matrix functions that don't modify the object ***************
@@ -63,5 +65,10 @@ static Vector3d mulMatVec(Matrix4d mat, Vector3d vec){
   result.y = mat.m10*vec.x + mat.m11*vec.y + mat.m12*vec.z + mat.m13;
   result.z = mat.m20*vec.x + mat.m21*vec.y + mat.m22*vec.z + mat.m23;
   return result;
-}//End of utility functions **********************************************
+}
+static Boolean RussianBullet(double d){
+	Random r = new Random();
+	return r.nextDouble() < d;
+}
+//End of utility functions **********************************************
 }

@@ -26,11 +26,7 @@ public class Camera  {
             for(int i = 0; i < Width; ++i){
                 endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
                 r = new Ray(eye1, endPoint, true);
-                S.triangleIntersect(r, 0, 2); //(ray, bounce index, max bounces)
-                p = new Pixel();
-                p.addRay(r);
-                p.setColorDoubleFromRayList();
-                pixelList.add(p.color);
+                pixelList.add(r.CastRay(S,0));
                 p = null;
             }
             updateProgress( (double) j/Height);
@@ -71,19 +67,19 @@ public class Camera  {
 
     public static void main(String[] args) throws IOException{
         long startTime = System.nanoTime();
-        Camera c = new Camera(1080,1080);
+        Camera c = new Camera(500,500);
         Scene s = new Scene();
-        Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new ColorDbl(1.0, 1.0, 1.0));
-        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new ColorDbl(1.0, 1.0, 1.0));
-        Light lamp = new Light(new Vector3d(5.0, 5.0, -2.0), new ColorDbl(1.0, 1.0, 1.0), 1.0, 1.0);
+        Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
+        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
+        Light lamp = new Light(new Vector3d(5.0, 0.0, 3.0), new ColorDbl(1.0, 1.0, 1.0), 1.0);
         s.addLight(lamp);
-        s.addObject(ball1);
-        s.addObject(ball2);
-        Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new ColorDbl(0.4, 0.7, 0.2));
-        Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new ColorDbl(1.0, 0.0, 0.3));
-        Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new ColorDbl(0.7, 0.8, 0.9));
+        //s.addObject(ball1);
+        //s.addObject(ball2);
+        Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 0.2)));
+        Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 0.7, 0.2)));
+        Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 0.2)));
         //s.addObject(T1);
-        //s.addObject(T2);
+        s.addObject(T2);
         //s.addObject(T3);
         c.createPixels(s);
         c.render("bild");
