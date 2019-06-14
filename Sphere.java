@@ -4,8 +4,8 @@ public class Sphere extends Object3D {
   Vector3d center;
   double radius;
 
-  Sphere(Vector3d c, double r, ColorDbl col){
-    super(col);
+  Sphere(Vector3d c, double r, Material m){
+    super(m);
     center = c;
     radius = r;
   }
@@ -43,8 +43,7 @@ Vector3d CalculateNormal(Vector3d P){
 }
 @Override
 Vector3d CalculateNormal(){
-    Vector3d temp = new Vector3d(-0.01, -0.01, -0.01);
-    return temp;
+    return null;
 }
 
 }

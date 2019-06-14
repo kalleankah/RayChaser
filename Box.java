@@ -3,8 +3,8 @@ import java.lang.Math;
 import java.util.*;
 public class Box extends Object3D{
     Vector<Triangle> Triangles = new Vector<Triangle>();
-    Box(Vector3d origin, double w, double h, double d ,ColorDbl c){
-        super(c);
+    Box(Vector3d origin, double w, double h, double d ,Material m){
+        super(m);
         Vector3d FBL = new Vector3d(origin);
         FBL.add(new Vector3d(-d/2,-w/2,-h/2));
         Vector3d FBR = new Vector3d(origin);
@@ -24,28 +24,28 @@ public class Box extends Object3D{
         BTR.add(new Vector3d(d/2,w/2,h/2));
 
         //Front
-        Triangles.add(new Triangle(FBL,FBR,FTR,c));
-        Triangles.add(new Triangle(FBL,FTR,FTL,c));
+        Triangles.add(new Triangle(FBL,FBR,FTR,m));
+        Triangles.add(new Triangle(FBL,FTR,FTL,m));
 
         //Right
-        Triangles.add(new Triangle(FBR,BBR,BTR,c));
-        Triangles.add(new Triangle(FBR,BTR,FTR,c));
+        Triangles.add(new Triangle(FBR,BBR,BTR,m));
+        Triangles.add(new Triangle(FBR,BTR,FTR,m));
 
         //left
-        Triangles.add(new Triangle(FBL,FTL,BTL,c));
-        Triangles.add(new Triangle(FBL,BTL,BBL,c));
+        Triangles.add(new Triangle(FBL,FTL,BTL,m));
+        Triangles.add(new Triangle(FBL,BTL,BBL,m));
 
         //Back
-        Triangles.add(new Triangle(BBR,BBL,BTL,c));
-        Triangles.add(new Triangle(BBR,BTL,BTR,c));
+        Triangles.add(new Triangle(BBR,BBL,BTL,m));
+        Triangles.add(new Triangle(BBR,BTL,BTR,m));
 
         //Top
-        Triangles.add(new Triangle(FTL,FTR,BTR,c));
-        Triangles.add(new Triangle(FTL,BTR,BTL,c));
+        Triangles.add(new Triangle(FTL,FTR,BTR,m));
+        Triangles.add(new Triangle(FTL,BTR,BTL,m));
 
         //Bottom
-        Triangles.add(new Triangle(FBR,FBL,BBL,c));
-        Triangles.add(new Triangle(FBR,BBL,BBR,c));
+        Triangles.add(new Triangle(FBR,FBL,BBL,m));
+        Triangles.add(new Triangle(FBR,BBL,BBR,m));
 
     }
     @Override
@@ -79,6 +79,10 @@ public class Box extends Object3D{
             }
         }
         System.out.println("CalculateNormal for box returned null");
+        return null;
+    }
+    @Override
+    Vector3d CalculateNormal(){
         return null;
     }
 }

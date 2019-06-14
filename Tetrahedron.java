@@ -3,8 +3,8 @@ import java.lang.Math;
 import java.util.*;
 public class Tetrahedron extends Object3D{
     Vector<Triangle> TriList = new Vector<>();
-    Tetrahedron(Vector3d origin, double size,ColorDbl c){
-        super(c);
+    Tetrahedron(Vector3d origin, double size,Material m){
+        super(m);
         //Calculate vertex distances
         double d1 = size * 0.942809041582063365867792482806465385713114583584632048; //sqrt(8/9)
         double d2 = size * 0.47140452079103168293389624140323269285655729179231602;  //sqrt(2/9)
@@ -21,10 +21,10 @@ public class Tetrahedron extends Object3D{
         v3.add(origin);
         v4.add(origin);
         //Create the triangles (positions defined as viewed from the camera, left is positive Y direction)
-        TriList.add( new Triangle( v1, v2, v3, c) );// bottom side
-        TriList.add( new Triangle( v1, v4, v2, c) );// left side
-        TriList.add( new Triangle( v1, v3, v4, c) );// Right side
-        TriList.add( new Triangle( v3, v2, v4, c) );// Back side
+        TriList.add( new Triangle( v1, v2, v3, m) );// bottom side
+        TriList.add( new Triangle( v1, v4, v2, m) );// left side
+        TriList.add( new Triangle( v1, v3, v4, m) );// Right side
+        TriList.add( new Triangle( v3, v2, v4, m) );// Back side
     }
     @Override
     double rayIntersection(Ray r){
@@ -57,6 +57,10 @@ public class Tetrahedron extends Object3D{
             }
         }
         System.out.println("CalculateNormal for Tetrahedron returned null");
+        return null;
+    }
+    @Override
+    Vector3d CalculateNormal(){
         return null;
     }
 

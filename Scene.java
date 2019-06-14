@@ -4,14 +4,18 @@ import java.util.*;
 public class Scene{
     Vector<Object3D> object3DList= new Vector<Object3D>();
     Vector<Light> lightList = new Vector<Light>();
+    int MAX_DEPTH;
+    double DEPTH_DECAY;
     Scene(){
-        ColorDbl white = new ColorDbl(0.95,0.95,0.95);
-        ColorDbl red = new ColorDbl(0.95,0.2,0.2);
-        ColorDbl green = new ColorDbl(0.2,0.95,0.2);
-        ColorDbl blue = new ColorDbl(0.2,0.2,0.95);
-        ColorDbl yellow = new ColorDbl(0.95,0.95,0.2);
-        ColorDbl cyan = new ColorDbl(0.2,0.95,0.95);
-        ColorDbl magenta = new ColorDbl(0.95,0.2,0.95);
+        MAX_DEPTH = 3;
+        DEPTH_DECAY = 0.5;
+        Material white = new Material(new ColorDbl(0.95,0.95,0.95));
+        Material red = new Material(new ColorDbl(0.95,0.2,0.2));
+        Material green = new Material(new ColorDbl(0.2,0.95,0.2));
+        Material blue = new Material(new ColorDbl(0.2,0.2,0.95));
+        Material yellow = new Material(new ColorDbl(0.95,0.95,0.2));
+        Material cyan = new Material(new ColorDbl(0.2,0.95,0.95));
+        Material magenta = new Material(new ColorDbl(0.95,0.2,0.95));
 
         Vector3d CeilingLM = new Vector3d(-3.0,0.0,5.0);
         Vector3d CeilingLU = new Vector3d(0.0,6.0,5.0);
@@ -69,8 +73,49 @@ public class Scene{
     void addLight(Light l){
         lightList.add(l);
     }
-
-    void triangleIntersect(Ray r, int bounceIndex, int maxBounces){
+    
+    Object3D triangleIntersect(Ray r){
+        double t = 0.0;
+        double temp = Double.POSITIVE_INFINITY;
+        double NearClip =0.0;
+        Object3D hitObject = null;
+        if(r.MotherNode){
+            NearClip = 1.0;
+        }
+        /*Vector<Object3D> newObject3DList = new Vector<>();
+        for (Object3D obj : object3DList){
+            Vector3d objNormal = obj.CalculateNormal();
+            if(objNormal == null || Utilities.vecDot(objNormal, r.direction) < 0.0){
+                newObject3DList.add(obj);
+            }
+        }*/
+        for (Object3D obj : object3DList){
+            t = obj.rayIntersection(r);
+            if(t > NearClip && t < Double.POSITIVE_INFINITY && t < temp){
+                hitObject = obj;
+                temp = t;
+                //Calculate the point of intersection
+                r.calculatePhit(temp);
+                //Calculate the normal of the point of intersectio
+                r.P_Normal = obj.CalculateNormal(r.P_hit);
+            }
+        }
+        if(hitObject == null){
+            hitObject = new Object3D();
+        }
+        return hitObject;
+    }
+    Boolean ObjectHit(Ray r){
+        double t = -1.0;
+        for(Object3D obj : object3DList){
+            t = obj.rayIntersection(r);
+            if(t > 0.0 && t <= 1.0){
+                return true;
+            }
+        }
+        return false;
+    }
+    /*void triangleIntersect(Ray r, int bounceIndex, int maxBounces){
         Boolean is_specular = false;
         double t = 0.0;
         double temp = Double.POSITIVE_INFINITY;
@@ -85,13 +130,13 @@ public class Scene{
             NearClip = 0.0;
         }
 
-        /* ------------------------- IMPORTANT ---------------------------------
+         ------------------------- IMPORTANT ---------------------------------
             Child-rays (secondary bounces) sometimes originate slightly (10e-15 units) from behind
             the surface its parent ray. For this reason, we have to prevent them from intersecting
             with the surface they originate from.
 
             Solution: Remove all objects in the object3DList facing away from the ray.
-        */
+        
         Vector<Object3D> newObject3DList = new Vector<>();
         for (Object3D obj : object3DList){
             Vector3d objNormal = obj.CalculateNormal();
@@ -145,8 +190,7 @@ public class Scene{
                 this.triangleIntersect(rChild, bounceIndex + randomInt.nextInt(maxBounces) + 1, maxBounces);
             }
         }
-
-    }
+}   */
     public static void main(String[] args) {
         /*Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
         Vector3d v2 = new Vector3d(0.0,0.21,0.1);
