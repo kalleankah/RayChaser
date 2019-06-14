@@ -25,16 +25,22 @@ public class Ray{
         ColorDbl DirectLightcontrib = new ColorDbl(0.0,0.0,0.0);
         ColorDbl IndirectLightcontrib = new ColorDbl(0.0,0.0,0.0);
         Double TotalBrightness = 0.0;
+        Double Brightness = 0.0;
         for(Light l : S.lightList){
             // Tar ej hänsyn till färg på lampor
             Ray ShadowRay = new Ray(Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01)), l.position,false);
-            Double Brightness = l.Brightness * Math.max(0.0, Utilities.vecDot(ShadowRay.direction, this.P_Normal))/(0.25*ShadowRay.RayLength);
+            
+            
             if(S.ObjectHit(ShadowRay)){
                 Brightness = 0.0;
+            }
+            else{
+                Brightness =  l.Brightness * Math.max(0.0, Utilities.vecDot(ShadowRay.direction, this.P_Normal))/(0.25*ShadowRay.RayLength);
             }
             TotalBrightness += Brightness;
         }
         TotalBrightness /= S.lightList.size();
+
         DirectLightcontrib.setColor(HitObject.mat.color); 
         DirectLightcontrib.multiply(TotalBrightness);
         if(Depth >= S.MAX_DEPTH) {
