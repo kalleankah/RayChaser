@@ -7,8 +7,8 @@ public class Scene{
     int MAX_DEPTH;
     double DEPTH_DECAY;
     Scene(){
-        MAX_DEPTH = 2;
-        DEPTH_DECAY = 0.5;
+        MAX_DEPTH = 3;
+        DEPTH_DECAY = 0.3;
         Material white = new Material(new ColorDbl(0.95,0.95,0.95));
         Material red = new Material(new ColorDbl(0.95,0.2,0.2));
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
@@ -91,7 +91,7 @@ public class Scene{
         }*/
         for (Object3D obj : object3DList){
             t = obj.rayIntersection(r);
-            if(t > NearClip && t < Double.POSITIVE_INFINITY && t < temp){
+            if(t > NearClip  && t < temp){
                 hitObject = obj;
                 temp = t;
                 //Calculate the point of intersection
