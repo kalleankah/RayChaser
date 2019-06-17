@@ -70,14 +70,20 @@ public class Camera  {
     public static void main(String[] args) throws IOException{
         long startTime = System.nanoTime();
         Camera c = new Camera(500,500);
-        Scene s = new Scene();
+        Settings setting = new Settings();
+        setting.setMaxDepth(1);
+        setting.setChildren(16);
+        setting.setDepthDecay(0.3);
+        setting.setShadowRays(8);
+        Scene s = new Scene(setting);
+
         Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
         Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
         //s.addObject(ball1);
         //s.addObject(ball2);
         Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));
         //Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 1.0, 0.2)));
-        Tetrahedron T3 = new Tetrahedron(new Vector3d(6.0, 2.0, -3.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
+        Tetrahedron T3 = new Tetrahedron(new Vector3d(6.0, 2.0, -5.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
         s.addObject(T1);
         //s.addObject(T2);
         s.addObject(T3);

@@ -18,7 +18,7 @@ public class Object3D{
     Vector3d CalculateNormal(){
         return null;
     }
-    Vector<Vector3d> getSampleLight(){
+    Vector<Vector3d> getSampleLight(int SAMPLES){
         return null;
     }
 }

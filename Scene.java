@@ -4,11 +4,9 @@ import java.util.*;
 public class Scene{
     Vector<Object3D> object3DList= new Vector<Object3D>();
     Vector<Object3D> lightList = new Vector<Object3D>();
-    int MAX_DEPTH;
-    double DEPTH_DECAY;
-    Scene(){
-        MAX_DEPTH = 2;
-        DEPTH_DECAY = 0.3;
+    public Settings settings;
+    Scene(Settings s){
+        settings = s;
         Material white = new Material(new ColorDbl(0.95,0.95,0.95));
         Material red = new Material(new ColorDbl(0.95,0.2,0.2));
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
@@ -39,10 +37,10 @@ public class Scene{
         object3DList.add(new Triangle(FloorLD,FloorLU,FloorLM,white));
 
         //Ceiling
-        addLight(new Triangle(CeilingRD,CeilingRU,CeilingRM,EMISSION));
+        object3DList.add(new Triangle(CeilingRD,CeilingRU,CeilingRM,white));
         object3DList.add(new Triangle(CeilingRD,CeilingLD,CeilingRU,white));
         object3DList.add(new Triangle(CeilingLD,CeilingLU,CeilingRU,white));
-        object3DList.add(new Triangle(CeilingLD,CeilingLM,CeilingLU,white));
+        addLight(new Triangle(CeilingLD,CeilingLM,CeilingLU,EMISSION));
         
 
         //Left upper wall
@@ -96,9 +94,9 @@ public class Scene{
                 r.P_Normal = obj.CalculateNormal(r.P_hit);
             }
         }
-        if(hitObject == null){
+        /*if(hitObject == null){
             hitObject = new Object3D();
-        }
+        }*/
         return hitObject;
     }
     Boolean ObjectHit(Ray r){

@@ -54,6 +54,7 @@ public class Triangle extends Object3D{
         double t = QE1/PE1;
         double u = PT/PE1;
         double v = QD/PE1;
+
         if(u < -0.00000000001 || v < -0.00000000001|| u+v > 1.00000000001){
             t = Double.POSITIVE_INFINITY;
         }
@@ -69,11 +70,15 @@ public class Triangle extends Object3D{
         return normal;
     }
     @Override
-    Vector<Vector3d> getSampleLight(){
+    Vector<Vector3d> getSampleLight(int SAMPLES){
         Vector<Vector3d> V = new Vector<Vector3d>();
-        V.add(vertex0);
-        V.add(vertex1);
-        V.add(vertex2);
+        Random R = new Random();
+        for(int i = 0; i < SAMPLES; i++){
+            Vector3d temp = new Vector3d(vertex0);
+            temp = Utilities.vecAdd(vertex0, Utilities.vecScale(edge1, R.nextDouble()));
+            temp = Utilities.vecAdd(temp, Utilities.vecScale(Utilities.vecSub(vertex2, temp), R.nextDouble()));
+            V.add(temp);
+        }
         return V;
     }
 }

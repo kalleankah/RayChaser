@@ -3,8 +3,6 @@ import java.lang.Math;
 import java.util.*;
 
 public class Ray{
-    private static final int CHILDREN = 32;
-    private static final int CHILDREN_SPECULAR = 32;
     Vector3d start;
     Vector3d end;
     public double RayLength;
@@ -22,6 +20,9 @@ public class Ray{
     }
     ColorDbl CastRay(Scene S, int Depth){
         Object3D HitObject = S.triangleIntersect(this);
+        if(HitObject == null){
+            return new ColorDbl(0.0,0.0,0.0);
+        }
         if(HitObject.mat.Emissive){
             // Ska returnera med hänsyn av distans och ljusets styrka.
             ColorDbl c = new ColorDbl(1.0,1.0,1.0);
@@ -35,7 +36,7 @@ public class Ray{
         Double Brightness = 0.0;
         Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
         for(Object3D l : S.lightList){
-            Vector<Vector3d> SampList = l.getSampleLight();
+            Vector<Vector3d> SampList = l.getSampleLight(S.settings.SHADOW_RAYS);
             Brightness = 0.0;
             for(Vector3d pos : SampList){ // Don't do this, Integrera över ljuskällan på hemispheren. 
                 Ray ShadowRay = new Ray(P_hit_corr, pos,false);
@@ -51,7 +52,7 @@ public class Ray{
         
         DirectLightcontrib.setColor(HitObject.mat.color); 
         DirectLightcontrib.multiply(TotalBrightness);
-        if(Depth >= S.MAX_DEPTH) {
+        if(Depth >= S.settings.MAX_DEPTH) {
             //DirectLightcontrib.divide(Depth+1);
             return DirectLightcontrib;
         }
@@ -91,7 +92,7 @@ public class Ray{
         if(HitObject.mat.isSpecular){
             LocalEndPoint = Utilities.vecSub( Utilities.vecScale(localnormal, Utilities.vecDot(localnormal, direction_local)), direction_local);
             Random random = new Random();
-            for(int i = 0; i < CHILDREN_SPECULAR; ++i){
+            for(int i = 0; i < S.settings.CHILDREN; ++i){
                 Azimuth = Math.PI - (random.nextDouble()*2.0*Math.PI)/1.0; /* Kolla över denna sektion och utvärdera matematiken för Azi och Alt */
                 Altitude = 0.25*Math.PI- (random.nextDouble()*0.5*Math.PI)/1.0;
                 LocalEndPoint.x += Math.sin(Altitude)*Math.sin(Azimuth);
@@ -106,8 +107,8 @@ public class Ray{
         else{
             LocalEndPoint = new Vector3d();
             Random random = new Random();
-            for(int i = 0; i < CHILDREN; ++i){
-                if(!Utilities.RussianBullet(S.DEPTH_DECAY + (1.0-S.DEPTH_DECAY) * ((double)Depth / (double)S.MAX_DEPTH))){
+            for(int i = 0; i < S.settings.CHILDREN; ++i){
+                if(!Utilities.RussianBullet(S.settings.DEPTH_DECAY + (1.0-S.settings.DEPTH_DECAY) * ((double)Depth / (double)S.settings.MAX_DEPTH))){
                     Azimuth = random.nextDouble()*2*Math.PI;
                     Altitude = random.nextDouble()*0.5*Math.PI;
                     LocalEndPoint.x = Math.sin(Altitude)*Math.sin(Azimuth);
