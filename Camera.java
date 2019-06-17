@@ -26,7 +26,9 @@ public class Camera  {
             for(int i = 0; i < Width; ++i){
                 endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
                 r = new Ray(eye1, endPoint, true);
-                pixelList.add(r.CastRay(S,0));
+                ColorDbl temp = r.CastRay(S,0);
+                temp.clamp();
+                pixelList.add(temp);
                 p = null;
             }
             updateProgress( (double) j/Height);
@@ -71,10 +73,6 @@ public class Camera  {
         Scene s = new Scene();
         Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
         Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
-        Light lamp = new Light(new Vector3d(0.0, 0.0, 3.0), new ColorDbl(1.0, 1.0, 1.0), 1.0);
-        Light lamp2 = new Light(new Vector3d(9.0, -2.0, 3.0), new ColorDbl(1.0, 1.0, 1.0), 1.0);
-        s.addLight(lamp);
-        s.addLight(lamp2);
         //s.addObject(ball1);
         //s.addObject(ball2);
         Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));

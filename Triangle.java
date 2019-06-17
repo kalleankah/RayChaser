@@ -1,4 +1,6 @@
 import javax.vecmath.Vector3d;
+import java.lang.Math;
+import java.util.*;
 public class Triangle extends Object3D{
     Vector3d vertex0, vertex1,vertex2;
     Vector3d edge1,edge2;
@@ -65,5 +67,13 @@ public class Triangle extends Object3D{
     @Override
     Vector3d CalculateNormal(){
         return normal;
+    }
+    @Override
+    Vector<Vector3d> getSampleLight(){
+        Vector<Vector3d> V = new Vector<Vector3d>();
+        V.add(vertex0);
+        V.add(vertex1);
+        V.add(vertex2);
+        return V;
     }
 }

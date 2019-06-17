@@ -70,5 +70,25 @@ static Boolean RussianBullet(double d){
 	Random r = new Random();
 	return r.nextDouble() < d;
 }
+static Vector3d FindOrthogonalVector(Vector3d V){
+  Vector3d temp;
+  if(V.x != 0.0){
+    temp = new Vector3d((-V.y - V.z) / V.x, 1.0, 1.0);
+  }
+  else if(V.y != 0.0){
+    temp = new Vector3d(1.0, (-V.x - V.z) / V.y, 1.0);
+  }
+  else if(V.z != 0.0){
+    temp = new Vector3d(1.0, 1.0, (-V.x - V.y) /V.z);
+  }
+  else{
+    return null;
+  }
+  return vecNormalize(temp);
+}
+static Vector3d FindOrthogonalVector(Vector3d V1, Vector3d V2){
+  Vector3d V = vecCross(V1, V2);
+  return vecNormalize(V);
+}
 //End of utility functions **********************************************
 }

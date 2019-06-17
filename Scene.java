@@ -3,17 +3,17 @@ import java.lang.Math;
 import java.util.*;
 public class Scene{
     Vector<Object3D> object3DList= new Vector<Object3D>();
-    Vector<Light> lightList = new Vector<Light>();
+    Vector<Object3D> lightList = new Vector<Object3D>();
     int MAX_DEPTH;
     double DEPTH_DECAY;
     Scene(){
-        MAX_DEPTH = 3;
+        MAX_DEPTH = 1;
         DEPTH_DECAY = 0.3;
         Material white = new Material(new ColorDbl(0.95,0.95,0.95));
         Material red = new Material(new ColorDbl(0.95,0.2,0.2));
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
         Material blue = new Material(new ColorDbl(0.2,0.2,0.95));
-        Material yellow = new Material(new ColorDbl(0.95,0.95,0.2));
+        Material yellow = new Material(new ColorDbl(0.95,0.95,0.2), false, true, 10.0);
         Material cyan = new Material(new ColorDbl(0.2,0.95,0.95));
         Material magenta = new Material(new ColorDbl(0.95,0.2,0.95));
 
@@ -38,10 +38,11 @@ public class Scene{
         object3DList.add(new Triangle(FloorLD,FloorLU,FloorLM,cyan));
 
         //Ceiling
-        object3DList.add(new Triangle(CeilingRD,CeilingRU,CeilingRM,yellow));
-        object3DList.add(new Triangle(CeilingLD,CeilingLU,CeilingRU,yellow));
-        object3DList.add(new Triangle(CeilingRD,CeilingLD,CeilingRU,yellow));
-        object3DList.add(new Triangle(CeilingLD,CeilingLM,CeilingLU,yellow));
+        addLight(new Triangle(CeilingRD,CeilingRU,CeilingRM,yellow));
+        addLight(new Triangle(CeilingLD,CeilingLU,CeilingRU,yellow));
+        addLight(new Triangle(CeilingRD,CeilingLD,CeilingRU,yellow));
+        addLight(new Triangle(CeilingLD,CeilingLM,CeilingLU,yellow));
+        
 
         //Left upper wall
         object3DList.add(new Triangle(FloorLM,FloorLU,CeilingLU,white));
@@ -70,8 +71,9 @@ public class Scene{
     void addObject(Object3D o){
         object3DList.add(o);
     }
-    void addLight(Light l){
-        lightList.add(l);
+    void addLight(Object3D o){
+        lightList.add(o);
+        object3DList.add(o);
     }
     
     Object3D triangleIntersect(Ray r){
@@ -82,13 +84,6 @@ public class Scene{
         if(r.MotherNode){
             NearClip = 1.0;
         }
-        /*Vector<Object3D> newObject3DList = new Vector<>();
-        for (Object3D obj : object3DList){
-            Vector3d objNormal = obj.CalculateNormal();
-            if(objNormal == null || Utilities.vecDot(objNormal, r.direction) < 0.0){
-                newObject3DList.add(obj);
-            }
-        }*/
         for (Object3D obj : object3DList){
             t = obj.rayIntersection(r);
             if(t > NearClip  && t < temp){
@@ -108,96 +103,14 @@ public class Scene{
     Boolean ObjectHit(Ray r){
         double t = -1.0;
         for(Object3D obj : object3DList){
-            t = obj.rayIntersection(r);
-            if(t > 0.01 && t <= 1.0){
-                return true;
-            }
+            //if(!obj.mat.Emissive){
+                t = obj.rayIntersection(r);
+                if(t > 0.01 && t < 1.0){
+                        return true;
+                }
+            //}
         }
         return false;
     }
-    /*void triangleIntersect(Ray r, int bounceIndex, int maxBounces){
-        Boolean is_specular = false;
-        double t = 0.0;
-        double temp = Double.POSITIVE_INFINITY;
-
-        double NearClip;
-        //Ignore intersections near camera
-        if(r.MotherNode){
-            NearClip = 1.0;
-        }
-        //Don't ignore any intersections for secondary bounces
-        else{
-            NearClip = 0.0;
-        }
-
-         ------------------------- IMPORTANT ---------------------------------
-            Child-rays (secondary bounces) sometimes originate slightly (10e-15 units) from behind
-            the surface its parent ray. For this reason, we have to prevent them from intersecting
-            with the surface they originate from.
-
-            Solution: Remove all objects in the object3DList facing away from the ray.
-        
-        Vector<Object3D> newObject3DList = new Vector<>();
-        for (Object3D obj : object3DList){
-            Vector3d objNormal = obj.CalculateNormal();
-            if(Utilities.vecDot(objNormal, r.direction) < 0.0){
-                newObject3DList.add(obj);
-            }
-        }
-        //Check for intersection with all Objects
-        for (Object3D obj : newObject3DList){
-            t = obj.rayIntersection(r); //Distance t to intersection with an object3D
-            //Conditions must be met for intersection to count
-            if(t > NearClip && t < Double.POSITIVE_INFINITY && t < temp){
-                //Give the ray the color of the object hit
-                r.rayColor.setColor(obj.color);
-                temp = t;
-                //Calculate the point of intersection
-                r.calculatePhit(temp);
-                //Calculate the normal of the point of intersection
-                r.P_Normal = obj.CalculateNormal(r.P_hit);
-                if(obj instanceof Sphere){
-                  is_specular = true;
-                }else{
-                  is_specular = false;
-                }
-            }
-        }
-        //System.out.println("Distance to intersection = " + temp);
-        //Create a shadow ray
-        r.calculateShadowRay(lightList.get(0));
-        if(r.ShadowRay == null){
-            System.out.println("ShadowRay == null");
-        }
-        double tshadowray = 0.0;
-        //Check for intersection with all Objects (ShadowRay)
-        for (Object3D obj : object3DList){
-            if(r.ShadowRay == null){
-                System.out.println("2 ShadowRay == null");
-            }
-            //Calculate distance to intersection (ShadowRay)
-            tshadowray = obj.rayIntersection(r.ShadowRay);
-            if(tshadowray > 0.000001 && tshadowray < 1.0){
-                r.isInShadow();
-                break;
-            }
-        }
-        //Call the function recursively for the bounce-depth
-        if(bounceIndex < maxBounces){
-            r.raybounce(is_specular);
-            for (Ray rChild : r.Children){
-                Random randomInt = new Random();
-                this.triangleIntersect(rChild, bounceIndex + randomInt.nextInt(maxBounces) + 1, maxBounces);
-            }
-        }
-}   */
-    public static void main(String[] args) {
-        /*Vector3d v1 = new Vector3d(-1.0,0.0,0.0);
-        Vector3d v2 = new Vector3d(0.0,0.21,0.1);
-        Ray r1 = new Ray(v1,v2);
-        Scene s = new Scene();
-        r1.rayColor.print();
-        s.triangleIntersect(r1);
-        r1.rayColor.print();*/
-    }
+    
 }
