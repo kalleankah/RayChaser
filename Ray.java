@@ -1,12 +1,9 @@
 import javax.vecmath.*;
-
-import com.sun.javafx.geom.Vec2d;
-
 import java.lang.Math;
 import java.util.*;
 
 public class Ray{
-    private static final int CHILDREN = 16;
+    private static final int CHILDREN = 32;
     private static final int CHILDREN_SPECULAR = 32;
     Vector3d start;
     Vector3d end;
@@ -28,7 +25,7 @@ public class Ray{
         if(HitObject.mat.Emissive){
             // Ska returnera med hänsyn av distans och ljusets styrka.
             ColorDbl c = new ColorDbl(1.0,1.0,1.0);
-            c.divide(Depth +1 );
+            //c.divide(Depth +1 );
             return c;
         }
 
@@ -38,16 +35,11 @@ public class Ray{
         Double Brightness = 0.0;
         Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
         for(Object3D l : S.lightList){
-            // Tar ej hänsyn till färg på lampor
-            
             Vector<Vector3d> SampList = l.getSampleLight();
             Brightness = 0.0;
-            for(Vector3d pos : SampList){
+            for(Vector3d pos : SampList){ // Don't do this, Integrera över ljuskällan på hemispheren. 
                 Ray ShadowRay = new Ray(P_hit_corr, pos,false);
-                if(S.ObjectHit(ShadowRay)){
-                    Brightness += 0.0;
-                }
-                else{    
+                if(!S.ObjectHit(ShadowRay)){  
                     Brightness +=  l.mat.Brightness * Math.max(0.0, Utilities.vecDot(ShadowRay.direction, this.P_Normal))/(ShadowRay.RayLength);
                 }
             }
@@ -56,11 +48,11 @@ public class Ray{
             
         }
         TotalBrightness /= S.lightList.size();
-
+        
         DirectLightcontrib.setColor(HitObject.mat.color); 
-        DirectLightcontrib.multiply(Math.min(1.0,TotalBrightness));
+        DirectLightcontrib.multiply(TotalBrightness);
         if(Depth >= S.MAX_DEPTH) {
-            DirectLightcontrib.divide(Depth+1);
+            //DirectLightcontrib.divide(Depth+1);
             return DirectLightcontrib;
         }
         
@@ -135,7 +127,7 @@ public class Ray{
         }
         IndirectLightcontrib.multiply(HitObject.mat.color);
         DirectLightcontrib.sumColor(IndirectLightcontrib);
-        DirectLightcontrib.divide(Depth+1);
+        //DirectLightcontrib.divide(Depth+1);
         return DirectLightcontrib;
     }
     

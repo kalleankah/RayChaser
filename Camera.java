@@ -76,10 +76,10 @@ public class Camera  {
         //s.addObject(ball1);
         //s.addObject(ball2);
         Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));
-        Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 1.0, 0.2)));
-        Tetrahedron T3 = new Tetrahedron(new Vector3d(3.0, -0.5, -1.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
+        //Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 1.0, 0.2)));
+        Tetrahedron T3 = new Tetrahedron(new Vector3d(6.0, 2.0, -3.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
         s.addObject(T1);
-        s.addObject(T2);
+        //s.addObject(T2);
         s.addObject(T3);
         c.createPixels(s);
         c.render("bild");
