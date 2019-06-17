@@ -18,6 +18,11 @@ public class ColorDbl{
     void print(){
         System.out.println("Color: ("+R+", "+G+", "+B+" );");
     }
+    void clamp(){
+        R = Math.max(0.0, Math.min(R, 1.0));
+        G = Math.max(0.0, Math.min(G, 1.0));
+        B = Math.max(0.0, Math.min(B, 1.0));
+    }
     void sumColor(ColorDbl C){
         R += C.R;
         G += C.G;

@@ -1,9 +1,12 @@
 import javax.vecmath.*;
+
+import com.sun.javafx.geom.Vec2d;
+
 import java.lang.Math;
 import java.util.*;
 
 public class Ray{
-    private static final int CHILDREN = 16;
+    private static final int CHILDREN = 32;
     private static final int CHILDREN_SPECULAR = 32;
     Vector3d start;
     Vector3d end;
@@ -26,9 +29,10 @@ public class Ray{
         ColorDbl IndirectLightcontrib = new ColorDbl(0.0,0.0,0.0);
         Double TotalBrightness = 0.0;
         Double Brightness = 0.0;
+        Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
         for(Light l : S.lightList){
             // Tar ej hänsyn till färg på lampor
-            Ray ShadowRay = new Ray(Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01)), l.position,false);
+            Ray ShadowRay = new Ray(P_hit_corr, l.position,false);
             
             
             if(S.ObjectHit(ShadowRay)){
@@ -90,7 +94,7 @@ public class Ray{
                 LocalEndPoint.z += Math.cos(Altitude); // up
   
                 EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
-                IndirectLightcontrib.sumColor(new Ray(P_hit, EndPoint, false).CastRay(S,Depth+1));
+                IndirectLightcontrib.sumColor(new Ray(P_hit_corr, EndPoint, false).CastRay(S,Depth+1));
                 N_CHILDREN++;
             }
           }
@@ -106,18 +110,20 @@ public class Ray{
                     LocalEndPoint.z = Math.cos(Altitude); // up
     
                     EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
-                    Ray Child = new Ray(P_hit, EndPoint, false);
+                    Ray Child = new Ray(P_hit_corr, EndPoint, false);
                     ColorDbl c = Child.CastRay(S, Depth+1);
                     IndirectLightcontrib.sumColor(c);
                     N_CHILDREN++;
                 }
             }
         }
-        
-        IndirectLightcontrib.divide(N_CHILDREN);
+        if(N_CHILDREN != 0){
+            IndirectLightcontrib.divide(N_CHILDREN);
+        }
         IndirectLightcontrib.multiply(HitObject.mat.color);
         DirectLightcontrib.sumColor(IndirectLightcontrib);
         DirectLightcontrib.divide(Depth+1);
+        DirectLightcontrib.clamp();
         return DirectLightcontrib;
     }
     /*ColorDbl CalculateColor(double Importance){
