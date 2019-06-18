@@ -2,31 +2,19 @@ import com.sun.prism.paint.Color;
 
 class Material{
     ColorDbl color;
-    Boolean isSpecular;
-    Boolean Emissive;
     double Brightness;
     Material(){
         color = new ColorDbl();
-        isSpecular = false;
-        Emissive = false;
+        Brightness = 1.0;
     }
     Material(ColorDbl C){
         color = new ColorDbl();
         color.setColor(C);
-        isSpecular = false;
-        Emissive = false;
+        Brightness = 1.0;
     }
-    Material(ColorDbl C, Boolean S){
+    Material(ColorDbl C, double b){
         color = new ColorDbl();
         color.setColor(C);
-        isSpecular = S;
-        Emissive = false;
-    }
-    Material(ColorDbl c, Boolean S, Boolean E, double b){
-        color = new ColorDbl();
-        color.setColor(c);
-        isSpecular = S;
-        Emissive = E;
         Brightness = b;
     }
     

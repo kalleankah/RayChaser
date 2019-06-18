@@ -15,6 +15,9 @@ public class ColorDbl{
         G = Math.min(b,1.0);
         B = Math.min(c,1.0);
     }
+    ColorDbl(ColorDbl c){
+        setColor(c);
+    }
     void print(){
         System.out.println("Color: ("+R+", "+G+", "+B+" );");
     }

@@ -26,7 +26,7 @@ public class Camera  {
             for(int i = 0; i < Width; ++i){
                 endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
                 r = new Ray(eye1, endPoint, true);
-                ColorDbl temp = r.CastRay(S,0);
+                ColorDbl temp = r.CastRay(S,0,0);
                 temp.clamp();
                 pixelList.add(temp);
                 p = null;
@@ -75,12 +75,13 @@ public class Camera  {
         setting.setChildren(16);
         setting.setDepthDecay(0.3);
         setting.setShadowRays(8);
+        setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
 
-        Sphere ball1 = new Sphere(new Vector3d(5.0, 0.0, -3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
-        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Material(new ColorDbl(1.0, 1.0, 1.0),true));
-        //s.addObject(ball1);
-        //s.addObject(ball2);
+        Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 0.0, 0.0)));
+        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Reflective(new ColorDbl(0.25, 0.25, 0.75)));
+        s.addObject(ball1);
+        s.addObject(ball2);
         Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));
         //Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 1.0, 0.2)));
         Tetrahedron T3 = new Tetrahedron(new Vector3d(6.0, 2.0, -5.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
