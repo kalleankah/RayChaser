@@ -12,9 +12,9 @@ public class Scene{
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
         Material blue = new Material(new ColorDbl(0.2,0.2,0.95));
         Material yellow = new Material(new ColorDbl(0.95,0.95,0.2));
-        Material EMISSION = new Material(new ColorDbl(0.95,0.95,0.2), false, true, 5.0);
+        Material EMISSION = new Emissive(new ColorDbl(0.0,1.0,0.0), 5.0);
         Material cyan = new Material(new ColorDbl(0.2,0.95,0.95));
-        Material magenta = new Material(new ColorDbl(0.95,0.2,0.95));
+        Material Reflective = new Reflective(new ColorDbl(1.0,1.0,1.0));
 
         Vector3d CeilingLM = new Vector3d(-3.0,0.0,5.0);
         Vector3d CeilingLU = new Vector3d(0.0,6.0,5.0);
@@ -64,8 +64,8 @@ public class Scene{
         object3DList.add(new Triangle(FloorRU,CeilingRM,CeilingRU,cyan));
 
         //Right bottom wall
-        object3DList.add(new Triangle(FloorRM,FloorRD,CeilingRD,magenta));
-        object3DList.add(new Triangle(FloorRM,CeilingRD,CeilingRM,magenta));
+        object3DList.add(new Triangle(FloorRM,FloorRD,CeilingRD,Reflective));
+        object3DList.add(new Triangle(FloorRM,CeilingRD,CeilingRM,Reflective));
     }
     void addObject(Object3D o){
         object3DList.add(o);
@@ -94,9 +94,6 @@ public class Scene{
                 r.P_Normal = obj.CalculateNormal(r.P_hit);
             }
         }
-        /*if(hitObject == null){
-            hitObject = new Object3D();
-        }*/
         return hitObject;
     }
     Boolean ObjectHit(Ray r){
