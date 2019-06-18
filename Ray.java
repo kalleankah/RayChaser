@@ -28,7 +28,7 @@ public class Ray{
             return new ColorDbl(1.0,1.0,1.0);
         }
         if(HitObject.mat instanceof Reflective && ReflectionDepth <= S.settings.MAX_REFLECTION_BOUNCES){
-            Vector3d d = Utilities.vecSub(P_hit,new Vector3d(-1,0.0,0.0));
+            Vector3d d = Utilities.vecSub(P_hit,start);
             Vector3d PerfectReflector = Utilities.vecSub(d, Utilities.vecScale(P_Normal, 2*Utilities.vecDot(d,P_Normal)));
             Ray Child = new Ray(P_hit_corr,Utilities.vecAdd(P_hit,PerfectReflector), false);
             ColorDbl c = Child.CastRay(S, Depth, ReflectionDepth+1);
@@ -43,19 +43,19 @@ public class Ray{
         for(Object3D l : S.lightList){
             Vector<Vector3d> SampList = l.getSampleLight(S.settings.SHADOW_RAYS);
             Brightness = 0.0;
-            for(Vector3d pos : SampList){ 
+            for(Vector3d pos : SampList){
                 Ray ShadowRay = new Ray(P_hit_corr, pos,false);
-                if(!S.ObjectHit(ShadowRay)){  
+                if(!S.ObjectHit(ShadowRay)){
                     Brightness +=  l.mat.Brightness * Math.max(0.0, Utilities.vecDot(ShadowRay.direction, this.P_Normal))/(ShadowRay.RayLength);
                 }
             }
             Brightness /= SampList.size();
             TotalBrightness += Brightness;
-            
+
         }
         TotalBrightness /= S.lightList.size();
-        
-        DirectLightcontrib.setColor(HitObject.mat.color); 
+
+        DirectLightcontrib.setColor(HitObject.mat.color);
         DirectLightcontrib.multiply(TotalBrightness);
         if(Depth >= S.settings.MAX_DEPTH) {
             //DirectLightcontrib.divide(Depth+1);
@@ -79,7 +79,7 @@ public class Ray{
         0.0, 1.0, 0.0, -P_hit.y,
         0.0, 0.0, 1.0, -P_hit.z,
         0.0, 0.0, 0.0, 1.0);
-        
+
         Matrix4d world2local = new Matrix4d();
         world2local.mul(rotation_mat, translation_mat);
         Matrix4d local2world = Utilities.invertMat(world2local);
@@ -117,7 +117,7 @@ public class Ray{
         DirectLightcontrib.sumColor(IndirectLightcontrib);
         return DirectLightcontrib;
     }
-    
+
     void calculatePhit(double t){
         P_hit = new Vector3d();
         P_hit = Utilities.vecSub(end,start);

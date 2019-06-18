@@ -90,5 +90,18 @@ static Vector3d FindOrthogonalVector(Vector3d V1, Vector3d V2){
   Vector3d V = vecCross(V1, V2);
   return vecNormalize(V);
 }
+static void updateProgress(double progressPercentage) {
+    final int width = 50; // progress bar width in chars
+
+    System.out.print("\r[");
+    int i = 0;
+    for (; i <= (int)(progressPercentage*width); i++) {
+      System.out.print(".");
+    }
+    for (; i < width; i++) {
+      System.out.print(" ");
+    }
+    System.out.print("]" + (int)(progressPercentage*100) + "%");
+}
 //End of utility functions **********************************************
 }
