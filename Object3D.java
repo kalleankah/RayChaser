@@ -1,4 +1,6 @@
 import javax.vecmath.Vector3d;
+import java.lang.Math;
+import java.util.*;
 public class Object3D{
     Material mat;
     public Object3D(){
@@ -14,6 +16,9 @@ public class Object3D{
         return null;
     }
     Vector3d CalculateNormal(){
+        return null;
+    }
+    Vector<Vector3d> getSampleLight(int SAMPLES){
         return null;
     }
 }

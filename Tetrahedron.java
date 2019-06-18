@@ -11,20 +11,20 @@ public class Tetrahedron extends Object3D{
         double d3 = size * 0.816496580927726032732428024901963797321982493552223376; //sqrt(2/3)
         double d4 = size * 0.33333333333333333333333333333333333333333333333333333;  //1/3
         //Create vertices, positioned with origin in the geometric center
-        Vector3d v1 = new Vector3d(d1, 0.0, -d4);
-        Vector3d v2 = new Vector3d(-d2, d3, -d4);
-        Vector3d v3 = new Vector3d(-d2, -d3, -d4);
-        Vector3d v4 = new Vector3d(0.0, 0.0, size);
+        Vector3d v1 = new Vector3d(d1, 0.0, -d4); //Längst bort, längst ned
+        Vector3d v2 = new Vector3d(-d2, d3, -d4); // Vänster nära
+        Vector3d v3 = new Vector3d(-d2, -d3, -d4); // höger nära
+        Vector3d v4 = new Vector3d(0.0, 0.0, size); // top
         //Move object to selected origin
         v1.add(origin);
         v2.add(origin);
         v3.add(origin);
         v4.add(origin);
         //Create the triangles (positions defined as viewed from the camera, left is positive Y direction)
-        TriList.add( new Triangle( v1, v2, v3, m) );// bottom side
-        TriList.add( new Triangle( v1, v4, v2, m) );// left side
-        TriList.add( new Triangle( v1, v3, v4, m) );// Right side
-        TriList.add( new Triangle( v3, v2, v4, m) );// Back side
+        TriList.add( new Triangle( v1, v3, v2, m) );// bottom side
+        TriList.add( new Triangle( v1, v2, v4, m) );// left side
+        TriList.add( new Triangle( v1, v4, v3, m) );// Right side
+        TriList.add( new Triangle( v3, v4, v2, m) );// Back side
     }
     @Override
     double rayIntersection(Ray r){
