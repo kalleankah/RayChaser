@@ -6,9 +6,11 @@ import java.util.*;
 public class Camera  {
     int Width;
     Vector3d eye;
+    int subpixels;
     ColorDbl[][] pixelList;
-    Camera(int w, Vector3d e){
+    Camera(int w, int s, Vector3d e){
         Width = w;
+        subpixels = s;
         eye = e;
         pixelList = new ColorDbl[w][w];
     }
@@ -16,13 +18,21 @@ public class Camera  {
     void render(Scene S){
         long endTime;
         double PixelSize = 2.0/Width;
+        double subPixelSize = PixelSize/subpixels;
         Vector3d endPoint;
         Ray r;
+        ColorDbl temp;
         for(int j = 0; j < Width; ++j){
             for(int i = 0; i < Width; ++i){
-                endPoint = new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
-                r = new Ray(eye, endPoint, true);
-                ColorDbl temp = r.CastRay(S,0,0);
+                temp = new ColorDbl();
+                for(int k = 0; k<subpixels; ++k){
+                    for(int l = 0; l<subpixels; ++l){
+                        endPoint = new Vector3d(0.0, i*PixelSize + 0.5*subPixelSize+k*subPixelSize -1, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1);
+                        r = new Ray(eye, endPoint, true);
+                        temp.sumColor(r.CastRay(S,0,0));
+                    }
+                }
+                temp.divide(subpixels*subpixels);
                 temp.clamp();
                 pixelList[i][j] = temp;
             }
@@ -54,12 +64,12 @@ public class Camera  {
         //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
-        setting.setChildren(16);
+        setting.setChildren(48);
         setting.setDepthDecay(0.3);
         setting.setShadowRays(8);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
-        Camera c = new Camera(500, new Vector3d(-1.0,0.0,0.0));
+        Camera c = new Camera(500, 2, new Vector3d(-1.0,0.0,0.0));
 
         //Add objects to scene
         Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 0.0, 0.0)));
@@ -75,7 +85,12 @@ public class Camera  {
 
         //Start rendering
         c.render(s);
-        c.write("bild");
+        if(args[0] != null){
+          c.write(args[0]);
+        }
+        else{
+          c.write("Bild");
+        }
 
         //Program ends here, set progress to 100%
         long endTime = System.nanoTime();
