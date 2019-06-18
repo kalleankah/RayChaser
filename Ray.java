@@ -46,12 +46,11 @@ public class Ray{
             for(Vector3d pos : SampList){
                 Ray ShadowRay = new Ray(P_hit_corr, pos,false);
                 if(!S.ObjectHit(ShadowRay)){
-                    Brightness +=  l.mat.Brightness * Math.max(0.0, Utilities.vecDot(ShadowRay.direction, this.P_Normal))/(ShadowRay.RayLength);
+                    Brightness +=  Math.max(0.0, l.mat.Brightness * Utilities.vecDot(ShadowRay.direction, this.P_Normal)* Utilities.vecDot(ShadowRay.direction, l.CalculateNormal())/(ShadowRay.RayLength));
                 }
             }
             Brightness /= SampList.size();
             TotalBrightness += Brightness;
-
         }
         TotalBrightness /= S.lightList.size();
 

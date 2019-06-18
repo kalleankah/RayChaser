@@ -66,16 +66,16 @@ public class Camera  {
         //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
-        setting.setChildren(4);
+        setting.setChildren(16);
         setting.setDepthDecay(0.3);
         setting.setShadowRays(8);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
-        Camera c = new Camera(800, 1, new Vector3d(-1.0,0.0,0.0),1.25);
+        Camera c = new Camera(500, 1, new Vector3d(-1.0,0.0,0.0),1.25);
 
         //Add objects to scene
-        s.addObject(new Sphere(new Vector3d(9.0, -1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.9, 0.9, 0.9))));
-        s.addObject(new Sphere(new Vector3d(9.0, 1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.9, 0.9, 0.9))));
+        s.addObject(new Sphere(new Vector3d(9.0, -1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+        s.addObject(new Sphere(new Vector3d(9.0, 1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
         s.addObject(new Box(new Vector3d(9.0, 0.0, -3), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
 
         //Start rendering
