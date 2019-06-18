@@ -66,24 +66,17 @@ public class Camera  {
         //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
-        setting.setChildren(16);
+        setting.setChildren(4);
         setting.setDepthDecay(0.3);
         setting.setShadowRays(8);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
-        Camera c = new Camera(800, 2, new Vector3d(2.0,2.5,0.0),2.0);
+        Camera c = new Camera(800, 1, new Vector3d(-1.0,0.0,0.0),1.25);
 
         //Add objects to scene
-        Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 1.0, 1.0)));
-        Sphere ball2 = new Sphere(new Vector3d(10.0, 0.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 1.0, 1.0)));
-        s.addObject(ball1);
-        s.addObject(ball2);
-        Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));
-        //Box T2 = new Box(new Vector3d(9.0, 2.0, -4.0), 10.0, 7.0, 4.0, new Material(new ColorDbl(0.4, 1.0, 0.2)));
-        Tetrahedron T3 = new Tetrahedron(new Vector3d(6.0, 2.0, -5.0), 2.0, new Material(new ColorDbl(0.4, 0.7, 1.0)));
-        s.addObject(T1);
-        //s.addObject(T2);
-        s.addObject(T3);
+        s.addObject(new Sphere(new Vector3d(9.0, -1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.9, 0.9, 0.9))));
+        s.addObject(new Sphere(new Vector3d(9.0, 1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.9, 0.9, 0.9))));
+        s.addObject(new Box(new Vector3d(9.0, 0.0, -3), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
 
         //Start rendering
         c.render(s);

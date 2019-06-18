@@ -23,6 +23,10 @@ public class Scene{
         Vector3d CeilingRU = new Vector3d(10.0,6.0,5.0);
         Vector3d CeilingRD = new Vector3d(10.0,-6.0,5.0);
         Vector3d CeilingRM = new Vector3d(13.0,0.0,5.0);
+        Vector3d CeilingLight1 = new Vector3d(8.5,-0.5,4.999999999);
+        Vector3d CeilingLight2 = new Vector3d(9.5,-0.5,4.999999999);
+        Vector3d CeilingLight3 = new Vector3d(9.5, 0.5,4.999999999);
+        Vector3d CeilingLight4 = new Vector3d(8.5, 0.5,4.999999999);
 
         Vector3d FloorLM = new Vector3d(-3.0,0.0,-5.0);
         Vector3d FloorLU = new Vector3d(0.0,6.0,-5.0);
@@ -41,8 +45,11 @@ public class Scene{
         object3DList.add(new Triangle(CeilingRD,CeilingRU,CeilingRM,white));
         object3DList.add(new Triangle(CeilingRD,CeilingLD,CeilingRU,white));
         object3DList.add(new Triangle(CeilingLD,CeilingLU,CeilingRU,white));
-        addLight(new Triangle(CeilingLD,CeilingLM,CeilingLU,EMISSION));
+        object3DList.add(new Triangle(CeilingLD,CeilingLM,CeilingLU,white));
 
+        //Lamp
+        addLight(new Triangle(CeilingLight1,CeilingLight2,CeilingLight3,EMISSION));
+        addLight(new Triangle(CeilingLight3,CeilingLight4,CeilingLight1,EMISSION));
 
         //Left upper wall
         object3DList.add(new Triangle(FloorLM,FloorLU,CeilingLU,red));
