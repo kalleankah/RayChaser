@@ -1,5 +1,3 @@
-import com.sun.prism.paint.Color;
-
 class Material{
     ColorDbl color;
     double Brightness;
@@ -17,5 +15,5 @@ class Material{
         color.setColor(C);
         Brightness = b;
     }
-    
+
 }

@@ -5,56 +5,37 @@ import java.io.*;
 import java.util.*;
 public class Camera  {
     int Width;
-    int Height;
-    Vector3d eye1;
-    Vector3d eye2;
-    Vector<ColorDbl> pixelList= new Vector<ColorDbl>();
-    Camera(int w, int h){
+    Vector3d eye;
+    ColorDbl[][] pixelList;
+    Camera(int w, Vector3d e){
         Width = w;
-        Height = h;
-        eye1 = new Vector3d(-1,0.0,0.0);
-        eye2 = new Vector3d(-2.0,0.0,0.0);
+        eye = e;
+        pixelList = new ColorDbl[w][w];
     }
     //Start rendering scene S
-    void createPixels(Scene S){
+    void render(Scene S){
         long endTime;
         double PixelSize = 2.0/Width;
         Vector3d endPoint;
         Ray r;
-        Pixel p;
-        for(int j = 0; j < Height; ++j){
+        for(int j = 0; j < Width; ++j){
             for(int i = 0; i < Width; ++i){
-                endPoint= new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
-                r = new Ray(eye1, endPoint, true);
+                endPoint = new Vector3d(0.0,0.5*PixelSize+i*PixelSize-1, 1-0.5*PixelSize-j*PixelSize );
+                r = new Ray(eye, endPoint, true);
                 ColorDbl temp = r.CastRay(S,0,0);
                 temp.clamp();
-                pixelList.add(temp);
-                p = null;
+                pixelList[i][j] = temp;
             }
-            updateProgress( (double) j/Height);
+            Utilities.updateProgress( (double) j/Width);
         }
     }
-
-    static void updateProgress(double progressPercentage) {
-        final int width = 50; // progress bar width in chars
-
-        System.out.print("\r[");
-        int i = 0;
-        for (; i <= (int)(progressPercentage*width); i++) {
-          System.out.print(".");
-        }
-        for (; i < width; i++) {
-          System.out.print(" ");
-        }
-        System.out.print("]" + (int)(progressPercentage*100) + "%");
-    }
-
-    void render(String filename){
+    //Write data to a PNG
+    void write(String filename){
         File file = null;
-        BufferedImage img = new BufferedImage(Width,Height, BufferedImage.TYPE_INT_RGB);
-        for(int y = 0; y < Height; y++){
+        BufferedImage img = new BufferedImage(Width,Width, BufferedImage.TYPE_INT_RGB);
+        for(int y = 0; y < Width; y++){
             for(int x = 0; x < Width; x++){
-                int rgb = pixelList.elementAt(x+y*Width).RGBForImage();
+                int rgb = pixelList[x][y].RGBForImage();
                 img.setRGB(x,y,rgb);
             }
         }
@@ -69,7 +50,8 @@ public class Camera  {
 
     public static void main(String[] args) throws IOException{
         long startTime = System.nanoTime();
-        Camera c = new Camera(500,500);
+
+        //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
         setting.setChildren(16);
@@ -77,7 +59,9 @@ public class Camera  {
         setting.setShadowRays(8);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
+        Camera c = new Camera(500, new Vector3d(-1.0,0.0,0.0));
 
+        //Add objects to scene
         Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 0.0, 0.0)));
         Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Reflective(new ColorDbl(0.25, 0.25, 0.75)));
         s.addObject(ball1);
@@ -88,10 +72,14 @@ public class Camera  {
         s.addObject(T1);
         //s.addObject(T2);
         s.addObject(T3);
-        c.createPixels(s);
-        c.render("bild");
+
+        //Start rendering
+        c.render(s);
+        c.write("bild");
+
+        //Program ends here, set progress to 100%
         long endTime = System.nanoTime();
-        updateProgress( 1.0 ); //Program ends here, set progress to 100%
+        Utilities.updateProgress( 1.0 );
         System.out.println("\nExecution time: " + (endTime-startTime)/1000000000.0+"s");
     }
 }
