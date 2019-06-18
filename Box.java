@@ -2,57 +2,55 @@ import javax.vecmath.Vector3d;
 import java.lang.Math;
 import java.util.*;
 public class Box extends Object3D{
-    Vector<Triangle> Triangles = new Vector<Triangle>();
+    Vector<Plane> Planes = new Vector<Plane>();
+    Vector3d[][] sides;
     Box(Vector3d origin, double w, double h, double d ,Material m){
         super(m);
-        Vector3d FBL = new Vector3d(origin);
-        FBL.add(new Vector3d(-d/2,-w/2,-h/2));
-        Vector3d FBR = new Vector3d(origin);
-        FBR.add(new Vector3d(-d/2,w/2,-h/2));
-        Vector3d FTL = new Vector3d(origin);
-        FTL.add(new Vector3d(-d/2,-w/2,h/2));
-        Vector3d FTR = new Vector3d(origin);
-        FTR.add(new Vector3d(-d/2,w/2,h/2));
+        sides = new Vector3d[6][2];
+        Vector3d FBL = Utilities.vecAdd(origin,new Vector3d(-d/2,w/2,-h/2));
+        Vector3d FBR = Utilities.vecAdd(origin,new Vector3d(-d/2,-w/2,-h/2));
+        Vector3d FTL = Utilities.vecAdd(origin,new Vector3d(-d/2,w/2,h/2));
+        Vector3d FTR = Utilities.vecAdd(origin,new Vector3d(-d/2,-w/2,h/2));
 
-        Vector3d BBL = new Vector3d(origin);
-        BBL.add(new Vector3d(d/2,-w/2,-h/2));
-        Vector3d BBR = new Vector3d(origin);
-        BBR.add(new Vector3d(d/2,w/2,-h/2));
-        Vector3d BTL = new Vector3d(origin);
-        BTL.add(new Vector3d(d/2,-w/2,h/2));
-        Vector3d BTR = new Vector3d(origin);
-        BTR.add(new Vector3d(d/2,w/2,h/2));
+        Vector3d BBL = Utilities.vecAdd(origin,new Vector3d(d/2,w/2,-h/2));
+        Vector3d BBR = Utilities.vecAdd(origin,new Vector3d(d/2,-w/2,-h/2));
+        Vector3d BTL = Utilities.vecAdd(origin,new Vector3d(d/2,w/2,h/2));
+        Vector3d BTR = Utilities.vecAdd(origin,new Vector3d(d/2,-w/2,h/2));
 
         //Front
-        Triangles.add(new Triangle(FBL,FBR,FTR,m));
-        Triangles.add(new Triangle(FBL,FTR,FTL,m));
-
+        Planes.add(new Plane(FBL,FBR,FTR,m));
+        sides[0][0] = Utilities.vecAdd(FBL,Utilities.vecScale(Utilities.vecSub(FTR, FBL),0.5));
+        sides[0][1] = Planes.get(0).CalculateNormal();
         //Right
-        Triangles.add(new Triangle(FBR,BBR,BTR,m));
-        Triangles.add(new Triangle(FBR,BTR,FTR,m));
+        Planes.add(new Plane(FBR,BBR,BTR,m));
+        sides[1][0] = Utilities.vecAdd(FBR,Utilities.vecScale(Utilities.vecSub(BTR, FBR),0.5));
+        sides[1][1] = Planes.get(1).CalculateNormal();
 
         //left
-        Triangles.add(new Triangle(FBL,FTL,BTL,m));
-        Triangles.add(new Triangle(FBL,BTL,BBL,m));
-
+        Planes.add(new Plane(FBL,FTL,BTL,m));
+        sides[2][0] = Utilities.vecAdd(FBL,Utilities.vecScale(Utilities.vecSub(BTL, FBL),0.5));
+        sides[2][1] = Planes.get(2).CalculateNormal();
         //Back
-        Triangles.add(new Triangle(BBR,BBL,BTL,m));
-        Triangles.add(new Triangle(BBR,BTL,BTR,m));
+        Planes.add(new Plane(BBR,BBL,BTL,m));
+        sides[3][0] = Utilities.vecAdd(BBR,Utilities.vecScale(Utilities.vecSub(BTL, BBR),0.5));
+        sides[3][1] = Planes.get(3).CalculateNormal();
 
         //Top
-        Triangles.add(new Triangle(FTL,FTR,BTR,m));
-        Triangles.add(new Triangle(FTL,BTR,BTL,m));
+        Planes.add(new Plane(FTL,FTR,BTR,m));
+        sides[4][0] = Utilities.vecAdd(FTL,Utilities.vecScale(Utilities.vecSub(BTR, FTL),0.5));
+        sides[4][1] = Planes.get(4).CalculateNormal();
 
         //Bottom
-        Triangles.add(new Triangle(FBR,FBL,BBL,m));
-        Triangles.add(new Triangle(FBR,BBL,BBR,m));
+        Planes.add(new Plane(FBR,FBL,BBL,m));
+        sides[5][0] = Utilities.vecAdd(FBR,Utilities.vecScale(Utilities.vecSub(BBL, FBR),0.5));
+        sides[5][1] = Planes.get(5).CalculateNormal();
 
     }
     @Override
     double rayIntersection(Ray r){
         double t = Double.POSITIVE_INFINITY;
         double temp = Double.POSITIVE_INFINITY;
-        for(Triangle tri : Triangles){
+        for(Plane tri : Planes){
             temp = tri.rayIntersection(r);
             if(temp < t){
                 t = temp;
@@ -62,24 +60,16 @@ public class Box extends Object3D{
     }
     @Override
     Vector3d CalculateNormal(Vector3d P){
-        for(Triangle tri : Triangles){
-            double PlaneValue = tri.normal.x*(P.x-tri.vertex0.x) + tri.normal.y*(P.y-tri.vertex0.y) + tri.normal.z*(P.z-tri.vertex0.z);
-            if(Math.abs(PlaneValue) < 0.0000001)
-            {
-                double Area = Utilities.vecNorm(Utilities.vecCross(tri.edge1,tri.edge2))/2.0;
-                Vector3d PA = Utilities.vecSub(tri.vertex0, P);
-                Vector3d PB = Utilities.vecSub(tri.vertex1, P);
-                Vector3d PC = Utilities.vecSub(tri.vertex2, P);
-                double alpha = Utilities.vecNorm(Utilities.vecCross(PB,PC))/(2.0*Area);
-                double beta = Utilities.vecNorm(Utilities.vecCross(PC,PA))/(2.0*Area);
-                double gamma = 1 - alpha - beta;
-                if(alpha >= 0.0 && alpha <= 1.0 && beta >= 0.0 && beta <= 1.0 && gamma >= 0.0 && gamma <= 1.0){
-                    return tri.normal;
-                }
+        double temp = Double.POSITIVE_INFINITY;
+        Vector3d norm = new Vector3d();
+        for(int i = 0; i<6; i++){
+            if(Utilities.vecNorm(Utilities.vecSub(sides[i][0], P)) < temp){
+                temp = Utilities.vecNorm(Utilities.vecSub(sides[i][0], P));
+                norm = sides[i][1];
             }
+
         }
-        System.out.println("CalculateNormal for box returned null");
-        return null;
+        return norm;
     }
     @Override
     Vector3d CalculateNormal(){
