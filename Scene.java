@@ -12,8 +12,9 @@ public class Scene{
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
         Material blue = new Material(new ColorDbl(0.2,0.2,0.95));
         Material yellow = new Material(new ColorDbl(0.95,0.95,0.2));
-        Material EMISSION = new Emissive(new ColorDbl(0.0,1.0,0.0), 5.0);
         Material cyan = new Material(new ColorDbl(0.2,0.95,0.95));
+        Material magenta = new Material(new ColorDbl(0.95,0.2,0.95));
+        Material EMISSION = new Emissive(new ColorDbl(0.0,1.0,0.0), 5.0);
         Material Reflective = new Reflective(new ColorDbl(1.0,1.0,1.0));
 
         Vector3d CeilingLM = new Vector3d(-3.0,0.0,5.0);
@@ -22,6 +23,10 @@ public class Scene{
         Vector3d CeilingRU = new Vector3d(10.0,6.0,5.0);
         Vector3d CeilingRD = new Vector3d(10.0,-6.0,5.0);
         Vector3d CeilingRM = new Vector3d(13.0,0.0,5.0);
+        Vector3d CeilingLight1 = new Vector3d(8.5,-0.5,4.999999999);
+        Vector3d CeilingLight2 = new Vector3d(9.5,-0.5,4.999999999);
+        Vector3d CeilingLight3 = new Vector3d(9.5, 0.5,4.999999999);
+        Vector3d CeilingLight4 = new Vector3d(8.5, 0.5,4.999999999);
 
         Vector3d FloorLM = new Vector3d(-3.0,0.0,-5.0);
         Vector3d FloorLU = new Vector3d(0.0,6.0,-5.0);
@@ -40,8 +45,11 @@ public class Scene{
         object3DList.add(new Triangle(CeilingRD,CeilingRU,CeilingRM,white));
         object3DList.add(new Triangle(CeilingRD,CeilingLD,CeilingRU,white));
         object3DList.add(new Triangle(CeilingLD,CeilingLU,CeilingRU,white));
-        addLight(new Triangle(CeilingLD,CeilingLM,CeilingLU,EMISSION));
-        
+        object3DList.add(new Triangle(CeilingLD,CeilingLM,CeilingLU,white));
+
+        //Lamp
+        addLight(new Triangle(CeilingLight1,CeilingLight2,CeilingLight3,EMISSION));
+        addLight(new Triangle(CeilingLight3,CeilingLight4,CeilingLight1,EMISSION));
 
         //Left upper wall
         object3DList.add(new Triangle(FloorLM,FloorLU,CeilingLU,red));
@@ -64,8 +72,8 @@ public class Scene{
         object3DList.add(new Triangle(FloorRU,CeilingRM,CeilingRU,cyan));
 
         //Right bottom wall
-        object3DList.add(new Triangle(FloorRM,FloorRD,CeilingRD,Reflective));
-        object3DList.add(new Triangle(FloorRM,CeilingRD,CeilingRM,Reflective));
+        object3DList.add(new Triangle(FloorRM,FloorRD,CeilingRD,magenta));
+        object3DList.add(new Triangle(FloorRM,CeilingRD,CeilingRM,magenta));
     }
     void addObject(Object3D o){
         object3DList.add(o);
@@ -74,7 +82,7 @@ public class Scene{
         lightList.add(o);
         object3DList.add(o);
     }
-    
+
     Object3D triangleIntersect(Ray r){
         double t = 0.0;
         double temp = Double.POSITIVE_INFINITY;
@@ -106,5 +114,5 @@ public class Scene{
         }
         return false;
     }
-    
+
 }

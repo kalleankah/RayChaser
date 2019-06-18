@@ -20,13 +20,13 @@ public class Ray{
     }
     ColorDbl CastRay(Scene S, int Depth, int ReflectionDepth){
         Object3D HitObject = S.triangleIntersect(this);
-        Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
         if(HitObject == null){
             return new ColorDbl(0.0,0.0,0.0);
         }
         if(HitObject.mat instanceof Emissive){
             return new ColorDbl(1.0,1.0,1.0);
         }
+        Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
         if(HitObject.mat instanceof Reflective && ReflectionDepth <= S.settings.MAX_REFLECTION_BOUNCES){
             Vector3d d = Utilities.vecSub(P_hit,start);
             Vector3d PerfectReflector = Utilities.vecSub(d, Utilities.vecScale(P_Normal, 2*Utilities.vecDot(d,P_Normal)));
