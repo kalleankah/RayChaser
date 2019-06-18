@@ -61,7 +61,6 @@ public class Ray{
             //DirectLightcontrib.divide(Depth+1);
             return DirectLightcontrib;
         }
-        
 
         // Calculate World2Local and Local2World Matrices
         Vector3d Z = P_Normal;
