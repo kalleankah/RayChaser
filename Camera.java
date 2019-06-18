@@ -7,11 +7,13 @@ public class Camera  {
     int Width;
     Vector3d eye;
     int subpixels;
+    double fov;
     ColorDbl[][] pixelList;
-    Camera(int w, int s, Vector3d e){
+    Camera(int w, int s, Vector3d e, double f){
         Width = w;
         subpixels = s;
         eye = e;
+        fov = f;
         pixelList = new ColorDbl[w][w];
     }
     //Start rendering scene S
@@ -27,7 +29,7 @@ public class Camera  {
                 temp = new ColorDbl();
                 for(int k = 0; k<subpixels; ++k){
                     for(int l = 0; l<subpixels; ++l){
-                        endPoint = new Vector3d(0.0, i*PixelSize + 0.5*subPixelSize+k*subPixelSize -1, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1);
+                        endPoint = new Vector3d(eye.x+fov, i*PixelSize + 0.5*subPixelSize+k*subPixelSize - 1 + eye.y, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1 + eye.z);
                         r = new Ray(eye, endPoint, true);
                         temp.sumColor(r.CastRay(S,0,0));
                     }
@@ -64,16 +66,16 @@ public class Camera  {
         //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
-        setting.setChildren(48);
+        setting.setChildren(16);
         setting.setDepthDecay(0.3);
         setting.setShadowRays(8);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
-        Camera c = new Camera(500, 2, new Vector3d(-1.0,0.0,0.0));
+        Camera c = new Camera(800, 2, new Vector3d(2.0,2.5,0.0),2.0);
 
         //Add objects to scene
-        Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 0.0, 0.0)));
-        Sphere ball2 = new Sphere(new Vector3d(5.0, -2.0, 3.75), 1.0, new Reflective(new ColorDbl(0.25, 0.25, 0.75)));
+        Sphere ball1 = new Sphere(new Vector3d(10.0, 3.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 1.0, 1.0)));
+        Sphere ball2 = new Sphere(new Vector3d(10.0, 0.0, 0.0), 1.0, new Reflective(new ColorDbl(1.0, 1.0, 1.0)));
         s.addObject(ball1);
         s.addObject(ball2);
         Tetrahedron T1 = new Tetrahedron(new Vector3d(9.0, -4.0, 3.0), 2.0, new Material(new ColorDbl(1.0, 0.0, 0.0)));
@@ -85,11 +87,11 @@ public class Camera  {
 
         //Start rendering
         c.render(s);
-        if(args[0] != null){
+        if(args.length > 0){
           c.write(args[0]);
         }
         else{
-          c.write("Bild");
+          c.write("image");
         }
 
         //Program ends here, set progress to 100%
