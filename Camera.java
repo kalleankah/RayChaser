@@ -29,7 +29,7 @@ public class Camera  {
                 temp = new ColorDbl();
                 for(int k = 0; k<subpixels; ++k){
                     for(int l = 0; l<subpixels; ++l){
-                        endPoint = new Vector3d(eye.x+fov, i*PixelSize + 0.5*subPixelSize+k*subPixelSize - 1 + eye.y, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1 + eye.z);
+                        endPoint = new Vector3d(eye.x+fov, -i*PixelSize - 0.5*subPixelSize-k*subPixelSize + 1 + eye.y, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1 + eye.z);
                         r = new Ray(eye, endPoint, true);
                         temp.sumColor(r.CastRay(S,0,0));
                     }
@@ -68,7 +68,7 @@ public class Camera  {
         setting.setMaxDepth(1);
         setting.setChildren(16);
         setting.setDepthDecay(0.3);
-        setting.setShadowRays(8);
+        setting.setShadowRays(4);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
         Camera c = new Camera(500, 1, new Vector3d(-1.0,0.0,0.0),1.25);
