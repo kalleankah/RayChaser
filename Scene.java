@@ -104,11 +104,12 @@ public class Scene{
         }
         return hitObject;
     }
+    //Shadow ray occlusion check
     Boolean ObjectHit(Ray r){
         double t = -1.0;
         for(Object3D obj : object3DList){
                 t = obj.rayIntersection(r);
-                if(t > 0.01 && t < 0.99){
+                if(t > 0.0000000001 && t < 0.9999999){
                         return true;
                 }
         }

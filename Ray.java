@@ -26,7 +26,7 @@ public class Ray{
         if(HitObject.mat instanceof Emissive){
             return new ColorDbl(1.0,1.0,1.0);
         }
-        Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.01));
+        Vector3d P_hit_corr = Utilities.vecAdd(P_hit,Utilities.vecScale(P_Normal, 0.00000001));
         if(HitObject.mat instanceof Reflective && ReflectionDepth <= S.settings.MAX_REFLECTION_BOUNCES){
             Vector3d d = Utilities.vecSub(P_hit,start);
             Vector3d PerfectReflector = Utilities.vecSub(d, Utilities.vecScale(P_Normal, 2*Utilities.vecDot(d,P_Normal)));

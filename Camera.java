@@ -21,12 +21,13 @@ public class Camera  {
         double PixelSize = 2.0/Width;
         double subPixelSize = PixelSize/subpixels;
         double halfSubPixel = 0.5*subPixelSize;
-        double subPixelFactor = 1.0/subpixels;
+        double subPixelFactor = 1.0/(subpixels*subpixels);
         Vector3d endPoint;
         Ray r;
         ColorDbl temp;
 
         for(int j = 0; j < Width; ++j){
+            Utilities.updateProgress( (double) j/Width); //adds 2-3 seconds to all renders
             for(int i = 0; i < Width; ++i){
                 temp = new ColorDbl();
                 for(int k = 0; k<subpixels; ++k){
@@ -40,7 +41,6 @@ public class Camera  {
                 temp.clamp();
                 pixelList[i][j] = temp;
             }
-            Utilities.updateProgress( (double) j/Width); //adds 2-3 seconds to all renders
         }
     }
     //Write data to a PNG
@@ -67,27 +67,22 @@ public class Camera  {
 
         //Create Scene and Camera
         Settings setting = new Settings();
-        setting.setMaxDepth(1);
-        setting.setChildren(32);
-        setting.setDepthDecay(0.3);
-        setting.setShadowRays(16);
-        setting.setMaxReflectionBounces(8);
+        setting.setChildren(Integer.parseInt(args[0]));
+        setting.setDepthDecay(Double.parseDouble(args[1]));
+        setting.setShadowRays(Integer.parseInt(args[2]));
+        setting.setMaxReflectionBounces(Integer.parseInt(args[3]));
+        setting.setMaxDepth(Integer.parseInt(args[4]));
         Scene s = new Scene(setting);
-        Camera c = new Camera(800, 2, new Vector3d(-1.0,0.0,0.0),1.25);
+        Camera c = new Camera(1080, Integer.parseInt(args[5]), new Vector3d(-1.0,0.0,0.0),5.0);
 
         //Add objects to scene
-        s.addObject(new Sphere(new Vector3d(9.0, -1.1, 0.1), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
-        s.addObject(new Sphere(new Vector3d(9.0, 1.1, 0.1), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
-        s.addObject(new Box(new Vector3d(9.0, 0.0, -3), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
+        s.addObject(new Sphere(new Vector3d(9.0, -1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+        s.addObject(new Sphere(new Vector3d(9.0, 1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+        s.addObject(new Box(new Vector3d(9.0, 0.0, -2.9999), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
 
         //Start rendering
         c.render(s);
-        if(args.length > 0){
-          c.write(args[0]);
-        }
-        else{
-          c.write("image");
-        }
+        c.write("C" + args[0] + "-DD"  + args[1] + "-SR"  + args[2] + "-RB"  + args[3] + "-MD"  + args[4] + "-AA"  + args[5]);
 
         //Program ends here, set progress to 100%
         long endTime = System.nanoTime();
