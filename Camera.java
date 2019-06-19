@@ -18,27 +18,29 @@ public class Camera  {
     }
     //Start rendering scene S
     void render(Scene S){
-        long endTime;
         double PixelSize = 2.0/Width;
         double subPixelSize = PixelSize/subpixels;
+        double halfSubPixel = 0.5*subPixelSize;
+        double subPixelFactor = 1.0/subpixels;
         Vector3d endPoint;
         Ray r;
         ColorDbl temp;
+
         for(int j = 0; j < Width; ++j){
             for(int i = 0; i < Width; ++i){
                 temp = new ColorDbl();
                 for(int k = 0; k<subpixels; ++k){
                     for(int l = 0; l<subpixels; ++l){
-                        endPoint = new Vector3d(eye.x+fov, -i*PixelSize - 0.5*subPixelSize-k*subPixelSize + 1 + eye.y, -j*PixelSize - 0.5*subPixelSize-l*subPixelSize + 1 + eye.z);
+                        endPoint = new Vector3d(eye.x+fov, -i*PixelSize - halfSubPixel-k*subPixelSize + 1 + eye.y, -j*PixelSize - halfSubPixel-l*subPixelSize + 1 + eye.z);
                         r = new Ray(eye, endPoint, true);
                         temp.sumColor(r.CastRay(S,0,0));
                     }
                 }
-                temp.divide(subpixels*subpixels);
+                temp.multiply(subPixelFactor);
                 temp.clamp();
                 pixelList[i][j] = temp;
             }
-            Utilities.updateProgress( (double) j/Width);
+            Utilities.updateProgress( (double) j/Width); //adds 2-3 seconds to all renders
         }
     }
     //Write data to a PNG
@@ -66,16 +68,16 @@ public class Camera  {
         //Create Scene and Camera
         Settings setting = new Settings();
         setting.setMaxDepth(1);
-        setting.setChildren(16);
+        setting.setChildren(32);
         setting.setDepthDecay(0.3);
-        setting.setShadowRays(4);
+        setting.setShadowRays(16);
         setting.setMaxReflectionBounces(8);
         Scene s = new Scene(setting);
-        Camera c = new Camera(500, 1, new Vector3d(-1.0,0.0,0.0),1.25);
+        Camera c = new Camera(800, 2, new Vector3d(-1.0,0.0,0.0),1.25);
 
         //Add objects to scene
-        s.addObject(new Sphere(new Vector3d(9.0, -1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
-        s.addObject(new Sphere(new Vector3d(9.0, 1.0, 0.0), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+        s.addObject(new Sphere(new Vector3d(9.0, -1.1, 0.1), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+        s.addObject(new Sphere(new Vector3d(9.0, 1.1, 0.1), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
         s.addObject(new Box(new Vector3d(9.0, 0.0, -3), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
 
         //Start rendering
