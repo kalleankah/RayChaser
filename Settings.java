@@ -12,7 +12,7 @@ public class Settings{
         DEPTH_DECAY = 0.3;
         SHADOW_RAYS = 16;
         MAX_REFLECTION_BOUNCES = 4;
-        
+
     }
     Settings(int MD, int C, double DD, int SR, int MRB){
         MAX_DEPTH = MD;
@@ -20,6 +20,13 @@ public class Settings{
         DEPTH_DECAY = DD;
         SHADOW_RAYS = SR;
         MAX_REFLECTION_BOUNCES = MRB;
+    }
+    Settings(Settings s){
+        MAX_DEPTH = s.MAX_DEPTH;
+        CHILDREN = s.CHILDREN;
+        DEPTH_DECAY = s.DEPTH_DECAY;
+        SHADOW_RAYS = s.SHADOW_RAYS;
+        MAX_REFLECTION_BOUNCES = s.MAX_REFLECTION_BOUNCES;
     }
     public void setMaxDepth(int MD){
         MAX_DEPTH = MD;
