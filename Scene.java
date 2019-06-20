@@ -1,12 +1,14 @@
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 import java.lang.Math;
 import java.util.*;
 public class Scene{
     Vector<Object3D> object3DList= new Vector<Object3D>();
     Vector<Object3D> lightList = new Vector<Object3D>();
+    Camera camera;
     public Settings settings;
-    Scene(Settings s){
+    Scene(Settings s, Camera c){
         settings = s;
+        camera = c;
         Material white = new Material(new ColorDbl(0.95,0.95,0.95));
         Material red = new Material(new ColorDbl(0.95,0.2,0.2));
         Material green = new Material(new ColorDbl(0.2,0.95,0.2));
@@ -59,9 +61,9 @@ public class Scene{
         object3DList.add(new Triangle(FloorLD,CeilingLM,CeilingLD,green));
 
         //Mid top wall
-        //object3DList.add(new Triangle(FloorLU,FloorRU,CeilingRU,blue));
-        //object3DList.add(new Triangle(FloorLU,CeilingRU,CeilingLU,blue));
-        object3DList.add(new Plane(FloorLU, FloorRU, CeilingRU, blue));
+        object3DList.add(new Triangle(FloorLU,FloorRU,CeilingRU,blue));
+        object3DList.add(new Triangle(FloorLU,CeilingRU,CeilingLU,blue));
+        //object3DList.add(new Plane(FloorLU, FloorRU, CeilingRU, blue));
 
         //Mid bottom wall
         object3DList.add(new Triangle(FloorRD,FloorLD,CeilingLD,yellow));
@@ -115,5 +117,129 @@ public class Scene{
         }
         return false;
     }
+    ColorDbl CastRay(Ray r, int Depth, int ReflectionDepth){
+        Object3D HitObject = triangleIntersect(r);
+        if(HitObject == null){
+            return new ColorDbl(0.0,0.0,0.0);
+        }
+        if(HitObject.mat instanceof Emissive){
+            return new ColorDbl(1.0,1.0,1.0);
+        }
+        Vector3d P_hit_corr = Utilities.vecAdd(r.P_hit,Utilities.vecScale(r.P_Normal, 0.00000001));
+        if(HitObject.mat instanceof Reflective && ReflectionDepth <= settings.MAX_REFLECTION_BOUNCES){
+            Vector3d d = Utilities.vecSub(r.P_hit,r.start);
+            Vector3d PerfectReflector = Utilities.vecSub(d, Utilities.vecScale(r.P_Normal, 2*Utilities.vecDot(d,r.P_Normal)));
+            Ray Child = new Ray(P_hit_corr,Utilities.vecAdd(r.P_hit,PerfectReflector), false);
+            ColorDbl c = CastRay(Child, Depth, ReflectionDepth+1);
+            c.multiply(HitObject.mat.color);
+            return c;
+        }
 
+        ColorDbl DirectLightcontrib = new ColorDbl(0.0,0.0,0.0);
+        ColorDbl IndirectLightcontrib = new ColorDbl(0.0,0.0,0.0);
+        Double TotalBrightness = 0.0;
+        Double Brightness = 0.0;
+        for(Object3D l : lightList){
+            Vector<Vector3d> SampList = l.getSampleLight(settings.SHADOW_RAYS);
+            Brightness = 0.0;
+            for(Vector3d pos : SampList){
+                Ray ShadowRay = new Ray(P_hit_corr, pos,false);
+                if(!ObjectHit(ShadowRay)){
+                    Brightness +=  Math.max(0.0, l.mat.Brightness * Utilities.vecDot(ShadowRay.direction, r.P_Normal)* Utilities.vecDot(ShadowRay.direction, l.CalculateNormal())/(ShadowRay.RayLength));
+                }
+            }
+            Brightness /= SampList.size();
+            TotalBrightness += Brightness;
+        }
+        TotalBrightness /= lightList.size();
+
+        DirectLightcontrib.setColor(HitObject.mat.color);
+        DirectLightcontrib.multiply(TotalBrightness);
+        if(Depth >= settings.MAX_DEPTH) {
+            //DirectLightcontrib.divide(Depth+1);
+            return DirectLightcontrib;
+        }
+
+        // Calculate World2Local and Local2World Matrices
+        Vector3d Z = r.P_Normal;
+        Vector3d I_o = Utilities.vecSub(r.direction, Utilities.vecScale(Z, Utilities.vecDot(r.direction, Z)));
+        Vector3d X = Utilities.vecScale(I_o, 1.0/Utilities.vecNorm(I_o));
+        Vector3d Y = Utilities.vecCross(Utilities.vecScale(X,-1.0), Z);
+
+        //Create coordinate system transformation matrices
+        Matrix4d rotation_mat = new Matrix4d(
+        X.x, X.y, X.z, 0.0,
+        Y.x, Y.y, Y.z, 0.0,
+        Z.x, Z.y, Z.z, 0.0,
+        0.0, 0.0, 0.0, 1.0);
+        Matrix4d translation_mat = new Matrix4d(
+        1.0, 0.0, 0.0, -r.P_hit.x,
+        0.0, 1.0, 0.0, -r.P_hit.y,
+        0.0, 0.0, 1.0, -r.P_hit.z,
+        0.0, 0.0, 0.0, 1.0);
+
+        Matrix4d world2local = new Matrix4d();
+        world2local.mul(rotation_mat, translation_mat);
+        Matrix4d local2world = Utilities.invertMat(world2local);
+
+        //Incoming ray in local coords
+        Vector3d direction_local = Utilities.mulMatVec(world2local, r.direction);
+        double Azimuth = 0; //phi
+        double Altitude = 0; //theta
+        double x,y,z = 0;
+        Vector3d LocalEndPoint, EndPoint;
+        Vector3d localnormal = new Vector3d(0.0, 0.0, 1.0);
+        int N_CHILDREN = 0;
+
+        LocalEndPoint = new Vector3d();
+        Random random = new Random();
+        for(int i = 0; i < settings.CHILDREN; ++i){
+            if(!Utilities.RussianBullet(settings.DEPTH_DECAY + (1.0-settings.DEPTH_DECAY) * ((double)Depth / (double)settings.MAX_DEPTH))){
+                Azimuth = random.nextDouble()*2*Math.PI;
+                Altitude = random.nextDouble()*0.5*Math.PI;
+                LocalEndPoint.x = Math.sin(Altitude)*Math.sin(Azimuth);
+                LocalEndPoint.y = Math.sin(Altitude)*Math.cos(Azimuth);
+                LocalEndPoint.z = Math.cos(Altitude); // up
+
+                EndPoint = Utilities.mulMatVec(local2world, LocalEndPoint);
+                Ray Child = new Ray(P_hit_corr, EndPoint, false);
+                ColorDbl c = CastRay(Child, Depth+1,0);
+                IndirectLightcontrib.sumColor(c);
+                N_CHILDREN++;
+            }
+        }
+        if(N_CHILDREN != 0){
+            IndirectLightcontrib.divide(N_CHILDREN);
+        }
+        IndirectLightcontrib.multiply(HitObject.mat.color);
+        DirectLightcontrib.sumColor(IndirectLightcontrib);
+        return DirectLightcontrib;
+    }
+    //Start rendering scene S
+    void render(int start, int end){
+        double PixelSize = 2.0/camera.Width;
+        double subPixelSize = PixelSize/camera.subpixels;
+        double halfSubPixel = 0.5*subPixelSize;
+        double subPixelFactor = 1.0/(camera.subpixels*camera.subpixels);
+        Vector3d endPoint;
+        Ray r;
+        ColorDbl temp;
+
+        for(int j = start; j < end; ++j){
+            //Utilities.updateProgress( (double) j/camera.Width); //adds 2-3 seconds to all renders
+            for(int i = 0; i < camera.Width; ++i){
+                temp = new ColorDbl();
+                for(int k = 0; k<camera.subpixels; ++k){
+                    for(int l = 0; l<camera.subpixels; ++l){
+                        endPoint = new Vector3d(camera.eye.x+camera.fov, -i*PixelSize - halfSubPixel-k*subPixelSize + 1 + camera.eye.y, -j*PixelSize - halfSubPixel-l*subPixelSize + 1 + camera.eye.z);
+                        r = new Ray(camera.eye, endPoint, true);
+                        temp.sumColor(CastRay(r,0,0));
+                    }
+                }
+                temp.multiply(subPixelFactor);
+                temp.clamp();
+                camera.pixelList[i][j] = temp;
+            }
+        }
+    }
 }

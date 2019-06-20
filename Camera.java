@@ -3,6 +3,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 public class Camera  {
     int Width;
     Vector3d eye;
@@ -15,33 +16,6 @@ public class Camera  {
         eye = e;
         fov = f;
         pixelList = new ColorDbl[w][w];
-    }
-    //Start rendering scene S
-    void render(Scene S){
-        double PixelSize = 2.0/Width;
-        double subPixelSize = PixelSize/subpixels;
-        double halfSubPixel = 0.5*subPixelSize;
-        double subPixelFactor = 1.0/(subpixels*subpixels);
-        Vector3d endPoint;
-        Ray r;
-        ColorDbl temp;
-
-        for(int j = 0; j < Width; ++j){
-            Utilities.updateProgress( (double) j/Width); //adds 2-3 seconds to all renders
-            for(int i = 0; i < Width; ++i){
-                temp = new ColorDbl();
-                for(int k = 0; k<subpixels; ++k){
-                    for(int l = 0; l<subpixels; ++l){
-                        endPoint = new Vector3d(eye.x+fov, -i*PixelSize - halfSubPixel-k*subPixelSize + 1 + eye.y, -j*PixelSize - halfSubPixel-l*subPixelSize + 1 + eye.z);
-                        r = new Ray(eye, endPoint, true);
-                        temp.sumColor(r.CastRay(S,0,0));
-                    }
-                }
-                temp.multiply(subPixelFactor);
-                temp.clamp();
-                pixelList[i][j] = temp;
-            }
-        }
     }
     //Write data to a PNG
     void write(String filename){
@@ -61,32 +35,44 @@ public class Camera  {
             System.out.println("Error: " +e );
         }
     }
-
     public static void main(String[] args) throws IOException{
         long startTime = System.nanoTime();
 
-        //Create Scene and Camera
+        //Create Camera
+        Camera c = new Camera(840, Integer.parseInt(args[5]), new Vector3d(-1.0,0.0,0.0),1.25);
         Settings setting = new Settings();
         setting.setChildren(Integer.parseInt(args[0]));
         setting.setDepthDecay(Double.parseDouble(args[1]));
         setting.setShadowRays(Integer.parseInt(args[2]));
         setting.setMaxReflectionBounces(Integer.parseInt(args[3]));
         setting.setMaxDepth(Integer.parseInt(args[4]));
-        Scene s = new Scene(setting);
-        Camera c = new Camera(1080, Integer.parseInt(args[5]), new Vector3d(-1.0,0.0,0.0),5.0);
 
-        //Add objects to scene
-        s.addObject(new Sphere(new Vector3d(9.0, -1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
-        s.addObject(new Sphere(new Vector3d(9.0, 1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
-        s.addObject(new Box(new Vector3d(9.0, 0.0, -2.9999), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
+        //Create Scenes for each thread
+        int threads = Runtime.getRuntime().availableProcessors();
+        System.out.println("Found " + threads + " CPU cores.");
+        CountDownLatch latch = new CountDownLatch(threads);
+        Scene[] Scenes = new Scene[threads];
+        for(int i=0; i<threads; ++i){
+            Scenes[i] = new Scene(new Settings(setting), c);
+            Scenes[i].addObject(new Sphere(new Vector3d(9.0, -1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+            Scenes[i].addObject(new Sphere(new Vector3d(9.0, 1.1, 0.2), 1.0, new Reflective(new ColorDbl(0.8, 0.8, 0.8))));
+            Scenes[i].addObject(new Box(new Vector3d(9.0, 0.0, -2.9999), 4.0, 4.0, 4.0, new Material(new ColorDbl(0.9, 0.9, 0.9))));
+            Thread T = new Thread(new Multithread(Scenes[i], c.Width/threads, i, latch));
+            T.start();
+        }
 
-        //Start rendering
-        c.render(s);
+        //Wait for threads
+        try{
+            latch.await();
+        }
+        catch(InterruptedException e){}
+
+        //Write file
         c.write("C" + args[0] + "-DD"  + args[1] + "-SR"  + args[2] + "-RB"  + args[3] + "-MD"  + args[4] + "-AA"  + args[5]);
 
         //Program ends here, set progress to 100%
         long endTime = System.nanoTime();
-        Utilities.updateProgress( 1.0 );
+        //Utilities.updateProgress( 1.0 );
         System.out.println("\nExecution time: " + (endTime-startTime)/1000000000.0+"s");
     }
 }
