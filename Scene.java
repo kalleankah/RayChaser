@@ -58,11 +58,11 @@ public class Scene{
       Vector3d CLNL = new Vector3d(4.0, 2.0, 4);
 
       // Lamp
-      addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION2));
+      // addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION2));
+      // Ceiling
+      addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, EMISSION));
       // Floor
       addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, wood));
-      // Ceiling
-      addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, white));
       // Left wall
       addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, white));
       // Right wall

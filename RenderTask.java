@@ -27,12 +27,11 @@ public class RenderTask extends Task<Void> {
    protected Void call(){
       double PixelSize = 2.0/camera.Width;
       double subPixelSize = PixelSize/camera.subpixels;
-      double halfSubPixel = 0.5*subPixelSize;
       double subPixelFactor = 1.0/(camera.subpixels*camera.subpixels);
       double cameraPlaneXaxis = camera.eye.x+camera.fov;
       ColorDbl temp = new ColorDbl();
-      int endX = startX+range;
-      int endY = startY+range;
+      int endX = Math.min(startX+range, camera.Width);
+      int endY = Math.min(startY+range, camera.Height);
 
       //Render the box [startX->endX, startY->endY]
       // The xy-loop is a loop over all pixels x*y
@@ -42,7 +41,7 @@ public class RenderTask extends Task<Void> {
             // The loop ij is a loop over all subpixels (samples) i*j on each pixel
             for(int i = 0; i<camera.subpixels; ++i){
                for(int j = 0; j<camera.subpixels; ++j){
-                  temp.sumColor(CastRay(new Ray(camera.eye, new Vector3d(cameraPlaneXaxis, -x*PixelSize - halfSubPixel-i*subPixelSize + 1 + camera.eye.y, -y*PixelSize - halfSubPixel-j*subPixelSize + 1 + camera.eye.z), true),0,0));
+                  temp.sumColor(CastRay(new Ray(camera.eye, new Vector3d(cameraPlaneXaxis, -x*PixelSize - 0.5*subPixelSize-i*subPixelSize + 1 + camera.eye.y, -y*PixelSize - 0.5*subPixelSize-j*subPixelSize + 1 + camera.eye.z), true),0,0));
                }
             }
             temp.multiply(subPixelFactor);

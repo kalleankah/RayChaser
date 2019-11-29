@@ -1,7 +1,6 @@
 - Possibility of arbitrary resolution
-- Possibility of arbitrary aspect ratio
+    - Including possibility of arbitrary aspect ratio
 - Emitter sampling functions for spheres and env lights
 - Environment texture
-- Replace BufferedImage
 - Spiral render order
 - Material.getuv

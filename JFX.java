@@ -61,14 +61,14 @@ public class JFX extends Application {
    ExecutorService executor;
    //The camera contains the camera position and the render settings
    Camera camera;
-   //The image is rendered in 50x50 blocks
-   int range = 50;
+   //The image is rendered in blocks
+   int range = 100;
    //An atomic integer to keep track of progress
    AtomicInteger progress = new AtomicInteger(0);
    double progress_double;
    //Render start time
    long startTime;
-   //GUI button
+   //GUI button to cancel rendering
    Button button_cancel;
 
    //Default launch
@@ -246,19 +246,22 @@ public class JFX extends Application {
 
       //updateWindow is responsible for refreshing the window
       updateWindow = new AnimationTimer(){
-         //lastUpdate contains time stamp of last update to control frame rate
+         // lastUpdate contains time stamp of last update to control frame rate
          private long lastUpdate = 0;
-         //Pre calculate progress denominator for performance
-         double progressFactor = range/((double)image.getWidth()*image.getWidth());
+         // Calculate total number of lines to compare with current rendered lines
+         int cols = ((int)image.getWidth())/range + 1;
+         int overflow = ((int)image.getHeight()) % range;
+         int tot_lines = ((int)image.getHeight())*cols;
 
          @Override
          public void handle(long now) {
-            //Update window every 100ms
+            //Update window every 100ms (in nanoseconds)
             if(now-lastUpdate>=100_000_000){
                //Draw the current content of "image" to the canvas
                canvas.getGraphicsContext2D().drawImage(image,0,0);
                //Fetch progress and update progress bar and text
-               progress_double = progress.get()*progressFactor;
+               progress_double = ((double)progress.get())/tot_lines;
+               // progress_double = progress.get()*range/((double)camera.Height*camera.Width);
                progressbar.setProgress(progress_double);
                progresstext.setText(""+(int)(100*progress_double)+"%");
                //Calculate elapsed time and update text
@@ -298,13 +301,13 @@ public class JFX extends Application {
          textures.add(new Image(new FileInputStream("texture/test.png")));
       }
       catch(FileNotFoundException e){
-         System.out.println("Textures could not load");
+         System.out.println("Textures not found in folder \"texture/\"");
          e.printStackTrace();
       }
       //Create and submit all tasks to Executor
       executor = Executors.newFixedThreadPool(camera.THREADS);
-      for(int y=0; y<(camera.Width/range); ++y){
-         for(int x=0; x<(camera.Width/range); ++x){
+      for(int y=0; y<(camera.Width/range + 1); ++y){
+         for(int x=0; x<(camera.Width/range + 1); ++x){
             //Important to create new scene for each task
             final Scene scene = new Scene(textures);
             final int X = x;

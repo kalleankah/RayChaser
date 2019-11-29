@@ -3,7 +3,7 @@ import javax.vecmath.Vector3d;
 
 public class Camera {
    Vector3d eye;
-   int Width;
+   int Width, Height;
    double fov;
    int subpixels;
    WritableImage image;
@@ -15,6 +15,7 @@ public class Camera {
 
    Camera(Vector3d e, double f, WritableImage img, int[] args){
       Width = args[0];
+      Height = args[0];
       subpixels = args[1];
       MAX_DEPTH = args[2];
       MAX_REFLECTION_BOUNCES = args[3];
