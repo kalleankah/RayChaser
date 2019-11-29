@@ -1,4 +1,9 @@
-- javac -cp ".;vecmath-1.5.1.jar" *.java
-- java -cp ".;vecmath-1.5.1.jar" Camera 8 0.3 8 8 1 1
+Windows
+javac -cp ".;v.jar" --module-path "C:\Program Files\Java\javafx-sdk-12.0.1\lib" --add-modules javafx.controls *.java
+java -cp ".;v.jar" --module-path "C:\Program Files\Java\javafx-sdk-12.0.1\lib" --add-modules javafx.controls JFX
 
+Java Vecmath help
 https://docs.oracle.com/cd/E17802_01/j2se/javase/technologies/desktop/java3d/forDevelopers/j3dapi/javax/vecmath/Vector3d.html
+
+JavaFX help
+https://openjfx.io/openjfx-docs/#install-javafx
