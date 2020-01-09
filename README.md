@@ -1,5 +1,5 @@
-#Ray Tracer in Java and JavaFX
-##To compile and run on Windows
+# Ray Tracer in Java and JavaFX
+## To compile and run on Windows
     javac -cp ".;v.jar" --module-path "C:\Program Files\Java\javafx-sdk-12.0.1\lib" --add-modules javafx.controls *.java
     java -cp ".;v.jar" --module-path "C:\Program Files\Java\javafx-sdk-12.0.1\lib" --add-modules javafx.controls JFX
 
