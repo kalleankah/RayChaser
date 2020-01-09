@@ -53,313 +53,340 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javax.vecmath.Vector3d;
 
+/* This class handles the GUI - windows, input, buttons, progress bar etc.
+When rendering, the current progress is stored in the WritableImage "image"
+which is previewed in real time.
+There is an ExecutorService "executor" which creates instances of RenderTask.
+Each instance of RenderTask renders a small portion of the image, a box.
+
+RenderTask extends Task<Void>, and contains the actual
+*/
+
 public class JFX extends Application {
-   Stage stage;
-   WritableImage image;
-   AnimationTimer updateWindow;
-   //Access to executor is necessary to stop the thread on window closing
-   ExecutorService executor;
-   //The camera contains the camera position and the render settings
-   Camera camera;
-   //The image is rendered in blocks
-   int range = 100;
-   //An atomic integer to keep track of progress
-   AtomicInteger progress = new AtomicInteger(0);
-   double progress_double;
-   //Render start time
-   long startTime;
-   //GUI button to cancel rendering
-   Button button_cancel;
+  // JFX globally accessible members
+  Stage stage;
+  WritableImage image;
+  AnimationTimer updateWindow;
+  //Access to executor is necessary to stop the thread on window closing
+  ExecutorService executor;
+  //The camera contains the camera position and the render settings
+  Camera camera;
+  //The image is rendered in blocks with range*range pixels
+  int range = 100;
+  //An atomic integer to keep track of progress
+  AtomicInteger progress = new AtomicInteger(0);
+  double progress_double;
+  //Render start time
+  long startTime;
+  //GUI button to cancel rendering
+  Button button_cancel;
 
-   //Default launch
-   public static void main(String[] args){
-      launch(args);
-   }
+  //Default launch
+  public static void main(String[] args){
+    launch(args);
+  }
 
-   //--START-- Store stage so setScene() can be called to replace scene
-   @Override
-   public void start(Stage primaryStage){
-      stage = primaryStage;
-      openConfigUI();
-   }
+  //--START-- Store stage so setScene() can be called to replace scene
+  @Override
+  public void start(Stage primaryStage){
+    stage = primaryStage;
+    openConfigUI();
+  }
 
-   public void openConfigUI(){
-      //Set title for current window
-      stage.setTitle("Configure render options");
+  // Opens the window with settings for rendering
+  public void openConfigUI(){
+    //Name the windows appropriately
+    stage.setTitle("Configure render options");
 
-      //Create Grid
-      GridPane grid = new GridPane();
-      grid.setVgap(5);
-      grid.setHgap(5);
-      grid.setAlignment(Pos.CENTER);
-      grid.setPadding(new Insets(50, 50, 50, 50));
+    //Create Grid to contain fields with settings
+    GridPane grid = new GridPane();
+    grid.setVgap(5);
+    grid.setHgap(5);
+    grid.setAlignment(Pos.CENTER);
+    grid.setPadding(new Insets(50, 50, 50, 50));
 
-      //Add items to grid
-      Text scenetitle = new Text("Ray Chaser!");
-      scenetitle.setFont(Font.font("Tahoma", FontWeight.BOLD, 36));
-      grid.setHalignment(scenetitle, HPos.CENTER);
-      grid.add(scenetitle, 0, 0, 2, 1);
+    //Add a fun title
+    Text scenetitle = new Text("Ray Chaser!");
+    scenetitle.setFont(Font.font("Tahoma", FontWeight.BOLD, 36));
+    grid.setHalignment(scenetitle, HPos.CENTER);
+    grid.add(scenetitle, 0, 0, 2, 1);
 
-      Label res = new Label("Resolution:");
-      grid.add(res, 0, 1);
-      grid.setHalignment(res, HPos.RIGHT);
-      TextField resField = new TextField("500");
-      grid.add(resField, 1, 1);
+    //Field to select resolution (square aspect only)
+    Label res = new Label("Resolution:");
+    grid.add(res, 0, 1);
+    grid.setHalignment(res, HPos.RIGHT);
+    TextField resField = new TextField("500");
+    grid.add(resField, 1, 1);
 
-      Label samples = new Label("Samples [25]");
-      grid.add(samples, 0, 2);
-      grid.setHalignment(samples, HPos.RIGHT);
-      Slider samplesSlider = new Slider(1,30,5);
-      samplesSlider.setLabelFormatter(new StringConverter<Double>() {
-         @Override
-         public String toString(Double t) {
-            return String.valueOf(Math.round(t*t));
-         }
-         @Override
-         public Double fromString(String string) {
-            return Double.parseDouble(string);
-         }
-      });
-      samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      samplesSlider.setValue(Math.round(newVal.doubleValue())));
-      samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()*newVal.doubleValue()) + "]"));
-      samplesSlider.setMajorTickUnit(2);
-      samplesSlider.setShowTickLabels(true);
-      grid.add(samplesSlider, 1, 2);
-
-      Label depth = new Label("Max Depth");
-      grid.add(depth, 0, 3);
-      grid.setHalignment(depth, HPos.RIGHT);
-      Slider depthSlider = new Slider(0,10,5);
-      depthSlider.setShowTickLabels(true);
-      depthSlider.setMajorTickUnit(1);
-      depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      depthSlider.setValue(Math.round(newVal.doubleValue())));
-      grid.add(depthSlider, 1, 3);
-
-      Label rb = new Label("Reflection Bounces");
-      grid.add(rb, 0, 4);
-      grid.setHalignment(rb, HPos.RIGHT);
-      Slider rbSlider = new Slider(0,20,10);
-      rbSlider.setShowTickLabels(true);
-      rbSlider.setMajorTickUnit(5);
-      rbSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      rbSlider.setValue(Math.round(newVal.doubleValue())));
-      grid.add(rbSlider, 1, 4);
-
-      Label sr = new Label("Shadow Rays");
-      grid.add(sr, 0, 5);
-      grid.setHalignment(sr, HPos.RIGHT);
-      Slider srSlider = new Slider(0,10,1);
-      srSlider.setShowTickLabels(true);
-      srSlider.setMajorTickUnit(1);
-      srSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      srSlider.setValue(Math.round(newVal.doubleValue())));
-      grid.add(srSlider, 1, 5);
-
-      Label threads = new Label("CPU Threads:");
-      grid.add(threads, 0, 6);
-      grid.setHalignment(threads, HPos.RIGHT);
-      Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
-      threadsSlider.setMajorTickUnit(1);
-      threadsSlider.setShowTickLabels(true);
-      threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      threadsSlider.setValue(Math.round(newVal.doubleValue())));
-      grid.add(threadsSlider, 1, 6);
-
-      //Define button action
-      Button btn = new Button("Render");
-      HBox btnbox = new HBox(10);
-      btnbox.setAlignment(Pos.BOTTOM_RIGHT);
-      btnbox.getChildren().add(btn);
-      grid.add(btnbox, 1, 7);
-      btn.setOnAction(new EventHandler<ActionEvent>(){
-         @Override
-         public void handle(ActionEvent event){
-            int[] args = new int[6];
-            args[0] = Integer.parseInt(resField.getText());
-            args[1] = (int)samplesSlider.getValue();
-            args[2] = (int)depthSlider.getValue();
-            args[3] = (int)rbSlider.getValue();
-            args[4] = (int)srSlider.getValue();
-            args[5] = (int)threadsSlider.getValue();
-            image = new WritableImage(args[0],args[0]);
-            openRenderUI();
-            startRenderingTasks(args);
-         }
-      });
-
-      //Bind enter key to button
-      grid.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-         if (event.getCode() == KeyCode.ENTER) {
-            btn.fire();
-            event.consume();
-         }
-      });
-      stage.setScene(new javafx.scene.Scene(grid));
-      stage.show();
-   }
-
-   //Replace window content with render preview
-   void openRenderUI(){
-      //Set window title
-      stage.setTitle("Rendering...");
-
-      //Create a progress menu_bar and text to put in a menu_bar
-      Region spacer = new Region();
-      HBox.setHgrow(spacer, Priority.SOMETIMES);
-      ProgressBar progressbar = new ProgressBar(0);
-      progressbar.setMaxWidth(Double.MAX_VALUE);
-      progressbar.setMaxHeight(Double.MAX_VALUE);
-      HBox.setHgrow(progressbar, Priority.SOMETIMES);
-      Text progresstext = new Text("0%");
-      progresstext.setFont(Font.font(16));
-      Text progresstime = new Text("00:00:00");
-      progresstime.setFont(Font.font(16));
-      int hours = 0;
-      int minutes = 0;
-
-      //Create cancel Button
-      button_cancel = new Button("Cancel");
-      button_cancel.setOnAction(new EventHandler<ActionEvent>(){
-         @Override
-         public void handle(ActionEvent event){
-            executor.shutdownNow();
-            updateWindow.stop();
-            progress = new AtomicInteger(0);
-            openConfigUI();
-         }
-      });
-
-      //Create HBox and place in BorderPane's top bar
-      BorderPane border = new BorderPane();
-      HBox menu_bar = new HBox(8, progressbar, progresstext, progresstime, spacer, button_cancel);
-      menu_bar.setPadding(new Insets(4, 4, 4, 4));
-      menu_bar.setFillHeight(true);
-      border.setTop(menu_bar);
-
-
-      //Create the canvas containing the image
-      Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
-      border.setCenter(canvas);
-
-      //updateWindow is responsible for refreshing the window
-      updateWindow = new AnimationTimer(){
-         // lastUpdate contains time stamp of last update to control frame rate
-         private long lastUpdate = 0;
-         // Calculate total number of lines to compare with current rendered lines
-         int cols = ((int)image.getWidth())/range + 1;
-         int overflow = ((int)image.getHeight()) % range;
-         int tot_lines = ((int)image.getHeight())*cols;
-
-         @Override
-         public void handle(long now) {
-            //Update window every 100ms (in nanoseconds)
-            if(now-lastUpdate>=100_000_000){
-               //Draw the current content of "image" to the canvas
-               canvas.getGraphicsContext2D().drawImage(image,0,0);
-               //Fetch progress and update progress bar and text
-               progress_double = ((double)progress.get())/tot_lines;
-               // progress_double = progress.get()*range/((double)camera.Height*camera.Width);
-               progressbar.setProgress(progress_double);
-               progresstext.setText(""+(int)(100*progress_double)+"%");
-               //Calculate elapsed time and update text
-               long current_time_ns = now-startTime;
-               progresstime.setText(String.format("%02d:%02d:%02d",
-                  TimeUnit.NANOSECONDS.toHours(current_time_ns),
-                  TimeUnit.NANOSECONDS.toMinutes(current_time_ns) -
-                  TimeUnit.HOURS.toMinutes(TimeUnit.NANOSECONDS.toHours(current_time_ns)),
-                  TimeUnit.NANOSECONDS.toSeconds(current_time_ns) -
-                  TimeUnit.MINUTES.toSeconds(TimeUnit.NANOSECONDS.toMinutes(current_time_ns))));
-               lastUpdate = now;
-               //Call done() when render is completed
-               if(progress_double>=1){done();}
-            }
-         }
-      };
-
-      //Begin updating the window
-      updateWindow.start();
-      //Set the new scene
-      stage.setScene(new javafx.scene.Scene(border));
-      stage.show();
-   }
-
-   public void startRenderingTasks(int[] args){
-      //Start rendering tasks
-      camera = new Camera(new Vector3d(0.01,0,0), 1, image, args);
-      //measure rendering time
-      startTime = System.nanoTime();
-      //Load texture images into Vector<Image>
-      Vector<Image> textures = new Vector<>();
-      try {
-         textures.add(new Image(new FileInputStream("texture/block.png")));
-         textures.add(new Image(new FileInputStream("texture/wood.jpg")));
-         textures.add(new Image(new FileInputStream("texture/gradient.png")));
-         textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
-         textures.add(new Image(new FileInputStream("texture/test.png")));
+    //Slider to select number of samples
+    Label samples = new Label("Samples [25]");
+    grid.add(samples, 0, 2);
+    grid.setHalignment(samples, HPos.RIGHT);
+    Slider samplesSlider = new Slider(1,30,5);
+    //Use custom labelformatter to make slider increase quadratically instead of linearly
+    samplesSlider.setLabelFormatter(new StringConverter<Double>() {
+      @Override
+      public String toString(Double t) {
+        return String.valueOf(Math.round(t*t));
       }
-      catch(FileNotFoundException e){
-         System.out.println("Textures not found in folder \"texture/\"");
-         e.printStackTrace();
+      @Override
+      public Double fromString(String string) {
+        return Double.parseDouble(string);
       }
-      //Create and submit all tasks to Executor
-      executor = Executors.newFixedThreadPool(camera.THREADS);
-      for(int y=0; y<(camera.Width/range + 1); ++y){
-         for(int x=0; x<(camera.Width/range + 1); ++x){
-            //Important to create new scene for each task
-            final Scene scene = new Scene(textures);
-            final int X = x;
-            final int Y = y;
-            RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
-            executor.execute(task);
-         }
-      }
-      //Shut executor down when done
-      executor.shutdown();
-   }
+    });
+    samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    samplesSlider.setValue(Math.round(newVal.doubleValue())));
+    samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()*newVal.doubleValue()) + "]"));
+    samplesSlider.setMajorTickUnit(2);
+    samplesSlider.setShowTickLabels(true);
+    grid.add(samplesSlider, 1, 2);
 
-   //Tasks to perform when rendering is completed
-   void done(){
-      //Display render time measurement in window and console
-      long endTime = System.nanoTime();
-      String logFinish = "Render Finished in " + (int)((endTime-startTime)/1000000000.0) + "s";
-      stage.setTitle(logFinish);
-      System.out.println(logFinish);
-      //Update cancel button text
-      button_cancel.setText("New Render");
-      updateWindow.stop();
-      //Save render to file
-      savePNG();
-   }
+    //Add slider to select max depth (number of bounces)
+    Label depth = new Label("Max Depth");
+    grid.add(depth, 0, 3);
+    grid.setHalignment(depth, HPos.RIGHT);
+    Slider depthSlider = new Slider(0,10,5);
+    depthSlider.setShowTickLabels(true);
+    depthSlider.setMajorTickUnit(1);
+    depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    depthSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(depthSlider, 1, 3);
 
-   //Write image to PNG
-   void savePNG(){
-      String filename =
-      "RES" + camera.Width +
-      "-SPP"+ camera.subpixels*camera.subpixels +
-      "-MD" + camera.MAX_DEPTH +
-      "-RB" + camera.MAX_REFLECTION_BOUNCES +
-      "-SR" + camera.SHADOW_RAYS;
+    //Add slider to select max consecutive bounecs between mirror/reflective objects
+    Label rb = new Label("Reflection Bounces");
+    grid.add(rb, 0, 4);
+    grid.setHalignment(rb, HPos.RIGHT);
+    Slider rbSlider = new Slider(0,20,10);
+    rbSlider.setShowTickLabels(true);
+    rbSlider.setMajorTickUnit(5);
+    rbSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    rbSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(rbSlider, 1, 4);
 
-      try{
-         OutputStream out = new FileOutputStream("images/" + filename + ".png");
-         PNGEncoder encoder = new PNGEncoder(out);
-         encoder.encode(image);
-      }
-      catch(IOException e){
-         System.out.println("Error: " + e );
-      }
-      System.out.println("Saved image as " + "\"" + filename + ".png\"");
-   }
+    //Add slider to select number of shadow rays to each light source each bounce
+    Label sr = new Label("Shadow Rays");
+    grid.add(sr, 0, 5);
+    grid.setHalignment(sr, HPos.RIGHT);
+    Slider srSlider = new Slider(0,10,1);
+    srSlider.setShowTickLabels(true);
+    srSlider.setMajorTickUnit(1);
+    srSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    srSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(srSlider, 1, 5);
 
-   //--STOP-- Window close method terminates executor if it's initiated
-   @Override
-   public void stop(){
-      if(executor != null){
-         executor.shutdownNow();
+    //Add slider to select number of CPU threads to Utilize
+    Label threads = new Label("CPU Threads:");
+    grid.add(threads, 0, 6);
+    grid.setHalignment(threads, HPos.RIGHT);
+    //Default number of threads equal to number of logical processors detected
+    Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
+    threadsSlider.setMajorTickUnit(1);
+    threadsSlider.setShowTickLabels(true);
+    threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
+    threadsSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(threadsSlider, 1, 6);
+
+    //Create button to start render and open render preview
+    Button btn = new Button("Render");
+    HBox btnbox = new HBox(10);
+    btnbox.setAlignment(Pos.BOTTOM_RIGHT);
+    btnbox.getChildren().add(btn);
+    grid.add(btnbox, 1, 7);
+    //Define button behavior
+    btn.setOnAction(new EventHandler<ActionEvent>(){
+      @Override
+      public void handle(ActionEvent event){
+        //Collect settings from fields/sliders
+        int[] args = new int[6];
+        args[0] = Integer.parseInt(resField.getText());
+        args[1] = (int)samplesSlider.getValue();
+        args[2] = (int)depthSlider.getValue();
+        args[3] = (int)rbSlider.getValue();
+        args[4] = (int)srSlider.getValue();
+        args[5] = (int)threadsSlider.getValue();
+        image = new WritableImage(args[0],args[0]);
+        //Open the render preview window
+        openRenderUI();
+        //Start the rendering
+        startRenderingTasks(args);
       }
-      Platform.exit();
-   }
+    });
+
+    //Bind enter key to render button in first screen
+    grid.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+      if (event.getCode() == KeyCode.ENTER) {
+        btn.fire();
+        event.consume();
+      }
+    });
+    stage.setScene(new javafx.scene.Scene(grid));
+    stage.show();
+  }
+
+  //Open render preview
+  void openRenderUI(){
+    //Name the window appropriately
+    stage.setTitle("Rendering...");
+
+    //Create a progress menu_bar and text to put in a menu_bar
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.SOMETIMES);
+    ProgressBar progressbar = new ProgressBar(0);
+    progressbar.setMaxWidth(Double.MAX_VALUE);
+    progressbar.setMaxHeight(Double.MAX_VALUE);
+    HBox.setHgrow(progressbar, Priority.SOMETIMES);
+    Text progresstext = new Text("0%");
+    progresstext.setFont(Font.font(16));
+    Text progresstime = new Text("00:00:00");
+    progresstime.setFont(Font.font(16));
+    int hours = 0;
+    int minutes = 0;
+
+    //Create cancel Button
+    button_cancel = new Button("Cancel");
+    button_cancel.setOnAction(new EventHandler<ActionEvent>(){
+      @Override
+      public void handle(ActionEvent event){
+        executor.shutdownNow();
+        updateWindow.stop();
+        progress = new AtomicInteger(0);
+        openConfigUI();
+      }
+    });
+
+    //Place a bar at the top of the window, containing the progressbar, timer, cancel button etc.
+    BorderPane border = new BorderPane();
+    HBox menu_bar = new HBox(8, progressbar, progresstext, progresstime, spacer, button_cancel);
+    menu_bar.setPadding(new Insets(4, 4, 4, 4));
+    menu_bar.setFillHeight(true);
+    border.setTop(menu_bar);
+
+    //Create a canvas and place the image (that's being rendered to) in it
+    Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
+    border.setCenter(canvas);
+
+    //updateWindow is responsible for refreshing the render preview window
+    updateWindow = new AnimationTimer(){
+      // lastUpdate contains time stamp of last update to control frame rate
+      private long lastUpdate = 0;
+      // Calculate total number of lines to compare with current rendered lines
+      int cols = ((int)image.getWidth())/range + 1;
+      int tot_lines = ((int)image.getHeight())*cols;
+
+      @Override
+      public void handle(long now) {
+        //Update window every 100ms (in nanoseconds)
+        if(now-lastUpdate>=100_000_000){
+          //Draw the current content of "image" to the canvas
+          canvas.getGraphicsContext2D().drawImage(image,0,0);
+          //Fetch progress and update progress bar and text
+          progress_double = ((double)progress.get())/tot_lines;
+          progressbar.setProgress(progress_double);
+          progresstext.setText(""+(int)(100*progress_double)+"%");
+          //Calculate elapsed time
+          long current_time_ns = now-startTime;
+          //Update elapsed time-text and format to HH:MM:SS
+          progresstime.setText(String.format("%02d:%02d:%02d",
+          TimeUnit.NANOSECONDS.toHours(current_time_ns),
+          TimeUnit.NANOSECONDS.toMinutes(current_time_ns) -
+          TimeUnit.HOURS.toMinutes(TimeUnit.NANOSECONDS.toHours(current_time_ns)),
+          TimeUnit.NANOSECONDS.toSeconds(current_time_ns) -
+          TimeUnit.MINUTES.toSeconds(TimeUnit.NANOSECONDS.toMinutes(current_time_ns))));
+          lastUpdate = now;
+          //Call done() when render is completed (saves the image and cleans up)
+          if(progress_double>=1){done();}
+        }
+      }
+    };
+
+    //Begin refreshing the window
+    updateWindow.start();
+    //Set the new scene
+    stage.setScene(new javafx.scene.Scene(border));
+    stage.show();
+  }
+
+  //Creates rendering tasks and executes them in parallell
+  public void startRenderingTasks(int[] args){
+    //Create camera object (the camera object contains the image and render settings)
+    Vector3d eye = new Vector3d(0.01,0,0);
+    double fov = 1.0;
+    camera = new Camera(eye, fov, image, args);
+    //Start measuring render time
+    startTime = System.nanoTime();
+    //Load texture images into Vector<Image>
+    Vector<Image> textures = new Vector<>();
+    try {
+      textures.add(new Image(new FileInputStream("texture/block.png")));
+      textures.add(new Image(new FileInputStream("texture/wood.jpg")));
+      textures.add(new Image(new FileInputStream("texture/gradient.png")));
+      textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
+      textures.add(new Image(new FileInputStream("texture/test.png")));
+    }
+    catch(FileNotFoundException e){
+      System.out.println("Textures not found in folder \"texture/\"");
+      e.printStackTrace();
+    }
+    //Create and submit all tasks to Executor
+    executor = Executors.newFixedThreadPool(camera.THREADS);
+    for(int y=0; y<(camera.Width/range + 1); ++y){
+      for(int x=0; x<(camera.Width/range + 1); ++x){
+        //Important to create new scene for each task, otherwise each RenderTask
+        //has to wait for parallell threads to stop accessing that scene.
+        //This causes blocking and makes multithreading much slower
+        final Scene scene = new Scene(textures);
+        final int X = x;
+        final int Y = y;
+        RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
+        executor.execute(task);
+      }
+    }
+    //Shut executor down when done
+    executor.shutdown();
+  }
+
+  //Tasks to perform when rendering is completed
+  void done(){
+    //Display render time measurement in window and console
+    long endTime = System.nanoTime();
+    String logFinish = "Render Finished in " + (int)((endTime-startTime)/1000000000.0) + "s";
+    stage.setTitle(logFinish);
+    System.out.println(logFinish);
+    //Update cancel button text (it still takes you to the same screen)
+    button_cancel.setText("New Render");
+    //Stop refreshing the window
+    updateWindow.stop();
+    //Save render to file
+    savePNG();
+  }
+
+  //Write image to PNG
+  void savePNG(){
+    String filename =
+    "RES" + camera.Width +
+    "-SPP"+ camera.subpixels*camera.subpixels +
+    "-MD" + camera.MAX_DEPTH +
+    "-RB" + camera.MAX_REFLECTION_BOUNCES +
+    "-SR" + camera.SHADOW_RAYS;
+
+    try{
+      OutputStream out = new FileOutputStream("images/" + filename + ".png");
+      PNGEncoder encoder = new PNGEncoder(out);
+      encoder.encode(image);
+    }
+    catch(IOException e){
+      System.out.println("Error: " + e );
+    }
+    System.out.println("Saved image as " + "\"" + filename + ".png\"");
+  }
+
+  //Window close method terminates the ExecutorService if it's initiated
+  @Override
+  public void stop(){
+    if(executor != null){
+      executor.shutdownNow();
+    }
+    Platform.exit();
+  }
 }
