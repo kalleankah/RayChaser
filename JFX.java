@@ -72,7 +72,7 @@ public class JFX extends Application {
   //The camera contains the camera position and the render settings
   Camera camera;
   //The image is rendered in blocks with range*range pixels
-  int range = 100;
+  int range = 50;
   //An atomic integer to keep track of progress
   AtomicInteger progress = new AtomicInteger(0);
   double progress_double;
@@ -111,16 +111,18 @@ public class JFX extends Application {
     grid.setHalignment(scenetitle, HPos.CENTER);
     grid.add(scenetitle, 0, 0, 2, 1);
 
-    //Field to select resolution (square aspect only)
+    //Fields to select resolution (arbitrary aspect ratio)
     Label res = new Label("Resolution:");
     grid.add(res, 0, 1);
     grid.setHalignment(res, HPos.RIGHT);
-    TextField resField = new TextField("500");
-    grid.add(resField, 1, 1);
+    TextField horizontalResField = new TextField("800");
+    grid.add(horizontalResField, 1, 1);
+    TextField verticalResField = new TextField("600");
+    grid.add(verticalResField, 1, 2);
 
     //Slider to select number of samples
     Label samples = new Label("Samples [25]");
-    grid.add(samples, 0, 2);
+    grid.add(samples, 0, 3);
     grid.setHalignment(samples, HPos.RIGHT);
     Slider samplesSlider = new Slider(1,30,5);
     //Use custom labelformatter to make slider increase quadratically instead of linearly
@@ -140,44 +142,44 @@ public class JFX extends Application {
     samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()*newVal.doubleValue()) + "]"));
     samplesSlider.setMajorTickUnit(2);
     samplesSlider.setShowTickLabels(true);
-    grid.add(samplesSlider, 1, 2);
+    grid.add(samplesSlider, 1, 3);
 
     //Add slider to select max depth (number of bounces)
     Label depth = new Label("Max Depth");
-    grid.add(depth, 0, 3);
+    grid.add(depth, 0, 4);
     grid.setHalignment(depth, HPos.RIGHT);
     Slider depthSlider = new Slider(0,10,5);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
     depthSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(depthSlider, 1, 3);
+    grid.add(depthSlider, 1, 4);
 
     //Add slider to select max consecutive bounecs between mirror/reflective objects
     Label rb = new Label("Reflection Bounces");
-    grid.add(rb, 0, 4);
+    grid.add(rb, 0, 5);
     grid.setHalignment(rb, HPos.RIGHT);
     Slider rbSlider = new Slider(0,20,10);
     rbSlider.setShowTickLabels(true);
     rbSlider.setMajorTickUnit(5);
     rbSlider.valueProperty().addListener((obs, oldval, newVal) ->
     rbSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(rbSlider, 1, 4);
+    grid.add(rbSlider, 1, 5);
 
     //Add slider to select number of shadow rays to each light source each bounce
     Label sr = new Label("Shadow Rays");
-    grid.add(sr, 0, 5);
+    grid.add(sr, 0, 6);
     grid.setHalignment(sr, HPos.RIGHT);
     Slider srSlider = new Slider(0,10,1);
     srSlider.setShowTickLabels(true);
     srSlider.setMajorTickUnit(1);
     srSlider.valueProperty().addListener((obs, oldval, newVal) ->
     srSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(srSlider, 1, 5);
+    grid.add(srSlider, 1, 6);
 
     //Add slider to select number of CPU threads to Utilize
     Label threads = new Label("CPU Threads:");
-    grid.add(threads, 0, 6);
+    grid.add(threads, 0, 7);
     grid.setHalignment(threads, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
@@ -185,27 +187,28 @@ public class JFX extends Application {
     threadsSlider.setShowTickLabels(true);
     threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
     threadsSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(threadsSlider, 1, 6);
+    grid.add(threadsSlider, 1, 7);
 
     //Create button to start render and open render preview
     Button btn = new Button("Render");
     HBox btnbox = new HBox(10);
     btnbox.setAlignment(Pos.BOTTOM_RIGHT);
     btnbox.getChildren().add(btn);
-    grid.add(btnbox, 1, 7);
+    grid.add(btnbox, 1, 8);
     //Define button behavior
     btn.setOnAction(new EventHandler<ActionEvent>(){
       @Override
       public void handle(ActionEvent event){
         //Collect settings from fields/sliders
-        int[] args = new int[6];
-        args[0] = Integer.parseInt(resField.getText());
-        args[1] = (int)samplesSlider.getValue();
-        args[2] = (int)depthSlider.getValue();
-        args[3] = (int)rbSlider.getValue();
-        args[4] = (int)srSlider.getValue();
-        args[5] = (int)threadsSlider.getValue();
-        image = new WritableImage(args[0],args[0]);
+        int[] args = new int[7];
+        args[0] = Integer.parseInt(horizontalResField.getText());
+        args[1] = Integer.parseInt(verticalResField.getText());
+        args[2] = (int)samplesSlider.getValue();
+        args[3] = (int)depthSlider.getValue();
+        args[4] = (int)rbSlider.getValue();
+        args[5] = (int)srSlider.getValue();
+        args[6] = (int)threadsSlider.getValue();
+        image = new WritableImage(args[0],args[1]);
         //Open the render preview window
         openRenderUI();
         //Start the rendering
@@ -310,8 +313,8 @@ public class JFX extends Application {
   //Creates rendering tasks and executes them in parallell
   public void startRenderingTasks(int[] args){
     //Create camera object (the camera object contains the image and render settings)
-    Vector3d eye = new Vector3d(0.01,0,0);
-    double fov = 1.0;
+    Vector3d eye = new Vector3d(0.01,0.0,-0.5);
+    double fov = 0.8;
     camera = new Camera(eye, fov, image, args);
     //Start measuring render time
     startTime = System.nanoTime();
@@ -330,7 +333,7 @@ public class JFX extends Application {
     }
     //Create and submit all tasks to Executor
     executor = Executors.newFixedThreadPool(camera.THREADS);
-    for(int y=0; y<(camera.Width/range + 1); ++y){
+    for(int y=0; y<(camera.Height/range + 1); ++y){
       for(int x=0; x<(camera.Width/range + 1); ++x){
         //Important to create new scene for each task, otherwise each RenderTask
         //has to wait for parallell threads to stop accessing that scene.
@@ -364,7 +367,7 @@ public class JFX extends Application {
   //Write image to PNG
   void savePNG(){
     String filename =
-    "RES" + camera.Width +
+    "RES" + camera.Width + "x" + camera.Height +
     "-SPP"+ camera.subpixels*camera.subpixels +
     "-MD" + camera.MAX_DEPTH +
     "-RB" + camera.MAX_REFLECTION_BOUNCES +

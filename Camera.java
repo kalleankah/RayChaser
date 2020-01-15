@@ -18,12 +18,12 @@ public class Camera {
 
   Camera(Vector3d e, double f, WritableImage img, int[] args){
     Width = args[0];
-    Height = args[0];
-    subpixels = args[1];
-    MAX_DEPTH = args[2];
-    MAX_REFLECTION_BOUNCES = args[3];
-    SHADOW_RAYS = args[4];
-    THREADS = args[5];
+    Height = args[1];
+    subpixels = args[2];
+    MAX_DEPTH = args[3];
+    MAX_REFLECTION_BOUNCES = args[4];
+    SHADOW_RAYS = args[5];
+    THREADS = args[6];
     eye = e;
     fov = f;
     image = img;
