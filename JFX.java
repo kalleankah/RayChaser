@@ -120,87 +120,100 @@ public class JFX extends Application {
     TextField verticalResField = new TextField("600");
     grid.add(verticalResField, 1, 2);
 
+    //Add slider to adjust camera zoom level
+    Label fov = new Label("Zoom");
+    grid.add(fov, 0, 3);
+    grid.setHalignment(fov, HPos.RIGHT);
+    Slider fovSlider = new Slider(0.5, 2.0, 0.8);
+    fovSlider.setShowTickLabels(true);
+    fovSlider.setMajorTickUnit(0.5);
+    // fovSlider.setBlockIncrement(0.1);
+    fovSlider.valueProperty().addListener((obs, oldval, newVal) ->
+      fovSlider.setValue(Math.round(newVal.doubleValue()*10.0)/10.0));
+    grid.add(fovSlider, 1, 3);
+
+    //Add slider to change light source brightness
+    Label brightnessLabel = new Label("Brightness");
+    grid.add(brightnessLabel, 0, 4);
+    grid.setHalignment(brightnessLabel, HPos.RIGHT);
+    Slider brightnessSlider = new Slider(1,10,5);
+    brightnessSlider.setMajorTickUnit(1);
+    brightnessSlider.setShowTickLabels(true);
+    brightnessSlider.valueProperty().addListener((obs, oldval, newVal) ->
+      brightnessSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(brightnessSlider, 1, 4);
+
     //Slider to select number of samples
-    Label samples = new Label("Samples [25]");
-    grid.add(samples, 0, 3);
+    Label samples = new Label("Samples [100]");
+    grid.add(samples, 0, 5);
     grid.setHalignment(samples, HPos.RIGHT);
-    Slider samplesSlider = new Slider(1,30,5);
-    //Use custom labelformatter to make slider increase quadratically instead of linearly
-    samplesSlider.setLabelFormatter(new StringConverter<Double>() {
-      @Override
-      public String toString(Double t) {
-        return String.valueOf(Math.round(t*t));
-      }
-      @Override
-      public Double fromString(String string) {
-        return Double.parseDouble(string);
-      }
-    });
+    Slider samplesSlider = new Slider(1,1000,100);
+    //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    samplesSlider.setValue(Math.round(newVal.doubleValue())));
+      samplesSlider.setValue(Math.round(newVal.doubleValue())));
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()*newVal.doubleValue()) + "]"));
-    samplesSlider.setMajorTickUnit(2);
+      samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()) + "]"));
+    samplesSlider.setMajorTickUnit(100);
     samplesSlider.setShowTickLabels(true);
-    grid.add(samplesSlider, 1, 3);
+    grid.add(samplesSlider, 1, 5);
 
     //Add slider to select max depth (number of bounces)
     Label depth = new Label("Max Depth");
-    grid.add(depth, 0, 4);
+    grid.add(depth, 0, 6);
     grid.setHalignment(depth, HPos.RIGHT);
-    Slider depthSlider = new Slider(0,10,5);
+    Slider depthSlider = new Slider(0,50,10);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    depthSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(depthSlider, 1, 4);
+      depthSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(depthSlider, 1, 6);
 
     //Add slider to select max consecutive bounecs between mirror/reflective objects
     Label rb = new Label("Reflection Bounces");
-    grid.add(rb, 0, 5);
+    grid.add(rb, 0, 7);
     grid.setHalignment(rb, HPos.RIGHT);
     Slider rbSlider = new Slider(0,20,10);
     rbSlider.setShowTickLabels(true);
     rbSlider.setMajorTickUnit(5);
     rbSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    rbSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(rbSlider, 1, 5);
+      rbSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(rbSlider, 1, 7);
 
     //Add slider to select number of shadow rays to each light source each bounce
     Label sr = new Label("Shadow Rays");
-    grid.add(sr, 0, 6);
+    grid.add(sr, 0, 8);
     grid.setHalignment(sr, HPos.RIGHT);
     Slider srSlider = new Slider(0,10,1);
     srSlider.setShowTickLabels(true);
     srSlider.setMajorTickUnit(1);
     srSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    srSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(srSlider, 1, 6);
+      srSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(srSlider, 1, 8);
 
     //Add slider to select number of CPU threads to Utilize
     Label threads = new Label("CPU Threads:");
-    grid.add(threads, 0, 7);
+    grid.add(threads, 0, 9);
     grid.setHalignment(threads, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
     threadsSlider.setMajorTickUnit(1);
     threadsSlider.setShowTickLabels(true);
     threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
-    threadsSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(threadsSlider, 1, 7);
+      threadsSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(threadsSlider, 1, 9);
 
     //Create button to start render and open render preview
     Button btn = new Button("Render");
     HBox btnbox = new HBox(10);
     btnbox.setAlignment(Pos.BOTTOM_RIGHT);
     btnbox.getChildren().add(btn);
-    grid.add(btnbox, 1, 8);
+    grid.add(btnbox, 1, 10);
     //Define button behavior
     btn.setOnAction(new EventHandler<ActionEvent>(){
       @Override
       public void handle(ActionEvent event){
         //Collect settings from fields/sliders
-        int[] args = new int[7];
+        int[] args = new int[8];
         args[0] = Integer.parseInt(horizontalResField.getText());
         args[1] = Integer.parseInt(verticalResField.getText());
         args[2] = (int)samplesSlider.getValue();
@@ -208,11 +221,13 @@ public class JFX extends Application {
         args[4] = (int)rbSlider.getValue();
         args[5] = (int)srSlider.getValue();
         args[6] = (int)threadsSlider.getValue();
+        args[7] = (int)brightnessSlider.getValue();
+        double fov = fovSlider.getValue();
         image = new WritableImage(args[0],args[1]);
         //Open the render preview window
         openRenderUI();
         //Start the rendering
-        startRenderingTasks(args);
+        startRenderingTasks(args, fov);
       }
     });
 
@@ -311,10 +326,9 @@ public class JFX extends Application {
   }
 
   //Creates rendering tasks and executes them in parallell
-  public void startRenderingTasks(int[] args){
+  public void startRenderingTasks(int[] args, double fov){
     //Create camera object (the camera object contains the image and render settings)
     Vector3d eye = new Vector3d(0.01,0.0,-0.5);
-    double fov = 0.8;
     camera = new Camera(eye, fov, image, args);
     //Start measuring render time
     startTime = System.nanoTime();
@@ -338,7 +352,7 @@ public class JFX extends Application {
         //Important to create new scene for each task, otherwise each RenderTask
         //has to wait for parallell threads to stop accessing that scene.
         //This causes blocking and makes multithreading much slower
-        final Scene scene = new Scene(textures);
+        final Scene scene = new Scene(textures, args[7]);
         final int X = x;
         final int Y = y;
         RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
@@ -368,7 +382,7 @@ public class JFX extends Application {
   void savePNG(){
     String filename =
     "RES" + camera.Width + "x" + camera.Height +
-    "-SPP"+ camera.subpixels*camera.subpixels +
+    "-SPP"+ camera.subpixels +
     "-MD" + camera.MAX_DEPTH +
     "-RB" + camera.MAX_REFLECTION_BOUNCES +
     "-SR" + camera.SHADOW_RAYS;

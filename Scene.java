@@ -16,7 +16,7 @@ public class Scene{
   Vector<Image> textureList;
 
   //Construct Scene object (in-argument is a list of textures)
-  Scene(Vector<Image> t_List){
+  Scene(Vector<Image> t_List, double brightness){
     textureList = t_List;
     Image block_img = textureList.get(0);
     Image wood_img = textureList.get(1);
@@ -39,8 +39,7 @@ public class Scene{
     Material cyan = new Material(new ColorDbl(0.3,0.85,0.85));
     Material magenta = new Material(new ColorDbl(0.85,0.3,0.85));
     //Emmissive materials
-    Material EMISSION = new Emissive(new ColorDbl(1.0,1.0,1.0), 1);
-    Material EMISSION2 = new Emissive(new ColorDbl(1.0,1.0,1.0), 5);
+    Material EMISSION = new Emissive(new ColorDbl(1.0,1.0,1.0), brightness);
     //Reflective materials
     Material Reflective = new Reflective(new ColorDbl(0.99,0.99,0.99));
     Material Mirror = new Reflective(new ColorDbl(0.95,0.99,0.95));
@@ -66,15 +65,15 @@ public class Scene{
     Vector3d CLNL = new Vector3d(4.0, 2.0, 4);
 
     // Lamp
-    // addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION2));
+    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION));
     // Ceiling
-    addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, EMISSION));
+    addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, white));
     // Floor
     addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, wood));
     // Left wall
     addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, white));
     // Right wall
-    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, EMISSION));
+    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, white));
     // Far wall
     addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, white));
     // Near wall

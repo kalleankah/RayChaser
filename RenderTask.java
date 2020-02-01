@@ -35,21 +35,14 @@ public class RenderTask extends Task<Void> {
     //PixelSize is the length a pixel has in the grid from -1 to 1
     double PixelSize = camera.Width>camera.Height ? 2.0/camera.Width : 2.0/camera.Height;
     double subPixelSize = PixelSize/camera.subpixels;
-    double subPixelFactor = 1.0/(camera.subpixels*camera.subpixels);
+    double subPixelFactor = 1.0/(camera.subpixels);
     double cameraPlaneXaxis = camera.eye.x+camera.fov;
     ColorDbl temp = new ColorDbl();
     int endX = Math.min(startX+range, camera.Width);
     int endY = Math.min(startY+range, camera.Height);
-    //Center the camera when aspect ratio is other than 1:1
-    double aspect = ((double)camera.Width)/((double)camera.Height);
-    double shift_H = 0.0;
-    double shift_V = 0.0;
-    if(aspect>1){
-      shift_V = 1.0/aspect-1.0;
-    }
-    if(aspect<1){
-      shift_H = aspect-1.0;
-    }
+    Random Rand = new Random();
+    double eye_y = camera.eye.y + camera.shift_H + 1.0;
+    double eye_z = camera.eye.z + camera.shift_V + 1.0;
 
     //Render the box [startX->endX, startY->endY]
     // The xy-loop is a loop over all pixels x*y
@@ -58,9 +51,10 @@ public class RenderTask extends Task<Void> {
         temp.R = temp.G = temp.B = 0.0;
         // The loop ij is a loop over all subpixels (samples) i*j on each pixel
         for(int i = 0; i<camera.subpixels; ++i){
-          for(int j = 0; j<camera.subpixels; ++j){
-            temp.sumColor(CastRay(new Ray(camera.eye, new Vector3d(cameraPlaneXaxis, -x*PixelSize - 0.5*subPixelSize-i*subPixelSize + 1 + camera.eye.y + shift_H, -y*PixelSize - 0.5*subPixelSize-j*subPixelSize + 1 + camera.eye.z + shift_V), true),0,0));
-          }
+          temp.sumColor(
+            CastRay(
+              new Ray(camera.eye,
+                new Vector3d(cameraPlaneXaxis, eye_y - (x*PixelSize + Rand.nextDouble()*subPixelSize), eye_z - (y*PixelSize + Rand.nextDouble()*subPixelSize)), true),0,0));
         }
         temp.multiply(subPixelFactor);
         temp.clamp();
@@ -209,7 +203,7 @@ public class RenderTask extends Task<Void> {
         TotalBrightness += Brightness;
       }
       //Average brightness over all emitters
-      // TotalBrightness /= scene.lightList.size();
+      TotalBrightness /= scene.lightList.size();
       DirectLightcontrib = ColorDbl.multiply(objectcolor, TotalBrightness); //Multiply incoming light with surface
 
       //If max depth reached, return without casting more rays

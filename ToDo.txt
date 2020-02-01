@@ -1,11 +1,14 @@
-- Double check theory of light integration
-  - Specifically end of if(glossy){...} in RenderTask.java
+- More control over the scene in GUI
+  - Brightness
+  - Materials?
+  - Textures?
+- Double check theory of light integration!!
+  - Specifically the end of "if(glossy){...}" in RenderTask.java
   - Average brightness over all emitters(??) in RenderTask.java. This doesn't
     make sense because the same doesn't happen when rays spontaneously intersect
     emitters.
-- Possibility of arbitrary resolution
-  - Including possibility of arbitrary aspect ratio
 - Emitter sampling functions for spheres and env lights
 - Environment texture
 - Spiral render order
-- Material.getuv
+- UV-coordinate fix
+  - Add function: Material.getuv()

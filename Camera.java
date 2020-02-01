@@ -15,6 +15,9 @@ public class Camera {
   int SHADOW_RAYS = 1;
   int MAX_REFLECTION_BOUNCES = 10;
   double DEPTH_DECAY = 0;
+  double aspectRatio;
+  double shift_H = 0.0;
+  double shift_V = 0.0;
 
   Camera(Vector3d e, double f, WritableImage img, int[] args){
     Width = args[0];
@@ -24,9 +27,18 @@ public class Camera {
     MAX_REFLECTION_BOUNCES = args[4];
     SHADOW_RAYS = args[5];
     THREADS = args[6];
-    eye = e;
     fov = f;
+    eye = e;
     image = img;
+
+    //Center the camera when aspect ratio is other than 1:1
+    aspectRatio = ((double) Width)/((double) Height);
+    if(aspectRatio>1){
+      shift_V = 1.0/aspectRatio-1.0;
+    }
+    if(aspectRatio<1){
+      shift_H = aspectRatio-1.0;
+    }
   }
 
 }

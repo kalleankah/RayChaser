@@ -29,8 +29,8 @@ class Material{
     Brightness = 1.0;
     texture = t;
     pixelreader = texture.getPixelReader();
-    width = (int)texture.getWidth() - 1;
-    height = (int)texture.getHeight() - 1;
+    width = (int)texture.getWidth();
+    height = (int)texture.getHeight();
   }
   //Construct with brightness, useful for emitters
   Material(ColorDbl C, double b){
@@ -53,8 +53,8 @@ class Material{
   }
   //Get color from texture
   ColorDbl getColor(double u, double v){
-    int x = Math.min(width, (int)(u*width));
-    int y = Math.min(height, (int)(v*height));
+    int x = (int) (u*(width-1.0));
+    int y = (int) (v*(height-1.0));
     return ColorDbl.argbToColorDbl(pixelreader.getArgb(x, y));
   }
   //Get color from textureless material
