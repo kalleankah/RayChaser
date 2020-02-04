@@ -16,9 +16,9 @@ public class Plane extends Object3D{
     vertex1 = v1;
     vertex2 = v2;
     vertex3 = v3;
-    edge1 = Utilities.vecSub(vertex1,vertex0);
-    edge2 = Utilities.vecSub(vertex2,vertex1);
-    normal = Utilities.vecNormalize(Utilities.vecCross(edge1, edge2));
+    edge1 = util.sub(vertex1,vertex0);
+    edge2 = util.sub(vertex2,vertex1);
+    normal = util.normalize(util.cross(edge1, edge2));
   }
   //Constructor from 3 corners
   Plane(Vector3d v0, Vector3d v1, Vector3d v2, Material m){
@@ -26,26 +26,27 @@ public class Plane extends Object3D{
     vertex0 = v0;
     vertex1 = v1;
     vertex2 = v2;
-    edge1 = Utilities.vecSub(vertex1,vertex0);
-    edge2 = Utilities.vecSub(vertex2,vertex1);
-    vertex3 = Utilities.vecAdd(v0, edge2);
-    normal = Utilities.vecNormalize(Utilities.vecCross(edge1, edge2));
+    edge1 = util.sub(vertex1,vertex0);
+    edge2 = util.sub(vertex2,vertex1);
+    vertex3 = util.add(v0, edge2);
+    normal = util.normalize(util.cross(edge1, edge2));
   }
 
   //Intersection between ray and plane
   @Override
   double rayIntersection(Ray r){
-    Vector3d dR = Utilities.vecSub(r.end, r.start);
-    Vector3d dP = Utilities.vecSub(vertex0, r.start);
-    double t = Utilities.vecDot(dP, normal)/Utilities.vecDot(dR, normal);
-    Vector3d M = Utilities.vecAdd(r.start, Utilities.vecScale(dR,t));
+    Vector3d dR = util.sub(r.end, r.start);
+    Vector3d dP = util.sub(vertex0, r.start);
+    double t = util.dot(dP, normal)/util.dot(dR, normal);
+    Vector3d M = util.add(r.start, util.scale(dR,t));
 
-    Vector3d dMV0 = Utilities.vecSub(M,vertex0);
-    double u = Utilities.vecDot(dMV0, edge1);
-    double v = Utilities.vecDot(dMV0, edge2);
+    Vector3d dMV0 = util.sub(M,vertex0);
+    double u = util.dot(dMV0, edge1);
+    double v = util.dot(dMV0, edge2);
 
-    if(u >= 0.0 && u <= Utilities.vecDot(edge1,edge1)
-    && v >= 0.0 && v <= Utilities.vecDot(edge2,edge2)){
+    // Margins 0.00001 prevent rays from going between adjacent planes
+    if(u >= -0.001 && u <= util.dot(edge1,edge1) + 0.001
+    && v >= -0.001 && v <= util.dot(edge2,edge2) + 0.001){
       return t;
     }
     return Double.POSITIVE_INFINITY;
@@ -63,17 +64,13 @@ public class Plane extends Object3D{
 
   //Sample the plane uniformly for shadow rays to be cast
   @Override
-  Vector<Vector3d> getSampleLight(int SAMPLES, Vector3d rayOrigin){
-    Vector<Vector3d> V = new Vector<>();
+  Vector3d SampleEmitter(Vector3d rayOrigin){
     Random R = new Random();
     Vector3d temp;
-    for(int i = 0; i < SAMPLES; i++){
-      //Distribute points equally all over the plane
-      temp = Utilities.vecAdd(vertex0, Utilities.vecScale(edge1, R.nextDouble()));
-      temp = Utilities.vecAdd(temp, Utilities.vecScale(edge2, R.nextDouble()));
-      V.add(temp);
-    }
-    return V;
+    //Distribute points equally all over the plane
+    temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
+    temp = util.add(temp, util.scale(edge2, R.nextDouble()));
+    return temp;
   }
   //Returns edge i of the plane (used for calculating texture coordinates)
   @Override

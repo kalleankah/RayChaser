@@ -22,18 +22,23 @@ public class Object3D{
     return Double.POSITIVE_INFINITY;
   }
   Vector3d CalculateNormal(Vector3d P){
+    System.out.println("WARNING: CalculateNormal(Vector3d P) called in parent class");
     return null;
   }
   Vector3d CalculateNormal(){
+    System.out.println("WARNING: CalculateNormal() called in parent class");
     return null;
   }
-  Vector<Vector3d> getSampleLight(int SAMPLES, Vector3d rayOrigin){
+  Vector3d SampleEmitter(Vector3d rayOrigin){
+    System.out.println("WARNING: SampleEmitter() called in parent class");
     return null;
   }
   Vector3d getEdge(int i){
+    System.out.println("WARNING: getEdge() called in parent class");
     return null;
   }
   Vector3d getVertex(int i){
+    System.out.println("WARNING: getVertex() called in parent class");
     return null;
   }
 }

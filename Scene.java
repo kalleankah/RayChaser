@@ -44,43 +44,46 @@ public class Scene{
     Material Reflective = new Reflective(new ColorDbl(0.99,0.99,0.99));
     Material Mirror = new Reflective(new ColorDbl(0.95,0.99,0.95));
     //Glossy materials
-    Material GlossyWhite = new Glossy(new ColorDbl(0.95,0.95,0.95), 0.04);
-    Material GlossyBlue = new Glossy(new ColorDbl(0.3,0.3,0.95), 0.04);
-    Material GlossyYellow = new Glossy(new ColorDbl(0.95,0.95,0.3), 0.04);
+    Material GlossyWhite = new Glossy(new ColorDbl(0.95,0.95,0.95), 0.05);
+    Material GlossyBlue = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.1);
+    Material GlossyYellow = new Glossy(new ColorDbl(0.95,0.95,0.3), 0.1);
+    Material GlossyRed = new Glossy(new ColorDbl(0.98,0.4,0.4), 0.05);
 
     //Vertex points, corners of the room
-    Vector3d CeilingLeftNear = new Vector3d(0.0,6.0,5.0);
-    Vector3d CeilingRightNear = new Vector3d(0.0,-6.0,5.0);
-    Vector3d CeilingLeftFar = new Vector3d(12.0,6.0,5.0);
-    Vector3d CeilingRightFar = new Vector3d(12.0,-6.0,5.0);
-    Vector3d FloorLeftNear = new Vector3d(0.0,6.0,-5.0);
-    Vector3d FloorRightNear = new Vector3d(0.0,-6.0,-5.0);
-    Vector3d FloorLeftFar = new Vector3d(12.0,6.0,-5.0);
-    Vector3d FloorRightFar = new Vector3d(12.0,-6.0,-5.0);
+    double depth = 12.0;
+    double width = 12.0;
+    double height = 10.1;
+    Vector3d CeilingLeftNear = new Vector3d(0.0,width/2.0,height/2.0);
+    Vector3d CeilingRightNear = new Vector3d(0.0,-width/2.0,height/2.0);
+    Vector3d CeilingLeftFar = new Vector3d(depth,width/2.0,height/2.0);
+    Vector3d CeilingRightFar = new Vector3d(depth,-width/2.0,height/2.0);
+    Vector3d FloorLeftNear = new Vector3d(0.0,width/2.0,-height/2.0);
+    Vector3d FloorRightNear = new Vector3d(0.0,-width/2.0,-height/2.0);
+    Vector3d FloorLeftFar = new Vector3d(depth,width/2.0,-height/2.0);
+    Vector3d FloorRightFar = new Vector3d(depth,-width/2.0,-height/2.0);
 
     //Vertex points ceiling light
-    Vector3d CLNR = new Vector3d(4.0,-2.0, 4);
-    Vector3d CLFR = new Vector3d(8.0,-2.0, 4);
-    Vector3d CLFL = new Vector3d(8.0, 2.0, 4);
-    Vector3d CLNL = new Vector3d(4.0, 2.0, 4);
+    Vector3d CLNR = new Vector3d(4.0,-2.0, height/2.0);
+    Vector3d CLFR = new Vector3d(8.0,-2.0, height/2.0);
+    Vector3d CLFL = new Vector3d(8.0, 2.0, height/2.0);
+    Vector3d CLNL = new Vector3d(4.0, 2.0, height/2.0);
 
     // Lamp
     addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION));
+    // Entire ceiling Lamp
+    // addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, EMISSION));
     // Ceiling
     addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, white));
     // Floor
     addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, wood));
     // Left wall
-    addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, white));
+    addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, green));
     // Right wall
-    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, white));
+    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, red));
     // Far wall
     addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, white));
     // Near wall
     addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, white));
-    // Mirror
-    // addObject(new Plane(new Vector3d(9.7,5.9,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
-    addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
 
 
     // Additional items
@@ -89,9 +92,10 @@ public class Scene{
     addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyBlue));
     addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
     addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
-    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, Reflective));
+    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
     addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, white));
     addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, Reflective));
+    addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
   }
   //Add object to the lists
   void addObject(Object3D o){
@@ -104,14 +108,14 @@ public class Scene{
   }
   //Add box to the scene
   void addBox(Vector3d origin, double width, double height, double depth, Material m){
-    Vector3d FBL = Utilities.vecAdd(origin,new Vector3d(-depth/2,width/2,-height/2));
-    Vector3d FBR = Utilities.vecAdd(origin,new Vector3d(-depth/2,-width/2,-height/2));
-    Vector3d FTL = Utilities.vecAdd(origin,new Vector3d(-depth/2,width/2,height/2));
-    Vector3d FTR = Utilities.vecAdd(origin,new Vector3d(-depth/2,-width/2,height/2));
-    Vector3d BBL = Utilities.vecAdd(origin,new Vector3d(depth/2,width/2,-height/2));
-    Vector3d BBR = Utilities.vecAdd(origin,new Vector3d(depth/2,-width/2,-height/2));
-    Vector3d BTL = Utilities.vecAdd(origin,new Vector3d(depth/2,width/2,height/2));
-    Vector3d BTR = Utilities.vecAdd(origin,new Vector3d(depth/2,-width/2,height/2));
+    Vector3d FBL = util.add(origin,new Vector3d(-depth/2,width/2,-height/2));
+    Vector3d FBR = util.add(origin,new Vector3d(-depth/2,-width/2,-height/2));
+    Vector3d FTL = util.add(origin,new Vector3d(-depth/2,width/2,height/2));
+    Vector3d FTR = util.add(origin,new Vector3d(-depth/2,-width/2,height/2));
+    Vector3d BBL = util.add(origin,new Vector3d(depth/2,width/2,-height/2));
+    Vector3d BBR = util.add(origin,new Vector3d(depth/2,-width/2,-height/2));
+    Vector3d BTL = util.add(origin,new Vector3d(depth/2,width/2,height/2));
+    Vector3d BTR = util.add(origin,new Vector3d(depth/2,-width/2,height/2));
 
     addObject(new Plane(FTL,FBL,FBR,FTR,m)); //Front
     addObject(new Plane(BTR,BBR,BBL,BTL,m)); //Back

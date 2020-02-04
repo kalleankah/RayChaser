@@ -13,9 +13,9 @@ public class InfinitePlane extends Object3D {
   @Override
   double rayIntersection(Ray r){
 
-    Vector3d dR = Utilities.vecSub(r.end, r.start);
-    Vector3d dP = Utilities.vecSub(position, r.start);
-    return Utilities.vecDot(dP, normal)/Utilities.vecDot(dR, normal);
+    Vector3d dR = util.sub(r.end, r.start);
+    Vector3d dP = util.sub(position, r.start);
+    return util.dot(dP, normal)/util.dot(dR, normal);
   }
   @Override
   Vector3d CalculateNormal(Vector3d P){

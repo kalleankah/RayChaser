@@ -24,14 +24,14 @@ public class Sphere extends Object3D {
   @Override
   double rayIntersection(Ray r){
     //Create a vector from sphere center to ray origin
-    Vector3d co = Utilities.vecSub(r.start, center);
+    Vector3d co = util.sub(r.start, center);
     double b = 2.0 * r.direction.dot(co);
     double c = co.dot(co) - (radius*radius);
     double rootarg = 0.25*b*b - c; //Pre-calculate argument of square root
 
     //Non-tangental intersection with sphere
-    if (rootarg > 0){
-      return (-0.5 * b - Math.sqrt(rootarg))/r.RayLength;
+    if (rootarg > 0.0){
+      return (-0.5 * b - Math.sqrt(rootarg))/r.length();
     }
     //If no intersection return dummy
     return -1.0;
@@ -51,17 +51,17 @@ public class Sphere extends Object3D {
   }
   //Sample sphere emitter surface uniformly
   @Override
-  Vector<Vector3d> getSampleLight(int SAMPLES, Vector3d rayOrigin){
-    Vector<Vector3d> V = new Vector<>();
+  Vector3d SampleEmitter(Vector3d rayOrigin){
+    Vector3d V = new Vector3d();
     //center - normalize(center-rayOrigin)*radius
-    // Vector3d sphereDirection = Utilities.vecNormalize(Utilities.vecSub(center,rayOrigin));
-    // Vector3d toSphereSurface = Utilities.vecScale(sphereDirection, radius);
-    // Vector3d point = Utilities.vecAdd(rayOrigin, toSphereSurface);
+    // Vector3d sphereDirection = util.normalize(util.sub(center,rayOrigin));
+    // Vector3d toSphereSurface = util.scale(sphereDirection, radius);
+    // Vector3d point = util.add(rayOrigin, toSphereSurface);
     // V.add(point);
-    // Utilities.print(point);
+    // util.print(point);
 
     //Not implemented yet, send warning.
-    System.out.println("Sphere.java: getSampleLight(int SAMPLES, Vector3d rayOrigin) not implemented!");
+    System.out.println("Sphere.java: SampleEmitter(Vector3d rayOrigin) not implemented!");
     return V;
   }
 }

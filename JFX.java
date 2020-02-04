@@ -25,6 +25,7 @@ import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
@@ -161,38 +162,17 @@ public class JFX extends Application {
     Label depth = new Label("Max Depth");
     grid.add(depth, 0, 6);
     grid.setHalignment(depth, HPos.RIGHT);
-    Slider depthSlider = new Slider(0,50,10);
+    Slider depthSlider = new Slider(0,20,10);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
       depthSlider.setValue(Math.round(newVal.doubleValue())));
     grid.add(depthSlider, 1, 6);
 
-    //Add slider to select max consecutive bounecs between mirror/reflective objects
-    Label rb = new Label("Reflection Bounces");
-    grid.add(rb, 0, 7);
-    grid.setHalignment(rb, HPos.RIGHT);
-    Slider rbSlider = new Slider(0,20,10);
-    rbSlider.setShowTickLabels(true);
-    rbSlider.setMajorTickUnit(5);
-    rbSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      rbSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(rbSlider, 1, 7);
-
-    //Add slider to select number of shadow rays to each light source each bounce
-    Label sr = new Label("Shadow Rays");
-    grid.add(sr, 0, 8);
-    grid.setHalignment(sr, HPos.RIGHT);
-    Slider srSlider = new Slider(0,10,1);
-    srSlider.setShowTickLabels(true);
-    srSlider.setMajorTickUnit(1);
-    srSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      srSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(srSlider, 1, 8);
 
     //Add slider to select number of CPU threads to Utilize
     Label threads = new Label("CPU Threads:");
-    grid.add(threads, 0, 9);
+    grid.add(threads, 0, 7);
     grid.setHalignment(threads, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
@@ -200,7 +180,16 @@ public class JFX extends Application {
     threadsSlider.setShowTickLabels(true);
     threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
       threadsSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(threadsSlider, 1, 9);
+    grid.add(threadsSlider, 1, 7);
+
+    //Add checkbox for using shadow rays
+    Label shadowrays = new Label("Use Shadow Rays");
+    grid.add(shadowrays, 0, 8);
+    grid.setHalignment(shadowrays, HPos.RIGHT);
+    //Use shadow rays by default
+    CheckBox shadowrayBox = new CheckBox();
+    shadowrayBox.setSelected(true);
+    grid.add(shadowrayBox, 1, 8);
 
     //Create button to start render and open render preview
     Button btn = new Button("Render");
@@ -218,8 +207,7 @@ public class JFX extends Application {
         args[1] = Integer.parseInt(verticalResField.getText());
         args[2] = (int)samplesSlider.getValue();
         args[3] = (int)depthSlider.getValue();
-        args[4] = (int)rbSlider.getValue();
-        args[5] = (int)srSlider.getValue();
+        args[5] = shadowrayBox.isSelected() ? 1:0;
         args[6] = (int)threadsSlider.getValue();
         args[7] = (int)brightnessSlider.getValue();
         double fov = fovSlider.getValue();
@@ -366,8 +354,8 @@ public class JFX extends Application {
   //Tasks to perform when rendering is completed
   void done(){
     //Display render time measurement in window and console
-    long endTime = System.nanoTime();
-    String logFinish = "Render Finished in " + (int)((endTime-startTime)/1000000000.0) + "s";
+    long renderTime = System.nanoTime()-startTime;
+    String logFinish = "Render Finished in " + (int)((renderTime)/1000000000.0) + "s";
     stage.setTitle(logFinish);
     System.out.println(logFinish);
     //Update cancel button text (it still takes you to the same screen)
@@ -375,17 +363,17 @@ public class JFX extends Application {
     //Stop refreshing the window
     updateWindow.stop();
     //Save render to file
-    savePNG();
+    savePNG(renderTime);
   }
 
   //Write image to PNG
-  void savePNG(){
+  void savePNG(long renderTime){
     String filename =
     "RES" + camera.Width + "x" + camera.Height +
     "-SPP"+ camera.subpixels +
     "-MD" + camera.MAX_DEPTH +
     "-RB" + camera.MAX_REFLECTION_BOUNCES +
-    "-SR" + camera.SHADOW_RAYS;
+    "-" + (int)((renderTime)/1000000000.0) + "sec";
 
     try{
       OutputStream out = new FileOutputStream("images/" + filename + ".png");

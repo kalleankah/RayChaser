@@ -63,6 +63,28 @@ public class ColorDbl{
   static ColorDbl multiply(ColorDbl c, double s){
     return new ColorDbl(c.R*s, c.G*s, c.B*s);
   }
+  // Multiply two ColorDbls element-wise
+  static ColorDbl multiply(ColorDbl c, ColorDbl d){
+    return new ColorDbl(c.R*d.R, c.G*d.G, c.B*d.B);
+  }
+  // Sum two ColorDbls
+  static ColorDbl sumColors(ColorDbl c, ColorDbl d){
+    return new ColorDbl(c.R+d.R, c.G+d.G, c.B+d.B);
+  }
+  // Calculate average of two colors
+  static ColorDbl avgCol(ColorDbl c1, ColorDbl c2){
+    return new ColorDbl(
+    (c1.R+c2.R)/2.0,
+    (c1.G+c2.G)/2.0,
+    (c1.B+c2.B)/2.0);
+  }
+  // Calculate average of two colors
+  static ColorDbl mixColors(ColorDbl c1, ColorDbl c2, double factor){
+    return new ColorDbl(
+    c1.R*factor+c2.R*(1.0-factor),
+    c1.G*factor+c2.G*(1.0-factor),
+    c1.B*factor+c2.B*(1.0-factor));
+  }
   //Format the data to write ppm image (not currently in use)
   // String printForImage(){
   //    int r = (int)(R*255);
@@ -107,5 +129,11 @@ public class ColorDbl{
     R = a;
     G = b;
     B = c;
+  }
+  //Assignment operator doubles
+  void addColor(double a){
+    R = a;
+    G = a;
+    B = a;
   }
 }

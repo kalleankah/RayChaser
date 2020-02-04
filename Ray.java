@@ -4,31 +4,29 @@ import java.util.*;
 
 //The ray contains a start- and end point, it has a direction and a length. The
 //Raylength is useful because in ray-object intersection calculations, a value t
-//is returned, where t represents a distance in "RayLength"-units. MotherNode
-//means that the current ray is originating from the camera, this is important
-//because the near clip is always 0.0 if the ray is not originating from camera.
+//is returned, where t represents a distance in "RayLength"-units.
 
 public class Ray{
   Vector3d start;
   Vector3d end;
-  double RayLength;
   Vector3d direction; //Normalized direction of ray
   Vector3d P_hit;
   Vector3d P_Normal;
-  Boolean MotherNode;
-  Ray(Vector3d s, Vector3d e, Boolean MN){
+  Ray(Vector3d s, Vector3d e){
     start = s;
     end = e;
-    this.MotherNode = MN;
-    direction = Utilities.vecSub(e, s);
-    RayLength = Utilities.vecNorm(direction);
+    direction = util.sub(e, s);
     direction.normalize();
   }
   //Calculate intersection point by traversing the intersection distance t
   void calculatePhit(double t){
-    P_hit = Utilities.vecSub(end,start);
+    P_hit = util.sub(end,start);
     P_hit.scale(t);
-    P_hit = Utilities.vecAdd(P_hit, start);
+    P_hit = util.add(P_hit, start);
+  }
+  //Get the length of the ray
+  double length(){
+    return Math.sqrt((end.x-start.x)*(end.x-start.x)+(end.y-start.y)*(end.y-start.y)+(end.z-start.z)*(end.z-start.z));
   }
   //Print information about the ray
   void print(){
