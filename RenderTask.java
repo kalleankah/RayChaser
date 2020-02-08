@@ -107,15 +107,13 @@ public class RenderTask extends Task<Void> {
     //If the ray hits a glossy object
     if(HitObject.mat instanceof Glossy && Depth < camera.MAX_DEPTH){
       Random glossy_or_diffuse = new Random();
-      if(glossy_or_diffuse.nextBoolean()){
+
+      if(glossy_or_diffuse.nextDouble() > HitObject.mat.getDiffuseFac()){
         //Calculate reflection, add roughness, reject samples > 180 deg
         Vector3d endPoint;
         Vector3d reflection = util.sub(r.direction, util.scale(r.P_Normal,util.dot(r.direction,r.P_Normal)*2.0));
-        do{
-          endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
-        }
-        //Reject when the endPoint is at an impossible angle
-        while(util.dot(util.sub(endPoint, r.P_hit), r.P_Normal) < 0.0);
+
+        endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
 
         glossycolor = CastRay(new Ray(r.P_hit,endPoint), Depth+1);
         glossycolor.multiply(HitObject.mat.getColor());

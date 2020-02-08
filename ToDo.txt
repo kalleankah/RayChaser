@@ -1,3 +1,5 @@
 - Emitter sampling functions for spheres
 - Texture UV-coordinate fix
   - Add function: Material.getuv()
+- Alternative glossy BRDF:
+  - Generate random_unit_vec() to offset normal instead of the reflected ray

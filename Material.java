@@ -61,4 +61,8 @@ class Material{
   ColorDbl getColor(){
     return new ColorDbl(color);
   }
+  double getDiffuseFac(){
+    //Dummy return
+    return -1.0;
+  }
 }

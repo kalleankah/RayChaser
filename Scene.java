@@ -44,10 +44,12 @@ public class Scene{
     Material Reflective = new Reflective(new ColorDbl(0.99,0.99,0.99));
     Material Mirror = new Reflective(new ColorDbl(0.95,0.99,0.95));
     //Glossy materials
-    Material GlossyWhite = new Glossy(new ColorDbl(0.95,0.95,0.95), 0.05);
-    Material GlossyBlue = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.1);
-    Material GlossyYellow = new Glossy(new ColorDbl(0.95,0.95,0.3), 0.1);
-    Material GlossyRed = new Glossy(new ColorDbl(0.98,0.4,0.4), 0.05);
+    Material GlossyWhite = new Glossy(new ColorDbl(0.95,0.95,0.95), 0.05, 0.1);
+    Material GlossyBlue = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.1, 0.25);
+    Material GlossyBlue2 = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.25, 0.8);
+    Material GlossyBlue3 = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.5, 0.5);
+    Material GlossyYellow = new Glossy(new ColorDbl(0.95,0.95,0.3), 0.1, 0.5);
+    Material GlossyRed = new Glossy(new ColorDbl(0.98,0.4,0.4), 0.05, 0.5);
 
     //Vertex points, corners of the room
     double depth = 12.0;
@@ -68,10 +70,10 @@ public class Scene{
     Vector3d CLFL = new Vector3d(8.0, 2.0, height/2.0);
     Vector3d CLNL = new Vector3d(4.0, 2.0, height/2.0);
 
-    // Lamp
-    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION));
     // Entire ceiling Lamp
     // addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, EMISSION));
+    // Lamp
+    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION));
     // Ceiling
     addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, white));
     // Floor
@@ -85,17 +87,23 @@ public class Scene{
     // Near wall
     addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, white));
 
-
     // Additional items
-    addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
-    addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, Reflective));
-    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyBlue));
-    addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
-    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
-    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
-    addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, white));
-    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, Reflective));
-    addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
+    // addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
+    // addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, Reflective));
+    // addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyBlue));
+    // addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
+    // addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
+    // addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
+    // addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, white));
+    // addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, Reflective));
+    // addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
+
+
+    //Scene with only glossy spheres
+    addObject(new Sphere(new Vector3d(depth/2.0, -width/4.0, 0.0), 1.25, GlossyBlue));
+    addObject(new Sphere(new Vector3d(depth/2.0, 0.0, 0.0), 1.25, GlossyBlue2));
+    addObject(new Sphere(new Vector3d(depth/2.0, width/4.0, 0.0), 1.25, GlossyBlue3));
+
   }
   //Add object to the lists
   void addObject(Object3D o){
