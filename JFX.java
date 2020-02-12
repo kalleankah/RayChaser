@@ -370,9 +370,9 @@ public class JFX extends Application {
   void savePNG(long renderTime){
     String filename =
     "RES" + camera.Width + "x" + camera.Height +
-    "-SPP"+ camera.subpixels +
+    "-SR" + camera.SHADOW_RAYS +
     "-MD" + camera.MAX_DEPTH +
-    "-RB" + camera.MAX_REFLECTION_BOUNCES +
+    "-SPP"+ camera.subpixels +
     "-" + (int)((renderTime)/1000000000.0) + "sec";
 
     try{
