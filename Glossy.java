@@ -3,9 +3,9 @@
 
 public class Glossy extends Material {
   double roughness, diffuseFac;
-  Glossy(ColorDbl col, double coeff, double diffuse){
+  Glossy(ColorDbl col, double rough, double diffuse){
     super(col);
-    roughness = coeff;
+    roughness = rough;
     diffuseFac = diffuse;
   }
   //getRoughness() is specific for Glossy material

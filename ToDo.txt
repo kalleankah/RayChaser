@@ -3,3 +3,5 @@
   - Add function: Material.getuv()
 - Alternative glossy BRDF:
   - Generate random_unit_vec() to offset normal instead of the reflected ray
+- Emitter brightness should be the NORM of the color components
+  - 10 * color is NOT the same as (10*color.r, 10*color.g, 10*color.b)

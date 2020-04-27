@@ -8,7 +8,6 @@ import java.lang.Math;
 
 class Material{
   ColorDbl color;
-  double Brightness;
   Image texture;
   int width;
   int height;
@@ -17,34 +16,29 @@ class Material{
   //Default constructor, black diffuse material
   Material(){
     color = new ColorDbl();
-    Brightness = 1.0;
   }
   //Construct from color
   Material(ColorDbl C){
     color = new ColorDbl(C);
-    Brightness = 1.0;
   }
   //Construct with texture
   Material(Image t){
-    Brightness = 1.0;
     texture = t;
     pixelreader = texture.getPixelReader();
     width = (int)texture.getWidth();
     height = (int)texture.getHeight();
   }
-  //Construct with brightness, useful for emitters
-  Material(ColorDbl C, double b){
-    color = new ColorDbl(C);
-    Brightness = b;
-  }
   //Copy constructor
   Material(Material m){
     color = m.color;
-    Brightness = m.Brightness;
     texture = m.texture;
     width = m.width;
     height = m.height;
     pixelreader = m.pixelreader;
+  }
+  //Calculate brightness
+  double getBrightness(){
+    return Math.sqrt(color.R*color.R + color.G*color.G + color.B*color.B);
   }
   //Roughness can only be used with glossy material (overridden in Glossy.java)
   double getRoughness(){
@@ -61,6 +55,7 @@ class Material{
   ColorDbl getColor(){
     return new ColorDbl(color);
   }
+  //Overridden in Glossy.java
   double getDiffuseFac(){
     //Dummy return
     return -1.0;

@@ -2,8 +2,7 @@
 //the member functions from Material.java
 
 public class Emissive extends Material{
-  Emissive(ColorDbl c, double b){
-    super(c,b);
+  Emissive(ColorDbl c){
+    super(c);
   }
-  //No Emissive-specific member functions have been added
 }

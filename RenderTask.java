@@ -85,9 +85,7 @@ public class RenderTask extends Task<Void> {
     if(HitObject.mat instanceof Emissive){
       //If it hits front side of light source
       if(util.dot(HitObject.CalculateNormal(r.P_hit),r.direction) < 0){
-        ColorDbl returncolor = new ColorDbl(HitObject.mat.getColor());
-        returncolor.multiply(HitObject.mat.Brightness);
-        return returncolor;
+        return HitObject.mat.getColor();
       }
       //If backside of light source, return black
       return new ColorDbl();
@@ -145,15 +143,12 @@ public class RenderTask extends Task<Void> {
     }
 
     /* --------------------- LOCAL LIGHT MODEL BEGIN ---------------------*/
-    // If the ray hits a diffuse object and shadow rays are enabled
     ColorDbl DirectLight = new ColorDbl();
     if(camera.SHADOW_RAYS > 0){
       double Brightness = 0.0;
       //Loop through all emitters in scene
       for(Object3D l : scene.lightList){
-        //Get a random position on the surface of the emitter
-        Vector3d samplePos = l.SampleEmitter(r.P_hit);
-        Brightness = 0.0;
+        //Send shadowray to random position on the surface of the emitter
         Ray ShadowRay = new Ray(r.P_hit, l.SampleEmitter(r.P_hit));
         if(!Occluded(ShadowRay)){
           /*
@@ -164,18 +159,17 @@ public class RenderTask extends Task<Void> {
           Ne = emitter surface normal
           d = distance to emitter sample point (d is clamped to d >= 1.0)
           */
-          Brightness += Math.max(0.0, l.mat.Brightness * util.dot(ShadowRay.direction, r.P_Normal) * -util.dot(ShadowRay.direction, l.CalculateNormal())/Math.max(1.0,ShadowRay.length()));
+          Brightness += Math.max(0.0, l.mat.getBrightness() * util.dot(ShadowRay.direction, r.P_Normal) * -util.dot(ShadowRay.direction, l.CalculateNormal()) / Math.max(1.0,ShadowRay.length()));
         }
       }
       //Average brightness over all emitters
       Brightness /= scene.lightList.size();
       DirectLight = ColorDbl.multiply(objectcolor, Brightness); //Multiply incoming light with surface
     }
-    /* -------------------- LOCAL LIGHT MODEL END --------------------- */
-    //If max depth reached, return without casting more rays
     if(Depth >= camera.MAX_DEPTH) {
       return DirectLight;
     }
+    /* -------------------- LOCAL LIGHT MODEL END --------------------- */
 
     // Calculate World2Local and Local2World transformation matrices
     Vector3d Nt, Nb;
@@ -202,6 +196,12 @@ public class RenderTask extends Task<Void> {
       inverting and use world2local. */
       local2world = world2local;
     }
+
+    // //Cast the reflected ray (branch size 2)
+    // ColorDbl IndirectLight1 = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
+    // ColorDbl IndirectLight2 = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
+    // ColorDbl IndirectLight = ColorDbl.avgCol(IndirectLight1, IndirectLight2);
+    // IndirectLight.multiply(objectcolor);
 
     //Cast the reflected ray
     ColorDbl IndirectLight = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
