@@ -137,7 +137,7 @@ public class JFX extends Application {
     Label brightnessLabel = new Label("Brightness");
     grid.add(brightnessLabel, 0, 4);
     grid.setHalignment(brightnessLabel, HPos.RIGHT);
-    Slider brightnessSlider = new Slider(1,10,5);
+    Slider brightnessSlider = new Slider(1,10,3);
     brightnessSlider.setMajorTickUnit(1);
     brightnessSlider.setShowTickLabels(true);
     brightnessSlider.valueProperty().addListener((obs, oldval, newVal) ->

@@ -39,7 +39,7 @@ public class Scene{
     Material cyan = new Material(new ColorDbl(0.3,0.85,0.85));
     Material magenta = new Material(new ColorDbl(0.85,0.3,0.85));
     //Emmissive materials
-    Material EMISSION = new Emissive(new ColorDbl(1.0,1.0,1.0), brightness);
+    Material EMISSION = new Emissive(new ColorDbl(brightness, brightness, brightness));
     //Reflective materials
     Material Reflective = new Reflective(new ColorDbl(0.99,0.99,0.99));
     Material Mirror = new Reflective(new ColorDbl(0.95,0.99,0.95));
@@ -65,7 +65,7 @@ public class Scene{
     Vector3d FloorRightFar = new Vector3d(depth,-width/2.0,-height/2.0);
 
     //Vertex points ceiling light
-    double lampSize = 1.0;
+    double lampSize = 2.0;
     Vector3d CLNR = new Vector3d(depth/2.0 - lampSize, -lampSize, height/2.0);
     Vector3d CLFR = new Vector3d(depth/2.0 + lampSize, -lampSize, height/2.0);
     Vector3d CLFL = new Vector3d(depth/2.0 + lampSize,  lampSize, height/2.0);
@@ -91,7 +91,7 @@ public class Scene{
     // Additional items
     addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
     addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, Reflective));
-    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyBlue));
+    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyYellow));
     addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
     addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
     addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
