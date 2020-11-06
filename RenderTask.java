@@ -76,6 +76,8 @@ public class RenderTask extends Task<Void> {
     }
     //Determine which object is hit
     Object3D HitObject = triangleIntersect(r, Depth);
+
+    /* TODO - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
     //If the ray doesn't hit any object, return skybox color in that direction
     if(HitObject == null){
       System.out.println("RenderTask.CastRay(): HitObject == null");
@@ -108,10 +110,8 @@ public class RenderTask extends Task<Void> {
 
       if(glossy_or_diffuse.nextDouble() > HitObject.mat.getDiffuseFac()){
         //Calculate reflection, add roughness, reject samples > 180 deg
-        Vector3d endPoint;
         Vector3d reflection = util.sub(r.direction, util.scale(r.P_Normal,util.dot(r.direction,r.P_Normal)*2.0));
-
-        endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
+        Vector3d endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
 
         glossycolor = CastRay(new Ray(r.P_hit,endPoint), Depth+1);
         glossycolor.multiply(HitObject.mat.getColor());
@@ -149,7 +149,8 @@ public class RenderTask extends Task<Void> {
       //Loop through all emitters in scene
       for(Object3D l : scene.lightList){
         //Send shadowray to random position on the surface of the emitter
-        Ray ShadowRay = new Ray(r.P_hit, l.SampleEmitter(r.P_hit));
+        Vector3d pointOnLight = l.SampleEmitter(r.P_hit);
+        Ray ShadowRay = new Ray(r.P_hit, pointOnLight);
         if(!Occluded(ShadowRay)){
           /*
           Brightness = b * dot(L, Ns) * -dot(L Nl) * 1/d
@@ -159,14 +160,17 @@ public class RenderTask extends Task<Void> {
           Ne = emitter surface normal
           d = distance to emitter sample point (d is clamped to d >= 1.0)
           */
-          Brightness += Math.max(0.0, l.mat.getBrightness() * util.dot(ShadowRay.direction, r.P_Normal) * -util.dot(ShadowRay.direction, l.CalculateNormal()) / Math.max(1.0,ShadowRay.length()));
+
+          Brightness += Math.max(0.0, l.mat.getBrightness() * util.dot(ShadowRay.direction, r.P_Normal) * -util.dot(ShadowRay.direction, l.CalculateNormal(pointOnLight)) / Math.max(1.0,ShadowRay.length()));
         }
       }
       //Average brightness over all emitters
       Brightness /= scene.lightList.size();
       DirectLight = ColorDbl.multiply(objectcolor, Brightness); //Multiply incoming light with surface
     }
-    if(Depth >= camera.MAX_DEPTH) {
+    double riskOfTermination = (Depth-1)/((double) camera.MAX_DEPTH);
+    if(util.RussianBullet(riskOfTermination) || Depth >= camera.MAX_DEPTH) {
+      // If the ray gets terminated
       return DirectLight;
     }
     /* -------------------- LOCAL LIGHT MODEL END --------------------- */
@@ -206,8 +210,12 @@ public class RenderTask extends Task<Void> {
     //Cast the reflected ray
     ColorDbl IndirectLight = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
     IndirectLight.multiply(objectcolor);
-
-    return ColorDbl.sumColors(DirectLight, IndirectLight);
+    ColorDbl output = ColorDbl.sumColors(DirectLight, IndirectLight);
+    
+    //Compensate for the lost energy when rays are randomly terminated. Greater risk
+    //of being terminated -> greater magnification of non-terminated rays.
+    output.multiply(1/(1-riskOfTermination));
+    return output;
   }
 
   //Calculate where the ray intersects the scene (if it does)

@@ -1,4 +1,6 @@
 import javax.vecmath.Vector3d;
+
+import java.util.Random;
 import java.util.Vector;
 
 //The Sphere is an analytic sphere, it is not made from primitive objects.
@@ -52,16 +54,37 @@ public class Sphere extends Object3D {
   //Sample sphere emitter surface uniformly
   @Override
   Vector3d SampleEmitter(Vector3d rayOrigin){
-    Vector3d V = new Vector3d();
-    //center - normalize(center-rayOrigin)*radius
-    // Vector3d sphereDirection = util.normalize(util.sub(center,rayOrigin));
-    // Vector3d toSphereSurface = util.scale(sphereDirection, radius);
-    // Vector3d point = util.add(rayOrigin, toSphereSurface);
-    // V.add(point);
-    // util.print(point);
+    
+    //Create  vector from ray origin to the center of the light
+    Vector3d fromCenter = util.sub(rayOrigin, center);
+    fromCenter.normalize();
 
-    //Not implemented yet, send warning.
-    System.out.println("Sphere.java: SampleEmitter(Vector3d rayOrigin) not implemented!");
-    return V;
+    //Create normalized vectors spanning a unit square plane orthogonal to "fromCenter"
+    Vector3d orthovec1 = util.findOrthogonalVector(fromCenter);
+    Vector3d orthovec2 = util.normalize(util.cross(fromCenter, orthovec1));
+    // System.out.println("Orthovec1 dot: " + util.dot(fromCenter, orthovec1));
+    // System.out.println("Orthovec2 dot: " + util.dot(fromCenter, orthovec2));
+
+    Random rand = new Random();
+    double d1,d2,generatedRadius;
+    do{
+      d1 = (-1 + 2 * rand.nextDouble()) * radius;
+      d2 = (-1 + 2 * rand.nextDouble()) * radius;
+      generatedRadius = Math.sqrt(d1*d1+d2*d2);
+    }
+    //Reject samples on the square, outside the disk
+    while(generatedRadius >= radius);
+    
+    //Create a vector from center to the surface of the sphere
+    double height = radius * Math.sqrt(Math.sin(Math.PI/2 * (1 - generatedRadius/radius) ));
+    Vector3d toSphereSurface = util.add(util.scale(orthovec1, d1), util.scale(orthovec2, d2), util.scale(fromCenter, height));
+    //Ensure the point is not inside the sphere
+    double epsilon = 0.001;
+    toSphereSurface = util.scale(toSphereSurface, (radius+epsilon)/util.norm(toSphereSurface));
+    Vector3d pointOnSphere = util.add(center, toSphereSurface);
+
+    // util.print(pointOnSphere);
+
+    return pointOnSphere;
   }
 }

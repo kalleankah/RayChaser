@@ -31,12 +31,22 @@ public class util{
     copy.z += vec2.z;
     return copy;
   }
-  // //Extend vector length by a double
-  // static Vector3d vecExtend(Vector3d vec, double extend){
-  //   Vector3d copy = new Vector3d(vec);
-  //   Vector3d extension = util.scale(util.normalize(vec), extend);
-  //   return util.add(copy, extension);
-  // }
+  // Sum three vectors
+  static Vector3d add(Vector3d vec1, Vector3d vec2, Vector3d vec3){
+    Vector3d copy = new Vector3d(
+      vec1.x + vec2.x + vec3.x,
+      vec1.y + vec2.y + vec3.y,
+      vec1.z + vec2.z + vec3.z);
+    return copy;
+  }
+  // Add double to vector
+  static Vector3d add(Vector3d vec1, double d){
+    Vector3d copy = new Vector3d(vec1);
+    copy.x += d;
+    copy.y += d;
+    copy.z += d;
+    return copy;
+  }
   //Subtract a vector from a vector
   static Vector3d sub(Vector3d vec1, Vector3d vec2){
     Vector3d copy = new Vector3d(vec1);
@@ -100,23 +110,26 @@ public class util{
     return new Vector3d(x, y, Math.sqrt(1-x*x-y*y));
   }
 
-  // // Algorithm to find orthogonal vector to another vector
-  // static Vector3d FindOrthogonalVector(Vector3d V){
-  //   Vector3d temp;
-  //   if(V.x != 0.0){
-  //     temp = new Vector3d((-V.y - V.z) / V.x, 1.0, 1.0);
-  //   }
-  //   else if(V.y != 0.0){
-  //     temp = new Vector3d(1.0, (-V.x - V.z) / V.y, 1.0);
-  //   }
-  //   else if(V.z != 0.0){
-  //     temp = new Vector3d(1.0, 1.0, (-V.x - V.y) /V.z);
-  //   }
-  //   else{
-  //     return null;
-  //   }
-  //   return vecNormalize(temp);
-  // }
+  // Algorithm to find orthogonal vector to another vector
+  static Vector3d findOrthogonalVector(Vector3d V){
+    Vector3d temp;
+    if(V.x != 0.0){
+      temp = new Vector3d((-V.y - V.z) / V.x, 1.0, 1.0);
+    }
+    else if(V.y != 0.0){
+      temp = new Vector3d(1.0, (-V.x - V.z) / V.y, 1.0);
+    }
+    else if(V.z != 0.0){
+      temp = new Vector3d(1.0, 1.0, (-V.x - V.y) /V.z);
+    }
+    else{
+      System.out.println("ERROR: Can't find orthogonal vector to a zero vector!");
+      return null;
+    }
+
+    temp.normalize();
+    return temp;
+  }
 
   //Print matrix vertices
   static void print(Matrix3d m){

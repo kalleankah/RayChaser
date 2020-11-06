@@ -162,7 +162,7 @@ public class JFX extends Application {
     Label depth = new Label("Max Depth");
     grid.add(depth, 0, 6);
     grid.setHalignment(depth, HPos.RIGHT);
-    Slider depthSlider = new Slider(0,20,10);
+    Slider depthSlider = new Slider(0,100,10);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
@@ -316,7 +316,7 @@ public class JFX extends Application {
   //Creates rendering tasks and executes them in parallell
   public void startRenderingTasks(int[] args, double fov){
     //Create camera object (the camera object contains the image and render settings)
-    Vector3d eye = new Vector3d(0.01,0.0,-0.5);
+    Vector3d eye = new Vector3d(0.01,0.0,-1.0);
     camera = new Camera(eye, fov, image, args);
     //Start measuring render time
     startTime = System.nanoTime();

@@ -13,6 +13,9 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# PowerShell scripts
+*.ps1
+
 # Package Files #
 *.war
 *.nar
