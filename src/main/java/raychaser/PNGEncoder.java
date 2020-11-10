@@ -1,3 +1,5 @@
+package raychaser;
+
 /*
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *

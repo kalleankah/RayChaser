@@ -1,3 +1,4 @@
+package raychaser;
 import java.lang.*;
 
 // ColorDbl is a custom vec3-like class representing color, with useful member

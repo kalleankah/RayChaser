@@ -1,3 +1,5 @@
+package raychaser;
+
 import javafx.concurrent.Task;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Matrix3d;

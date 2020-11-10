@@ -1,3 +1,5 @@
+package raychaser;
+
 import javax.vecmath.*;
 import java.lang.Math;
 import java.util.*;

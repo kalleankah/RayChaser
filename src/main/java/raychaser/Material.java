@@ -1,3 +1,5 @@
+package raychaser;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import java.lang.Math;

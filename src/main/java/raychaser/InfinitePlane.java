@@ -1,3 +1,5 @@
+package raychaser;
+
 import javax.vecmath.Vector3d;
 
 //InfinitePlane is simply an infinitely large plane. It has a different

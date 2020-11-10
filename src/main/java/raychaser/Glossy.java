@@ -1,3 +1,6 @@
+package raychaser;
+
+
 //The purpose of the class Glossy is to categorize the material type and enable
 //the getRoughness() function.
 

@@ -1,3 +1,5 @@
+package raychaser;
+
 import java.util.Random;
 import javax.vecmath.*;
 

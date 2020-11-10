@@ -1,3 +1,5 @@
+package raychaser;
+
 import javafx.scene.image.WritableImage;
 import javax.vecmath.Vector3d;
 
