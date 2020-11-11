@@ -1,9 +1,8 @@
 package raychaser;
 
-import javax.vecmath.Vector3d;
-
 import java.util.Random;
-import java.util.Vector;
+
+import javax.vecmath.Vector3d;
 
 //The Sphere is an analytic sphere, it is not made from primitive objects.
 

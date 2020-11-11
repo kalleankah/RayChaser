@@ -1,8 +1,8 @@
 package raychaser;
 
+import java.util.Random;
+
 import javax.vecmath.Vector3d;
-import java.lang.Math;
-import java.util.*;
 
 public class Plane extends Object3D{
   Vector3d vertex0, vertex1, vertex2, vertex3, edge1, edge2, normal;

@@ -1,5 +1,13 @@
 package raychaser;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.CRC32;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+
 /*
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
@@ -48,17 +56,6 @@ package raychaser;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
-import java.util.zip.CRC32;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
 
 /** This class allows to encode JavaFX Image to color PNG
 * image format with maximum compression.<br>

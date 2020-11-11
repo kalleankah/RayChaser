@@ -1,8 +1,6 @@
 package raychaser;
 
 import javax.vecmath.Vector3d;
-import java.lang.Math;
-import java.util.*;
 
 //Object3D is parent class for all types of objects (not only 3d objects). Its
 //only member is the material. Most member functions are overridden in its
