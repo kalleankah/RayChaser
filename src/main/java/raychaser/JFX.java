@@ -1,22 +1,19 @@
 package raychaser;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.Math;
-import java.text.SimpleDateFormat;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.Vector;
-import javafx.animation.Animation;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.vecmath.Vector3d;
+
 import javafx.animation.AnimationTimer;
-import javafx.animation.Interpolator;
-import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -32,29 +29,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.util.Duration;
-import javafx.util.StringConverter;
-import javax.vecmath.Vector3d;
 
 /* This class handles the GUI - windows, input, buttons, progress bar etc.
 When rendering, the current progress is stored in the WritableImage "image"
@@ -111,13 +100,13 @@ public class JFX extends Application {
     //Add a fun title
     Text scenetitle = new Text("Ray Chaser!");
     scenetitle.setFont(Font.font("Tahoma", FontWeight.BOLD, 36));
-    grid.setHalignment(scenetitle, HPos.CENTER);
+    GridPane.setHalignment(scenetitle, HPos.CENTER);
     grid.add(scenetitle, 0, 0, 2, 1);
 
     //Fields to select resolution (arbitrary aspect ratio)
     Label res = new Label("Resolution:");
     grid.add(res, 0, 1);
-    grid.setHalignment(res, HPos.RIGHT);
+    GridPane.setHalignment(res, HPos.RIGHT);
     TextField horizontalResField = new TextField("800");
     grid.add(horizontalResField, 1, 1);
     TextField verticalResField = new TextField("600");
@@ -126,7 +115,7 @@ public class JFX extends Application {
     //Add slider to adjust camera zoom level
     Label fov = new Label("Zoom");
     grid.add(fov, 0, 3);
-    grid.setHalignment(fov, HPos.RIGHT);
+    GridPane.setHalignment(fov, HPos.RIGHT);
     Slider fovSlider = new Slider(0.5, 2.0, 0.8);
     fovSlider.setShowTickLabels(true);
     fovSlider.setMajorTickUnit(0.5);
@@ -138,7 +127,7 @@ public class JFX extends Application {
     //Add slider to change light source brightness
     Label brightnessLabel = new Label("Brightness");
     grid.add(brightnessLabel, 0, 4);
-    grid.setHalignment(brightnessLabel, HPos.RIGHT);
+    GridPane.setHalignment(brightnessLabel, HPos.RIGHT);
     Slider brightnessSlider = new Slider(1,10,3);
     brightnessSlider.setMajorTickUnit(1);
     brightnessSlider.setShowTickLabels(true);
@@ -149,7 +138,7 @@ public class JFX extends Application {
     //Slider to select number of samples
     Label samples = new Label("Samples [100]");
     grid.add(samples, 0, 5);
-    grid.setHalignment(samples, HPos.RIGHT);
+    GridPane.setHalignment(samples, HPos.RIGHT);
     Slider samplesSlider = new Slider(1,1000,100);
     //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
@@ -163,7 +152,7 @@ public class JFX extends Application {
     //Add slider to select max depth (number of bounces)
     Label depth = new Label("Max Depth");
     grid.add(depth, 0, 6);
-    grid.setHalignment(depth, HPos.RIGHT);
+    GridPane.setHalignment(depth, HPos.RIGHT);
     Slider depthSlider = new Slider(0,100,10);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
@@ -175,7 +164,7 @@ public class JFX extends Application {
     //Add slider to select number of CPU threads to Utilize
     Label threads = new Label("CPU Threads:");
     grid.add(threads, 0, 7);
-    grid.setHalignment(threads, HPos.RIGHT);
+    GridPane.setHalignment(threads, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
     threadsSlider.setMajorTickUnit(1);
@@ -187,7 +176,7 @@ public class JFX extends Application {
     //Add checkbox for using shadow rays
     Label shadowrays = new Label("Use Shadow Rays");
     grid.add(shadowrays, 0, 8);
-    grid.setHalignment(shadowrays, HPos.RIGHT);
+    GridPane.setHalignment(shadowrays, HPos.RIGHT);
     //Use shadow rays by default
     CheckBox shadowrayBox = new CheckBox();
     shadowrayBox.setSelected(true);
@@ -248,10 +237,8 @@ public class JFX extends Application {
     progresstext.setFont(Font.font(16));
     Text progresstime = new Text("00:00:00");
     progresstime.setFont(Font.font(16));
-    int hours = 0;
-    int minutes = 0;
 
-    //Create cancel Button
+    // Create cancel Button
     button_cancel = new Button("Cancel");
     button_cancel.setOnAction(new EventHandler<ActionEvent>(){
       @Override
@@ -271,7 +258,9 @@ public class JFX extends Application {
     border.setTop(menu_bar);
 
     //Create a canvas and place the image (that's being rendered to) in it
-    Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
+      // First, compensate for any scaling since we want the image 1:1
+    double scaling = Screen.getPrimary().getOutputScaleX();
+    Canvas canvas = new Canvas(image.getWidth()/scaling, image.getHeight()/scaling);
     border.setCenter(canvas);
 
     //updateWindow is responsible for refreshing the render preview window
@@ -287,7 +276,12 @@ public class JFX extends Application {
         //Update window every 100ms (in nanoseconds)
         if(now-lastUpdate>=100_000_000){
           //Draw the current content of "image" to the canvas
-          canvas.getGraphicsContext2D().drawImage(image,0,0);
+          GraphicsContext gc = canvas.getGraphicsContext2D();
+          final Affine xform = gc.getTransform();
+          xform.setMxx(1/scaling);
+          xform.setMyy(1/scaling);
+          gc.setTransform(xform);
+          gc.drawImage(image,0,0);
           //Fetch progress and update progress bar and text
           progress_double = ((double)progress.get())/tot_lines;
           progressbar.setProgress(progress_double);
