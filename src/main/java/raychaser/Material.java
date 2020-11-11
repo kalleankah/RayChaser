@@ -62,4 +62,14 @@ class Material{
     //Dummy return
     return -1.0;
   }
+  //Overridden in Glossy.java
+  double getRefractionIndex(){
+    //Dummy return
+    return -1.0;
+  }
+  //Overridden in Glossy.java
+  double getReflectivity(){
+    //Dummy return
+    return -1.0;
+  }
 }

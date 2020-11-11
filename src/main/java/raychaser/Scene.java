@@ -32,26 +32,46 @@ public class Scene{
     Material gradient = new Material(gradient_img);
     Material wallpaper = new Material(wallpaper_img);
     Material test = new Material(test_img);
+
+    //Colors
+    ColorDbl white = new ColorDbl(0.95,0.95,0.95);
+    ColorDbl red = new ColorDbl(0.85,0.3,0.3);
+    ColorDbl green = new ColorDbl(0.3,0.85,0.3);
+    ColorDbl blue = new ColorDbl(0.3,0.3,0.85);
+    ColorDbl yellow = new ColorDbl(0.85,0.85,0.3);
+    ColorDbl cyan = new ColorDbl(0.3,0.85,0.85);
+    ColorDbl magenta = new ColorDbl(0.85,0.3,0.85);
+    
+    ColorDbl bright = new ColorDbl(0.99,0.99,0.99);
+    ColorDbl mirror = new ColorDbl(0.95,0.99,0.95);
+
     //Diffuse materials
-    Material white = new Material(new ColorDbl(0.85,0.85,0.85));
-    Material red = new Material(new ColorDbl(0.85,0.3,0.3));
-    Material green = new Material(new ColorDbl(0.3,0.85,0.3));
-    Material blue = new Material(new ColorDbl(0.3,0.3,0.85));
-    Material yellow = new Material(new ColorDbl(0.85,0.85,0.3));
-    Material cyan = new Material(new ColorDbl(0.3,0.85,0.85));
-    Material magenta = new Material(new ColorDbl(0.85,0.3,0.85));
-    //Emmissive materials
-    Material EMISSION = new Emissive(new ColorDbl(brightness, brightness, brightness));
+    Material diffuseWhite = new Material(white);
+    Material diffuseRed = new Material(red);
+    Material diffuseGreen = new Material(green);
+    Material diffuseBlue = new Material(blue);
+    Material diffuseYellow = new Material(yellow);
+    Material diffuseCyan = new Material(cyan);
+    Material diffuseMagenta = new Material(magenta);
+    
     //Reflective materials
-    Material Reflective = new Reflective(new ColorDbl(0.99,0.99,0.99));
-    Material Mirror = new Reflective(new ColorDbl(0.95,0.99,0.95));
+    Material reflectiveBright = new Reflective(bright);
+    Material reflectiveMirror = new Reflective(mirror);
+
     //Glossy materials
-    Material GlossyWhite = new Glossy(new ColorDbl(0.95,0.95,0.95), 0.05, 0.1);
-    Material GlossyBlue = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.05, 0.0);
-    Material GlossyBlue2 = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.05, 0.25);
-    Material GlossyBlue3 = new Glossy(new ColorDbl(0.4,0.4,0.95), 0.05, 0.5);
-    Material GlossyYellow = new Glossy(new ColorDbl(0.95,0.95,0.3), 0.1, 0.4);
-    Material GlossyRed = new Glossy(new ColorDbl(0.98,0.4,0.4), 0.05, 0.5);
+    Material glossyWhite = new Glossy(white, 0.05, 0.1);
+    Material glossyBlue = new Glossy(blue, 0.05, 0.0);
+    Material glossyBlue2 = new Glossy(blue, 0.05, 0.25);
+    Material glossyBlue3 = new Glossy(blue, 0.05, 0.5);
+    Material glossyYellow = new Glossy(yellow, 0.1, 0.4);
+    Material glossyRed = new Glossy(red, 0.05, 0.5);
+
+    //Refractive materials
+    Material refractiveCyan = new Refractive(cyan, 1.5, 0.1);
+    Material refractiveBright = new Refractive(bright, 1.5, 0.1);
+    
+    //Emmissive materials
+    Material emissive = new Emissive(new ColorDbl(brightness, brightness, brightness));
 
     //Vertex points, corners of the room
     double depth = 12.0;
@@ -76,31 +96,31 @@ public class Scene{
     // Entire ceiling Lamp
     // addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, EMISSION));
     // Lamp
-    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, EMISSION));
+    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, emissive));
     // addObject(new Sphere(new Vector3d(8.0, 0.0, 3.0), 0.5, EMISSION));
     // Ceiling
-    addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, white));
+    addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, diffuseWhite));
     // Floor
     addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, wood));
     // Left wall
-    addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, green));
+    addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, diffuseGreen));
     // Right wall
-    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, red));
+    addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, diffuseRed));
     // Far wall
-    addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, white));
+    addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, diffuseWhite));
     // Near wall
-    addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, white));
+    addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseWhite));
 
     // Default items
-    addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
-    addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, Reflective));
-    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, GlossyYellow));
-    addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
-    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
-    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
-    addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, white));
-    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, Reflective));
-    addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
+    addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, diffuseYellow);
+    addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, refractiveBright));
+    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, glossyYellow));
+    addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, diffuseWhite));
+    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, reflectiveBright));
+    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, glossyRed));
+    addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, diffuseWhite));
+    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, reflectiveBright));
+    addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
 
     // Scene for testing caustics
     // addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
@@ -135,6 +155,7 @@ public class Scene{
 
 
   }
+
   //Add object to the lists
   void addObject(Object3D o){
     //Add all objects to "object3DList"

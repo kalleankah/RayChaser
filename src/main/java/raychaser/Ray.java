@@ -1,8 +1,6 @@
 package raychaser;
 
-import javax.vecmath.*;
-import java.lang.Math;
-import java.util.*;
+import javax.vecmath.Vector3d;
 
 //The ray contains a start- and end point, it has a direction and a length. The
 //Raylength is useful because in ray-object intersection calculations, a value t

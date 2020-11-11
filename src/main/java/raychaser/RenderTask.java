@@ -1,11 +1,12 @@
 package raychaser;
 
-import javafx.concurrent.Task;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Matrix3d;
 import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import javafx.concurrent.Task;
 
 /* The purpose of RenderTask is to render a small portion (a box) of the scene.
 A rendering loop is created that covers (startX, startY) to (endX, endY).
@@ -36,7 +37,6 @@ public class RenderTask extends Task<Void> {
   protected Void call(){
     //PixelSize is the length a pixel has in the grid from -1 to 1
     double PixelSize = camera.Width>camera.Height ? 2.0/camera.Width : 2.0/camera.Height;
-    double subPixelSize = PixelSize/camera.subpixels;
     double subPixelFactor = 1.0/(camera.subpixels);
     double cameraPlaneXaxis = camera.eye.x+camera.fov;
     ColorDbl temp = new ColorDbl();
@@ -85,7 +85,7 @@ public class RenderTask extends Task<Void> {
       System.out.println("RenderTask.CastRay(): HitObject == null");
       return SkyColor(r);
     }
-    //If the ray hits an emitter
+    //If the ray hits an emitter(BRDF)
     if(HitObject.mat instanceof Emissive){
       //If it hits front side of light source
       if(util.dot(HitObject.CalculateNormal(r.P_hit),r.direction) < 0){
@@ -95,7 +95,7 @@ public class RenderTask extends Task<Void> {
       return new ColorDbl();
     }
 
-    //If the ray hits a reflective object
+    //If the ray hits a reflective object (BRDF)
     if(HitObject.mat instanceof Reflective && Depth < camera.MAX_DEPTH){
       //Cast new ray in the "perfect reflection-direction"
       Vector3d d = util.sub(r.P_hit,r.start);
@@ -105,8 +105,62 @@ public class RenderTask extends Task<Void> {
       return c;
     }
 
+    //If the ray hits a refractive object (BRDF)
+    if(HitObject.mat instanceof Refractive && Depth < camera.MAX_DEPTH){
+      //Whether the object is intersected from the outside or inside
+      // determines the order of refraction indices.
+      double n1, n2;
+      double cosine = -util.dot(r.direction, r.P_Normal);
+      if(cosine > 0.0){
+        //Entering the refractive object
+        n1 = 1.0;
+        n2 = HitObject.mat.getRefractionIndex();
+      }else{
+        //Leaving the refractive object
+        n1 = HitObject.mat.getRefractionIndex();
+        n2 = 1.0;
+      }
+      // // Reflectivity based on angle of incidence should be moved to the util class, something like:
+      // double totalReflectivity = util.fresnel(n1, n2, cosine);
+      // if(n1 > n2){
+      //   double n = n1/n2;
+      //   double sinus = n*n*(1.0-cosine*cosine);
+      //   // This means total internal reflection
+      //   sinus = Math.max(1.0, sinus);
+      //   cosine = Math.sqrt(1.0-sinus);
+      // }
+      // // Simplified fresnel equation (does not take into account polarization)
+      // double fresnel = (n1-n2)/(n1+n2);
+      // fresnel *= fresnel;
+      // double x = 1.0-cosine;
+      // double ret = fresnel+(1.0-fresnel)*x*x*x*x*x;
+
+      // double totalReflectivity = (HitObject.mat.getReflectivity() + (1.0-HitObject.mat.getReflectivity()) * ret);
+      double totalReflectivity = HitObject.mat.getReflectivity();
+      
+      // The total reflectivity represents a statistical probability that a ray is reflected rather than refracted
+      Random random = new Random();
+      if(random.nextDouble() > totalReflectivity){
+        // The ray is refracted
+        double n = n1/n2;
+        double c2 = Math.sqrt( (1-n*n) * (1-cosine*cosine) );
+        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(r.P_Normal, n*cosine-c2)) ;
+        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Depth+1);
+        // TODO: It would make more sense to use a color of the volume
+        // (e.g. using Beer's Law) but in this case a simple surface color is used.
+        c.multiply(HitObject.mat.getColor());
+        return c;
+      }else{
+        // The ray is reflected (TODO: Use a a shared reflect function with Reflective material)
+        Vector3d newDir = util.add(r.direction, util.scale(r.P_Normal, 2*cosine));
+        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Depth+1);
+        c.multiply(HitObject.mat.getColor());
+        return c;
+      }
+    }
+
     ColorDbl glossycolor = new ColorDbl();
-    //If the ray hits a glossy object
+    //If the ray hits a glossy object (BRDF)
     if(HitObject.mat instanceof Glossy && Depth < camera.MAX_DEPTH){
       Random glossy_or_diffuse = new Random();
 
@@ -123,7 +177,7 @@ public class RenderTask extends Task<Void> {
 
     //The color of the surface must be initiated for texture calculations
     ColorDbl objectcolor;
-    //If the ray hits a textured object
+    //If the ray hits a textured object (BRDF)
     if(HitObject.mat.texture != null){
       //Determine texture coordinates
       Vector3d nxv0 = util.sub(r.P_hit,HitObject.getVertex(0));
