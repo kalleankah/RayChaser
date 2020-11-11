@@ -79,7 +79,7 @@ public class RenderTask extends Task<Void> {
     //Determine which object is hit
     Object3D HitObject = triangleIntersect(r, Depth);
 
-    /* TODO - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
+    /* TODO: - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
     //If the ray doesn't hit any object, return skybox color in that direction
     if(HitObject == null){
       System.out.println("RenderTask.CastRay(): HitObject == null");

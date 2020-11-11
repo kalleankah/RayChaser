@@ -1,9 +1,9 @@
 package raychaser;
 
-import javax.vecmath.*;
-import java.lang.Math;
-import java.util.*;
-import java.io.*;
+import java.util.Vector;
+
+import javax.vecmath.Vector3d;
+
 import javafx.scene.image.Image;
 
 // The class Scene contains lists of objects such as walls and boxes, as well as

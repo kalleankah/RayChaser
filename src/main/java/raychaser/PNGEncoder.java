@@ -108,8 +108,6 @@ public class PNGEncoder extends Object {
     BufferedOutputStream bos = new BufferedOutputStream( new DeflaterOutputStream(compressed, new Deflater(9)));
     PixelReader px_reader = image.getPixelReader();
     int pixel;
-    int color;
-    int colorset;
 
     //Write the color data
     for (int y=0;y<height;y++) {
