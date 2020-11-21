@@ -78,7 +78,7 @@ public class ColorDbl{
     (c1.G+c2.G)/2.0,
     (c1.B+c2.B)/2.0);
   }
-  // Calculate average of two colors
+  // Mix colors
   static ColorDbl mixColors(ColorDbl c1, ColorDbl c2, double factor){
     return new ColorDbl(
     c1.R*factor+c2.R*(1.0-factor),

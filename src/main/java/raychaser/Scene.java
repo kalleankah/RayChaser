@@ -67,8 +67,8 @@ public class Scene{
     Material glossyRed = new Glossy(red, 0.05, 0.5);
 
     //Refractive materials
-    Material refractiveCyan = new Refractive(cyan, 1.5, 0.1);
-    Material refractiveBright = new Refractive(bright, 1.5, 0.1);
+    Material refractiveCyan = new Refractive(cyan, 1.5);
+    Material refractiveBright = new Refractive(bright, 1.5);
     
     //Emmissive materials
     Material emissive = new Emissive(new ColorDbl(brightness, brightness, brightness));
@@ -114,35 +114,29 @@ public class Scene{
     // Default items
     addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, diffuseYellow);
     addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 1.0, refractiveBright));
-    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, glossyYellow));
+    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, diffuseYellow));
     addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, diffuseWhite));
-    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, reflectiveBright));
-    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, glossyRed));
+    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, diffuseWhite));
+    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, diffuseRed));
     addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, diffuseWhite));
-    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, reflectiveBright));
+    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, diffuseWhite));
     addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
 
     // Scene for testing caustics
-    // addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, yellow);
-    double halfside = 0.25;
-    // addObject(new Sphere(new Vector3d(6.5, -1.1, -4), 0.7, EMISSION));
+    // double halfside = 0.25;
+    // addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, diffuseYellow);
     // addObject(new Plane(
     //   new Vector3d(7.5-halfside, -0.85, -3.5+halfside),
     //   new Vector3d(7.5+halfside, -0.85, -3.5+halfside),
     //   new Vector3d(7.5+halfside, -1.0, -3.5-halfside),
-    //   EMISSION));
-    // addObject(new Plane(
-    //   new Vector3d(7.5+halfside*4, 0.5, -3.5+halfside*4),
-    // new Vector3d(7.5-halfside*4, 2.0, -3.5+halfside*4),
-    // new Vector3d(7.5-halfside*4, 2.0, -3.5-halfside*4),
-    // Reflective));
-    // addObject(new Sphere(new Vector3d(7.5, 1.1, -4.0), 1.0, Reflective));
-    // addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, white));
-    // addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, Reflective));
-    // addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, GlossyRed));
-    // addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, white));
-    // addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, Reflective));
-    // addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), Mirror));
+    //   emissive));
+    // addObject(new Sphere(new Vector3d(6.5, 1.1, -4.0), 1.0, refractiveBright));
+    // addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, diffuseWhite));
+    // addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, reflectiveBright));
+    // addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, glossyRed));
+    // addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, diffuseWhite));
+    // addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, reflectiveBright));
+    // addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
 
 
     //Scene with only glossy spheres

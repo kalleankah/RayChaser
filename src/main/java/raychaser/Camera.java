@@ -10,7 +10,7 @@ public class Camera {
   Vector3d eye;
   int Width, Height;
   double fov;
-  int subpixels;
+  int samples;
   WritableImage image;
   int THREADS;
   int MAX_DEPTH = 5;
@@ -24,7 +24,7 @@ public class Camera {
   Camera(Vector3d e, double f, WritableImage img, int[] args){
     Width = args[0];
     Height = args[1];
-    subpixels = args[2];
+    samples = args[2];
     MAX_DEPTH = args[3];
     MAX_REFLECTION_BOUNCES = args[4];
     SHADOW_RAYS = args[5];

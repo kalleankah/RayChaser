@@ -27,9 +27,9 @@ public class Sphere extends Object3D {
   @Override
   double rayIntersection(Ray r){
     //Create a vector from sphere center to ray origin
-    Vector3d co = util.sub(r.start, center);
-    double b = 2.0 * r.direction.dot(co);
-    double c = co.dot(co) - (radius*radius);
+    Vector3d L = util.sub(r.start, center);
+    double b = 2.0 * r.direction.dot(L);
+    double c = L.dot(L) - (radius*radius);
     double rootarg = 0.25*b*b - c; //Pre-calculate argument of square root
 
     //Non-tangental intersection with sphere

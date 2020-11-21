@@ -139,7 +139,7 @@ public class JFX extends Application {
     Label samples = new Label("Samples [100]");
     grid.add(samples, 0, 5);
     GridPane.setHalignment(samples, HPos.RIGHT);
-    Slider samplesSlider = new Slider(1,1000,100);
+    Slider samplesSlider = new Slider(1,100,100);
     //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
       samplesSlider.setValue(Math.round(newVal.doubleValue())));
@@ -312,7 +312,7 @@ public class JFX extends Application {
   //Creates rendering tasks and executes them in parallell
   public void startRenderingTasks(int[] args, double fov){
     //Create camera object (the camera object contains the image and render settings)
-    Vector3d eye = new Vector3d(0.01,0.0,-1.0);
+    Vector3d eye = new Vector3d(0.01,0.0,-3.0);
     camera = new Camera(eye, fov, image, args);
     //Start measuring render time
     startTime = System.nanoTime();
@@ -368,7 +368,7 @@ public class JFX extends Application {
     "RES" + camera.Width + "x" + camera.Height +
     "-SR" + camera.SHADOW_RAYS +
     "-MD" + camera.MAX_DEPTH +
-    "-SPP"+ camera.subpixels +
+    "-SPP"+ camera.samples +
     "-" + (int)((renderTime)/1000000000.0) + "sec";
 
     try{

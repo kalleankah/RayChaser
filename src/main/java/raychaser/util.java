@@ -152,4 +152,24 @@ public class util{
   //   catch(NumberFormatException nfe){return false;}
   //   return true;
   // }
+
+  static void progressiveTest(int n){
+    Random rand = new Random();
+    double average = 0;
+    double progressiveAverage = 0;
+
+    double sample;
+    for(int i = 1; i<=n; ++i){
+      sample = rand.nextDouble();
+      average += sample/n;
+      progressiveAverage = ((i-1)*progressiveAverage)/i + sample/i;
+    }
+
+    System.out.println("Real average = " + average);
+    System.out.println("Progressive average = " + progressiveAverage);
+  }
+
+  public static void main(String[] args) {
+    progressiveTest(10);
+  }
 }

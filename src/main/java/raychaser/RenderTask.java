@@ -37,7 +37,7 @@ public class RenderTask extends Task<Void> {
   protected Void call(){
     //PixelSize is the length a pixel has in the grid from -1 to 1
     double PixelSize = camera.Width>camera.Height ? 2.0/camera.Width : 2.0/camera.Height;
-    double subPixelFactor = 1.0/(camera.subpixels);
+    double subPixelFactor = 1.0/(camera.samples);
     double cameraPlaneXaxis = camera.eye.x+camera.fov;
     ColorDbl temp = new ColorDbl();
     int endX = Math.min(startX+range, camera.Width);
@@ -52,7 +52,7 @@ public class RenderTask extends Task<Void> {
       for(int x = startX; x < endX; ++x){
         temp.R = temp.G = temp.B = 0.0;
         // Loop over all subpixels (samples) on each pixel
-        for(int i = 0; i<camera.subpixels; ++i){
+        for(int i = 0; i<camera.samples; ++i){
           // Positive Y in space is equal to negative X in the image plane
           // Positive Z in space is equal to negative Y in the image plane
           temp.sumColor(
@@ -72,18 +72,19 @@ public class RenderTask extends Task<Void> {
   }
 
   //Cast a ray into the scene
-  ColorDbl CastRay(Ray r, int Depth){
-    if(Depth>camera.MAX_DEPTH){
+  ColorDbl CastRay(Ray r, int Bounce){
+    if(Bounce>camera.MAX_DEPTH){
       System.out.println("Depth exceeded!");
     }
     //Determine which object is hit
-    Object3D HitObject = triangleIntersect(r, Depth);
+    Object3D HitObject = triangleIntersect(r, Bounce);
 
     /* TODO: - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
     //If the ray doesn't hit any object, return skybox color in that direction
     if(HitObject == null){
       System.out.println("RenderTask.CastRay(): HitObject == null");
-      return SkyColor(r);
+      // return SkyColor(r);
+      return new ColorDbl();
     }
     //If the ray hits an emitter(BRDF)
     if(HitObject.mat instanceof Emissive){
@@ -96,22 +97,22 @@ public class RenderTask extends Task<Void> {
     }
 
     //If the ray hits a reflective object (BRDF)
-    if(HitObject.mat instanceof Reflective && Depth < camera.MAX_DEPTH){
+    if(HitObject.mat instanceof Reflective && Bounce < camera.MAX_DEPTH){
       //Cast new ray in the "perfect reflection-direction"
       Vector3d d = util.sub(r.P_hit,r.start);
       Vector3d PerfectReflector = util.sub(d, util.scale(r.P_Normal, 2*util.dot(d,r.P_Normal)));
-      ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,PerfectReflector)), Depth+1);
+      ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,PerfectReflector)), Bounce+1);
       c.multiply(HitObject.mat.getColor());
       return c;
     }
 
     //If the ray hits a refractive object (BRDF)
-    if(HitObject.mat instanceof Refractive && Depth < camera.MAX_DEPTH){
+    if(HitObject.mat instanceof Refractive && Bounce < camera.MAX_DEPTH){
       //Whether the object is intersected from the outside or inside
-      // determines the order of refraction indices.
+      // determines the order of the refraction indices.
       double n1, n2;
-      double cosine = -util.dot(r.direction, r.P_Normal);
-      if(cosine > 0.0){
+      double costheta = -util.dot(r.direction, r.P_Normal);
+      if(costheta > 0.0){
         //Entering the refractive object
         n1 = 1.0;
         n2 = HitObject.mat.getRefractionIndex();
@@ -120,40 +121,30 @@ public class RenderTask extends Task<Void> {
         n1 = HitObject.mat.getRefractionIndex();
         n2 = 1.0;
       }
-      // // Reflectivity based on angle of incidence should be moved to the util class, something like:
-      // double totalReflectivity = util.fresnel(n1, n2, cosine);
-      // if(n1 > n2){
-      //   double n = n1/n2;
-      //   double sinus = n*n*(1.0-cosine*cosine);
-      //   // This means total internal reflection
-      //   sinus = Math.max(1.0, sinus);
-      //   cosine = Math.sqrt(1.0-sinus);
-      // }
-      // // Simplified fresnel equation (does not take into account polarization)
-      // double fresnel = (n1-n2)/(n1+n2);
-      // fresnel *= fresnel;
-      // double x = 1.0-cosine;
-      // double ret = fresnel+(1.0-fresnel)*x*x*x*x*x;
 
-      // double totalReflectivity = (HitObject.mat.getReflectivity() + (1.0-HitObject.mat.getReflectivity()) * ret);
-      double totalReflectivity = HitObject.mat.getReflectivity();
+      // TODO Account for total internal reflection
+      // Schlick's approximation of the fresnel equation
+      double r_zero = (n1-n2)/(n1+n2);
+      r_zero *= r_zero;
+      double x = (1-costheta);
+      double probabilityOfReflection = Math.min(r_zero + (1-r_zero) * x * x * x * x * x, 1.0);
       
       // The total reflectivity represents a statistical probability that a ray is reflected rather than refracted
       Random random = new Random();
-      if(random.nextDouble() > totalReflectivity){
+      if(random.nextDouble() > probabilityOfReflection){
         // The ray is refracted
         double n = n1/n2;
-        double c2 = Math.sqrt( (1-n*n) * (1-cosine*cosine) );
-        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(r.P_Normal, n*cosine-c2)) ;
-        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Depth+1);
-        // TODO: It would make more sense to use a color of the volume
+        double c2 = Math.sqrt( (1-n*n) * (1-costheta*costheta) );
+        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(r.P_Normal, n*costheta-c2)) ;
+        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Bounce+1);
+        // TODO It would make more sense to use a volume color
         // (e.g. using Beer's Law) but in this case a simple surface color is used.
         c.multiply(HitObject.mat.getColor());
         return c;
       }else{
-        // The ray is reflected (TODO: Use a a shared reflect function with Reflective material)
-        Vector3d newDir = util.add(r.direction, util.scale(r.P_Normal, 2*cosine));
-        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Depth+1);
+        // The ray is reflected (TODO Use a a shared reflect function with Reflective material)
+        Vector3d newDir = util.add(r.direction, util.scale(r.P_Normal, 2*costheta));
+        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Bounce+1);
         c.multiply(HitObject.mat.getColor());
         return c;
       }
@@ -161,7 +152,7 @@ public class RenderTask extends Task<Void> {
 
     ColorDbl glossycolor = new ColorDbl();
     //If the ray hits a glossy object (BRDF)
-    if(HitObject.mat instanceof Glossy && Depth < camera.MAX_DEPTH){
+    if(HitObject.mat instanceof Glossy && Bounce < camera.MAX_DEPTH){
       Random glossy_or_diffuse = new Random();
 
       if(glossy_or_diffuse.nextDouble() > HitObject.mat.getDiffuseFac()){
@@ -169,7 +160,7 @@ public class RenderTask extends Task<Void> {
         Vector3d reflection = util.sub(r.direction, util.scale(r.P_Normal,util.dot(r.direction,r.P_Normal)*2.0));
         Vector3d endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
 
-        glossycolor = CastRay(new Ray(r.P_hit,endPoint), Depth+1);
+        glossycolor = CastRay(new Ray(r.P_hit,endPoint), Bounce+1);
         glossycolor.multiply(HitObject.mat.getColor());
         return glossycolor;
       }
@@ -224,8 +215,8 @@ public class RenderTask extends Task<Void> {
       Brightness /= scene.lightList.size();
       DirectLight = ColorDbl.multiply(objectcolor, Brightness); //Multiply incoming light with surface
     }
-    double riskOfTermination = (Depth-1)/((double) camera.MAX_DEPTH);
-    if(util.RussianBullet(riskOfTermination) || Depth >= camera.MAX_DEPTH) {
+    double riskOfTermination = (Bounce-1)/((double) camera.MAX_DEPTH);
+    if(util.RussianBullet(riskOfTermination) || Bounce >= camera.MAX_DEPTH) {
       // If the ray gets terminated
       return DirectLight;
     }
@@ -257,14 +248,15 @@ public class RenderTask extends Task<Void> {
       local2world = world2local;
     }
 
-    // //Cast the reflected ray (branch size 2)
-    // ColorDbl IndirectLight1 = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
-    // ColorDbl IndirectLight2 = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
-    // ColorDbl IndirectLight = ColorDbl.avgCol(IndirectLight1, IndirectLight2);
-    // IndirectLight.multiply(objectcolor);
-
     //Cast the reflected ray
-    ColorDbl IndirectLight = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Depth+1);
+    ColorDbl IndirectLight;
+    if(Bounce == 0){
+      IndirectLight = ColorDbl.avgCol(
+        CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1),
+        CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1));
+    }else{
+      IndirectLight = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1);
+    }
     IndirectLight.multiply(objectcolor);
     ColorDbl output = ColorDbl.sumColors(DirectLight, IndirectLight);
     
@@ -275,13 +267,13 @@ public class RenderTask extends Task<Void> {
   }
 
   //Calculate where the ray intersects the scene (if it does)
-  Object3D triangleIntersect(Ray r, int Depth){
+  Object3D triangleIntersect(Ray r, int Bounce){
     double t = 0.0;
     double temp = Double.POSITIVE_INFINITY;
     double NearClip = 0.0; // Clip extremely near intersections
     Object3D hitObject = null;
-    if(Depth==0){
-      //Clip objects near camera, when depth == 0, don't clip for bounces
+    if(Bounce==0){
+      //Clip objects near camera, when bounce == 0, don't clip for bounces
       NearClip = 1.0;
     }
     //Loop through all objects in the scene (including emitters)
@@ -305,13 +297,14 @@ public class RenderTask extends Task<Void> {
 
     return hitObject;
   }
+  
   //Shadow ray occlusion check
   Boolean Occluded(Ray r){
     double t = -1.0;
     for(Object3D obj : scene.object3DList){
       t = obj.rayIntersection(r);
-      //If intersection is between origin and emitter (with margins)...
-      if(t > 0.0001 && t < 0.9999){
+      //If intersection is between origin and emitter (with margin)...
+      if(t > 0.0 && t < 0.99999999){
         // ...the emitter is occluded -> return true.
         return true;
       }
