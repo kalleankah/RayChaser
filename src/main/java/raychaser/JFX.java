@@ -11,8 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.vecmath.Vector3d;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -62,7 +60,7 @@ public class JFX extends Application {
   //Access to executor is necessary to stop the thread on window closing
   ExecutorService executor;
   //The camera contains the camera position and the render settings
-  Camera camera;
+  Camera camera = new Camera();
   //The image is rendered in blocks with range*range pixels
   int range = 50;
   //An atomic integer to keep track of progress
@@ -125,21 +123,32 @@ public class JFX extends Application {
     grid.add(fovSlider, 1, 3);
 
     //Add slider to change light source brightness
+    Label cameraHeight = new Label("Camera Height");
+    grid.add(cameraHeight, 0, 4);
+    GridPane.setHalignment(cameraHeight, HPos.RIGHT);
+    Slider cameraHeightSlider = new Slider(-5,5,0);
+    cameraHeightSlider.setMajorTickUnit(1);
+    cameraHeightSlider.setShowTickLabels(true);
+    cameraHeightSlider.valueProperty().addListener((obs, oldval, newVal) ->
+      cameraHeightSlider.setValue(Math.round(newVal.doubleValue())));
+    grid.add(cameraHeightSlider, 1, 4);
+
+    //Add slider to change light source brightness
     Label brightnessLabel = new Label("Brightness");
-    grid.add(brightnessLabel, 0, 4);
+    grid.add(brightnessLabel, 0, 5);
     GridPane.setHalignment(brightnessLabel, HPos.RIGHT);
     Slider brightnessSlider = new Slider(1,10,3);
     brightnessSlider.setMajorTickUnit(1);
     brightnessSlider.setShowTickLabels(true);
     brightnessSlider.valueProperty().addListener((obs, oldval, newVal) ->
       brightnessSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(brightnessSlider, 1, 4);
+    grid.add(brightnessSlider, 1, 5);
 
     //Slider to select number of samples
-    Label samples = new Label("Samples [100]");
-    grid.add(samples, 0, 5);
+    Label samples = new Label("Samples [1]");
+    grid.add(samples, 0, 6);
     GridPane.setHalignment(samples, HPos.RIGHT);
-    Slider samplesSlider = new Slider(1,100,100);
+    Slider samplesSlider = new Slider(1,100,1);
     //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
       samplesSlider.setValue(Math.round(newVal.doubleValue())));
@@ -147,23 +156,23 @@ public class JFX extends Application {
       samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()) + "]"));
     samplesSlider.setMajorTickUnit(100);
     samplesSlider.setShowTickLabels(true);
-    grid.add(samplesSlider, 1, 5);
+    grid.add(samplesSlider, 1, 6);
 
     //Add slider to select max depth (number of bounces)
     Label depth = new Label("Max Depth");
-    grid.add(depth, 0, 6);
+    grid.add(depth, 0, 7);
     GridPane.setHalignment(depth, HPos.RIGHT);
     Slider depthSlider = new Slider(0,100,10);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
       depthSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(depthSlider, 1, 6);
+    grid.add(depthSlider, 1, 7);
 
 
     //Add slider to select number of CPU threads to Utilize
     Label threads = new Label("CPU Threads:");
-    grid.add(threads, 0, 7);
+    grid.add(threads, 0, 8);
     GridPane.setHalignment(threads, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
@@ -171,42 +180,47 @@ public class JFX extends Application {
     threadsSlider.setShowTickLabels(true);
     threadsSlider.valueProperty().addListener((obs, oldval, newVal) ->
       threadsSlider.setValue(Math.round(newVal.doubleValue())));
-    grid.add(threadsSlider, 1, 7);
+    grid.add(threadsSlider, 1, 8);
 
     //Add checkbox for using shadow rays
     Label shadowrays = new Label("Use Shadow Rays");
-    grid.add(shadowrays, 0, 8);
+    grid.add(shadowrays, 0, 9);
     GridPane.setHalignment(shadowrays, HPos.RIGHT);
     //Use shadow rays by default
     CheckBox shadowrayBox = new CheckBox();
     shadowrayBox.setSelected(true);
-    grid.add(shadowrayBox, 1, 8);
+    grid.add(shadowrayBox, 1, 9);
 
     //Create button to start render and open render preview
     Button btn = new Button("Render");
     HBox btnbox = new HBox(10);
     btnbox.setAlignment(Pos.BOTTOM_RIGHT);
     btnbox.getChildren().add(btn);
-    grid.add(btnbox, 1, 10);
+    grid.add(btnbox, 1, 11);
     //Define button behavior
     btn.setOnAction(new EventHandler<ActionEvent>(){
       @Override
       public void handle(ActionEvent event){
-        //Collect settings from fields/sliders
-        int[] args = new int[8];
-        args[0] = Integer.parseInt(horizontalResField.getText());
-        args[1] = Integer.parseInt(verticalResField.getText());
-        args[2] = (int)samplesSlider.getValue();
-        args[3] = (int)depthSlider.getValue();
-        args[5] = shadowrayBox.isSelected() ? 1:0;
-        args[6] = (int)threadsSlider.getValue();
-        args[7] = (int)brightnessSlider.getValue();
-        double fov = fovSlider.getValue();
-        image = new WritableImage(args[0],args[1]);
-        //Open the render preview window
+        //Collect settings from fields/sliders into the camera object
+        camera.setSize(
+          Integer.parseInt(horizontalResField.getText()),
+          Integer.parseInt(verticalResField.getText())
+          );
+        image = new WritableImage(camera.Width, camera.Height);
+        camera.setImg(image);
+        camera.setSamples((int)samplesSlider.getValue());
+        camera.setDepth((int)depthSlider.getValue());
+        camera.setShadowRays(shadowrayBox.isSelected() ? 1:0);
+        camera.setThreads((int)threadsSlider.getValue());
+        camera.setBrightness((int)brightnessSlider.getValue());
+        camera.setEye(cameraHeightSlider.getValue());
+        camera.setFov(fovSlider.getValue());
+        
+        //Switch to the render preview window
         openRenderUI();
+
         //Start the rendering
-        startRenderingTasks(args, fov);
+        startRenderingTasks(camera);
       }
     });
 
@@ -217,6 +231,8 @@ public class JFX extends Application {
         event.consume();
       }
     });
+
+    // Set the scene and make it visible
     stage.setScene(new javafx.scene.Scene(grid));
     stage.show();
   }
@@ -304,18 +320,17 @@ public class JFX extends Application {
 
     //Begin refreshing the window
     updateWindow.start();
+
     //Set the new scene
     stage.setScene(new javafx.scene.Scene(border));
     stage.show();
   }
 
   //Creates rendering tasks and executes them in parallell
-  public void startRenderingTasks(int[] args, double fov){
-    //Create camera object (the camera object contains the image and render settings)
-    Vector3d eye = new Vector3d(0.01,0.0,-3.0);
-    camera = new Camera(eye, fov, image, args);
+  public void startRenderingTasks(Camera camera){
     //Start measuring render time
     startTime = System.nanoTime();
+
     //Load texture images into Vector<Image>
     Vector<Image> textures = new Vector<>();
     try {
@@ -329,6 +344,7 @@ public class JFX extends Application {
       System.out.println("Textures not found in folder \"texture/\"");
       e.printStackTrace();
     }
+
     //Create and submit all tasks to Executor
     executor = Executors.newFixedThreadPool(camera.THREADS);
     for(int y=0; y<(camera.Height/range + 1); ++y){
@@ -336,7 +352,7 @@ public class JFX extends Application {
         //Important to create new scene for each task, otherwise each RenderTask
         //has to wait for parallell threads to stop accessing that scene.
         //This causes blocking and makes multithreading much slower
-        final Scene scene = new Scene(textures, args[7]);
+        final Scene scene = new Scene(textures, camera.Brightness);
         final int X = x;
         final int Y = y;
         RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
@@ -354,10 +370,13 @@ public class JFX extends Application {
     String logFinish = "Render Finished in " + (int)((renderTime)/1000000000.0) + "s";
     stage.setTitle(logFinish);
     System.out.println(logFinish);
+
     //Update cancel button text (it still takes you to the same screen)
     button_cancel.setText("New Render");
+
     //Stop refreshing the window
     updateWindow.stop();
+
     //Save render to file
     savePNG(renderTime);
   }
@@ -386,7 +405,9 @@ public class JFX extends Application {
   @Override
   public void stop(){
     if(executor != null){
+      System.out.println("Shutting down " + camera.THREADS + " threads...");
       executor.shutdownNow();
+      System.out.println("Done!");
     }
     Platform.exit();
   }
