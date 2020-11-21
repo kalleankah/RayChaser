@@ -30,14 +30,19 @@ public class Camera {
     aspectRatio = ((double) Width)/((double) Height);
     if(aspectRatio>1){
       shift_V = 1.0/aspectRatio-1.0;
+      shift_H = 0.0;
     }
     else if(aspectRatio<1){
       shift_H = aspectRatio-1.0;
+      shift_V = 0.0;
     }
     else{
       shift_H = 0.0;
       shift_V = 0.0;
     }
+
+    System.out.println("shift_H = " + shift_H);
+    System.out.println("shift_V = " + shift_V);
   }
   
   public void setBrightness(double b){

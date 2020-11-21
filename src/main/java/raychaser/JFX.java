@@ -367,7 +367,7 @@ public class JFX extends Application {
   void done(){
     //Display render time measurement in window and console
     long renderTime = System.nanoTime()-startTime;
-    String logFinish = "Render Finished in " + (int)((renderTime)/1000000000.0) + "s";
+    String logFinish = "Render Finished in " + (int)((renderTime)/1_000_000_000.0) + "s";
     stage.setTitle(logFinish);
     System.out.println(logFinish);
 
@@ -388,7 +388,7 @@ public class JFX extends Application {
     "-SR" + camera.SHADOW_RAYS +
     "-MD" + camera.MAX_DEPTH +
     "-SPP"+ camera.samples +
-    "-" + (int)((renderTime)/1000000000.0) + "sec";
+    "-" + (int)((renderTime)/1_000_000_000.0) + "sec";
 
     try{
       OutputStream out = new FileOutputStream("images/" + filename + ".png");
@@ -405,9 +405,7 @@ public class JFX extends Application {
   @Override
   public void stop(){
     if(executor != null){
-      System.out.println("Shutting down " + camera.THREADS + " threads...");
       executor.shutdownNow();
-      System.out.println("Done!");
     }
     Platform.exit();
   }
