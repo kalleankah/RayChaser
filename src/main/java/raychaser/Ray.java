@@ -20,6 +20,7 @@ public class Ray{
   }
   //Calculate intersection point by traversing the intersection distance t
   void calculatePhit(double t){
+    //TODO the efficiency could be improved
     P_hit = util.sub(end,start);
     P_hit.scale(t);
     P_hit = util.add(P_hit, start);

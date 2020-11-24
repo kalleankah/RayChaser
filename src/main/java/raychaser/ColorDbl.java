@@ -45,10 +45,10 @@ public class ColorDbl{
     G += C.G;
     B += C.B;
   }
-  void divide(double i){
-    R = R/i;
-    G = G/i;
-    B = B/i;
+  void divide(double d){
+    R = R/d;
+    G = G/d;
+    B = B/d;
   }
   void multiply(double d){
     R *= d;
@@ -135,5 +135,9 @@ public class ColorDbl{
     R = a;
     G = a;
     B = a;
+  }
+
+  public double getMaxIntensity() {
+    return Math.max(R, Math.max(G, B));
   }
 }

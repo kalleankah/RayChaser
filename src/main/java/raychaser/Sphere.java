@@ -26,18 +26,82 @@ public class Sphere extends Object3D {
   //Checks for intersection between a ray and a sphere
   @Override
   double rayIntersection(Ray r){
+    // //Create a vector from ray origin to sphere center
+    // Vector3d L = util.sub(center, r.start);
+    // double tCenter = util.dot(r.direction, L);
+    // if(tCenter < 0.0){
+    //   //Sphere center is in behind the ray origin
+    //   return -1.0;
+    // }
+    // double d2 = L.dot(L) - (tCenter*tCenter);
+    // if(d2 > radius*radius){
+    //   // Ray doesn't intersect the sphere
+    //   return -1.0;
+    // }
+    // double tCenterToSurface = Math.sqrt(radius*radius - d2);
+    // double t0 = tCenter - tCenterToSurface;
+    // double t1 = tCenter + tCenterToSurface;
+
+    // if(t0 < t1){
+    //   if(t0 > 0.0){
+    //     //if t0 is in front of ray origin, both are, but t0 is closer
+    //     return t0;
+    //   }
+    //   if(t1 > 0.0){
+    //     //t0 is behind ray origin, but t1 is in front
+    //     return t1;
+    //   }
+    //   //Both t0 and t1 are behind the ray origin
+    //   return -1.0;
+    // }
+    // else{
+    //   //t1 < t0
+    //   if(t1 > 0.0){
+    //     //if t1 is in front of ray origin, both are, but t1 is closer
+    //     return t1;
+    //   }
+    //   if(t0 > 0.0){
+    //     //t1 is behind ray origin, but t0 is in front
+    //     return t0;
+    //   }
+    //   //Both t0 and t1 are behind the ray origin
+    //   return -1.0;
+    // }
+
     //Create a vector from sphere center to ray origin
     Vector3d L = util.sub(r.start, center);
     double b = 2.0 * r.direction.dot(L);
     double c = L.dot(L) - (radius*radius);
-    double rootarg = 0.25*b*b - c; //Pre-calculate argument of square root
 
-    //Non-tangental intersection with sphere
-    if (rootarg > 0.0){
-      return (-0.5 * b - Math.sqrt(rootarg))/r.length();
+    //Solve quadratic
+    double t0, t1;
+    double rootarg = b*b - 4*c;
+    if(rootarg <= 0.0){
+      //Complex root, no intersection
+      return -1.0;
     }
-    //If no intersection return dummy
-    return -1.0;
+    else{
+      double q = b>0 ? -0.5 * (b + Math.sqrt(rootarg)) : -0.5 * (b - Math.sqrt(rootarg));
+      t0 = q;
+      t1 = c/q;
+    }
+    if(t0 > t1){
+      double temp = t0;
+      t0 = t1;
+      t1 = temp;
+    }
+
+    // t0 is smaller than t1, we need to return the smallest positive of them
+    if(t0 < 0.0){
+      //t0 is behind ray origin, replace it with t1 and check again
+      t0 = t1;
+      if(t0 < 0.0){
+        return -1.0;
+      }
+    }
+    
+    //t0 is the closest non-negative intersection
+    return t0/r.length();
   }
   //Unlike planes and triangles, the normal to the sphere depends on the
   //position on the sphere.

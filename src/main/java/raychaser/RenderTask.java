@@ -99,9 +99,8 @@ public class RenderTask extends Task<Void> {
     //If the ray hits a reflective object (BRDF)
     if(HitObject.mat instanceof Reflective && Bounce < camera.MAX_DEPTH){
       //Cast new ray in the "perfect reflection-direction"
-      Vector3d d = util.sub(r.P_hit,r.start);
-      Vector3d PerfectReflector = util.sub(d, util.scale(r.P_Normal, 2*util.dot(d,r.P_Normal)));
-      ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,PerfectReflector)), Bounce+1);
+      Vector3d reflectDir = reflect(r.direction, r.P_Normal);
+      ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,reflectDir)), Bounce+1);
       c.multiply(HitObject.mat.getColor());
       return c;
     }
@@ -111,43 +110,59 @@ public class RenderTask extends Task<Void> {
       //Whether the object is intersected from the outside or inside
       // determines the order of the refraction indices.
       double n1, n2;
-      double costheta = -util.dot(r.direction, r.P_Normal);
-      if(costheta > 0.0){
-        //Entering the refractive object
+      double costheta = Math.min(1.0, util.dot(r.direction, r.P_Normal));
+      Vector3d correctedNormal = r.P_Normal;
+      if(costheta < 0.0){
+        //Hitting the outside of the refractive object
         n1 = 1.0;
         n2 = HitObject.mat.getRefractionIndex();
+        costheta *= -1.0;
       }else{
-        //Leaving the refractive object
+        //Hitting the inside of the refractive object
         n1 = HitObject.mat.getRefractionIndex();
         n2 = 1.0;
+        correctedNormal = util.scale(r.P_Normal, -1.0);
       }
 
-      // TODO Account for total internal reflection
       // Schlick's approximation of the fresnel equation
+      double probabilityOfReflection;
       double r_zero = (n1-n2)/(n1+n2);
       r_zero *= r_zero;
-      double x = (1-costheta);
-      double probabilityOfReflection = Math.min(r_zero + (1-r_zero) * x * x * x * x * x, 1.0);
+      //Check for total internal reflection
+      double n = n1/n2;
+      double c2 = 1 - n*n * (1-costheta*costheta);
+      if(c2 < 0.0){
+        //Total internal reflection
+        probabilityOfReflection = 1.0;
+      }
+      else{
+        double x = Math.max(0.0, 1-costheta);
+        probabilityOfReflection = Math.min(r_zero + (1-r_zero) * x * x * x * x * x, 1.0);
+      }
       
       // The total reflectivity represents a statistical probability that a ray is reflected rather than refracted
+      ColorDbl c;
       Random random = new Random();
       if(random.nextDouble() > probabilityOfReflection){
         // The ray is refracted
-        double n = n1/n2;
-        double c2 = Math.sqrt( (1-n*n) * (1-costheta*costheta) );
-        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(r.P_Normal, n*costheta-c2)) ;
-        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Bounce+1);
-        // TODO It would make more sense to use a volume color
+        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(correctedNormal, n*costheta-Math.sqrt(c2)));
+        // The ray is slightly pushed behind the surface to prevent self intersection
+        Vector3d correctedRayOrigin = util.add(r.P_hit, util.scale(correctedNormal, -0.001));
+        
+        c = CastRay(new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir)), Bounce+1);
+      }else{
+        // The ray is reflected (TODO Use a a shared reflect function with Reflective material)
+        // The ray is slightly pushed out to prevent self intersection
+        Vector3d correctedRayOrigin = util.add(r.P_hit, util.scale(correctedNormal, 0.001));
+        
+        Vector3d newDir = reflect(r.direction, correctedNormal);
+        c = CastRay(new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir)), Bounce+1);
+      }
+
+      // TODO It would make more sense to use a volume color
         // (e.g. using Beer's Law) but in this case a simple surface color is used.
         c.multiply(HitObject.mat.getColor());
         return c;
-      }else{
-        // The ray is reflected (TODO Use a a shared reflect function with Reflective material)
-        Vector3d newDir = util.add(r.direction, util.scale(r.P_Normal, 2*costheta));
-        ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,newDir)), Bounce+1);
-        c.multiply(HitObject.mat.getColor());
-        return c;
-      }
     }
 
     ColorDbl glossycolor = new ColorDbl();
@@ -171,16 +186,15 @@ public class RenderTask extends Task<Void> {
     //If the ray hits a textured object (BRDF)
     if(HitObject.mat.texture != null){
       //Determine texture coordinates
-      Vector3d nxv0 = util.sub(r.P_hit,HitObject.getVertex(0));
-      double numerator_u = util.dot(nxv0,HitObject.getEdge(1));
-      double denominator_u = util.norm(nxv0)*util.norm(HitObject.getEdge(1));
-      double numerator_v = util.dot(nxv0,HitObject.getEdge(2));
-      double denominator_v = util.norm(nxv0)*util.norm(HitObject.getEdge(2));
+      Vector3d diagonal = util.sub(r.P_hit,HitObject.getVertex(0));
+      //The u-coordinate is the length of the diagonal along edge 2 compared to the length of edge 2
+      double u = util.dot(diagonal,util.normalize(HitObject.getEdge(2)))/util.norm(HitObject.getEdge(2));
+      //The v-coordinate is the length of the diagonal along edge 1 compared to the length of edge 1
+      double v = util.dot(diagonal,util.normalize(HitObject.getEdge(1)))/util.norm(HitObject.getEdge(1));
 
-      double sqrt2ratio = Math.sqrt(2)*util.norm(nxv0)/util.norm(util.sub(HitObject.getVertex(2),HitObject.getVertex(0)));
-
-      double u = Math.max(0,Math.min(1,sqrt2ratio*numerator_u/denominator_u));
-      double v = Math.max(0,Math.min(1,sqrt2ratio*numerator_v/denominator_v));
+      //Clamp uv coordinates
+      u = Math.max(0.0,Math.min(1.0,u));
+      v = Math.max(0.0,Math.min(1.0,v));
 
       //Fetch color using calculated texture coordinates (u,v)
       objectcolor = HitObject.mat.getColor(u,v);
@@ -215,7 +229,8 @@ public class RenderTask extends Task<Void> {
       Brightness /= scene.lightList.size();
       DirectLight = ColorDbl.multiply(objectcolor, Brightness); //Multiply incoming light with surface
     }
-    double riskOfTermination = (Bounce-1)/((double) camera.MAX_DEPTH);
+    // double riskOfTermination = Math.min(1.0, (Bounce)/((double) camera.MAX_DEPTH));
+    double riskOfTermination = 1-Math.min(1.0, objectcolor.getMaxIntensity());
     if(util.RussianBullet(riskOfTermination) || Bounce >= camera.MAX_DEPTH) {
       // If the ray gets terminated
       return DirectLight;
@@ -262,11 +277,15 @@ public class RenderTask extends Task<Void> {
     
     //Compensate for the lost energy when rays are randomly terminated. Greater risk
     //of being terminated -> greater magnification of non-terminated rays.
-    output.multiply(1/(1-riskOfTermination));
+    output.divide((1-riskOfTermination));
     return output;
   }
 
-  //Calculate where the ray intersects the scene (if it does)
+  private Vector3d reflect(Vector3d direction, Vector3d normal) {
+    return util.sub(direction, util.scale(normal, 2*util.dot(direction,normal)));
+  }
+
+  // Calculate where the ray intersects the scene (if it does)
   Object3D triangleIntersect(Ray r, int Bounce){
     double t = 0.0;
     double temp = Double.POSITIVE_INFINITY;

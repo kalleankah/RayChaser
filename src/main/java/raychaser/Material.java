@@ -49,8 +49,8 @@ class Material{
   }
   //Get color from texture
   ColorDbl getColor(double u, double v){
-    int x = (int) (u*(width-1.0));
-    int y = (int) (v*(height-1.0));
+    int x = (int) Math.round(u * (width-1));
+    int y = (int) Math.round(v * (height-1));
     return ColorDbl.argbToColorDbl(pixelreader.getArgb(x, y));
   }
   //Get color from textureless material

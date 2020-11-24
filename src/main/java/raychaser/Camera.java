@@ -40,9 +40,6 @@ public class Camera {
       shift_H = 0.0;
       shift_V = 0.0;
     }
-
-    System.out.println("shift_H = " + shift_H);
-    System.out.println("shift_V = " + shift_V);
   }
   
   public void setBrightness(double b){

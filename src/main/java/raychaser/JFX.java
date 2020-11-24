@@ -339,6 +339,7 @@ public class JFX extends Application {
       textures.add(new Image(new FileInputStream("texture/gradient.png")));
       textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
       textures.add(new Image(new FileInputStream("texture/test.png")));
+      textures.add(new Image(new FileInputStream("texture/tile.jpg")));
     }
     catch(FileNotFoundException e){
       System.out.println("Textures not found in folder \"texture/\"");
@@ -396,7 +397,7 @@ public class JFX extends Application {
       encoder.encode(image);
     }
     catch(IOException e){
-      System.out.println("Error: " + e );
+      System.out.println("Error when writing output image: " + e );
     }
     System.out.println("Saved image as " + "\"" + filename + ".png\"");
   }
