@@ -31,6 +31,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -42,6 +43,7 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /* This class handles the GUI - windows, input, buttons, progress bar etc.
 When rendering, the current progress is stored in the WritableImage "image"
@@ -57,6 +59,9 @@ public class JFX extends Application {
   Stage stage;
   WritableImage image;
   AnimationTimer updateWindow;
+  // For moving the window
+  private double xOffset = 0;
+  private double yOffset = 0;
   //Access to executor is necessary to stop the thread on window closing
   ExecutorService executor;
   //The camera contains the camera position and the render settings
@@ -80,6 +85,7 @@ public class JFX extends Application {
   @Override
   public void start(Stage primaryStage){
     stage = primaryStage;
+    stage.initStyle(StageStyle.UNDECORATED);
     openConfigUI();
   }
 
@@ -114,7 +120,7 @@ public class JFX extends Application {
     Label fov = new Label("Zoom");
     grid.add(fov, 0, 3);
     GridPane.setHalignment(fov, HPos.RIGHT);
-    Slider fovSlider = new Slider(0.5, 2.0, 0.8);
+    Slider fovSlider = new Slider(0.5, 2.0, 1);
     fovSlider.setShowTickLabels(true);
     fovSlider.setMajorTickUnit(0.5);
     // fovSlider.setBlockIncrement(0.1);
@@ -148,7 +154,7 @@ public class JFX extends Application {
     Label samples = new Label("Samples [1]");
     grid.add(samples, 0, 6);
     GridPane.setHalignment(samples, HPos.RIGHT);
-    Slider samplesSlider = new Slider(1,100,1);
+    Slider samplesSlider = new Slider(1,1000,1);
     //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
       samplesSlider.setValue(Math.round(newVal.doubleValue())));
@@ -230,6 +236,23 @@ public class JFX extends Application {
         btn.fire();
         event.consume();
       }
+    });
+
+    grid.setOnMousePressed(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          xOffset = event.getSceneX();
+          yOffset = event.getSceneY();
+      }
+    });
+    
+    //move around here
+    grid.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
+        }
     });
 
     // Set the scene and make it visible
@@ -317,6 +340,23 @@ public class JFX extends Application {
         }
       }
     };
+
+    border.setOnMousePressed(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          xOffset = event.getSceneX();
+          yOffset = event.getSceneY();
+      }
+    });
+    
+    //move around here
+    border.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
+        }
+    });
 
     //Begin refreshing the window
     updateWindow.start();

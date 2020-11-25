@@ -95,7 +95,7 @@ public class Scene{
     Vector3d FloorRightFar2 = new Vector3d(depth,-width/2.0,-height/2.0 + 3.5);
 
     //Vertex points ceiling light
-    double lampSize = 1.5;
+    double lampSize = width/6;
     Vector3d CLNR = new Vector3d(depth/2.0 - lampSize, -lampSize, height/2.0);
     Vector3d CLFR = new Vector3d(depth/2.0 + lampSize, -lampSize, height/2.0);
     Vector3d CLFL = new Vector3d(depth/2.0 + lampSize,  lampSize, height/2.0);
@@ -122,7 +122,7 @@ public class Scene{
     // Far wall
     addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, diffuseWhite));
     // Near wall
-    addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseWhite));
+    // addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseWhite));
 
     // Default items
     addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, diffuseYellow);

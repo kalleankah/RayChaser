@@ -82,7 +82,7 @@ public class RenderTask extends Task<Void> {
     /* TODO: - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
     //If the ray doesn't hit any object, return skybox color in that direction
     if(HitObject == null){
-      System.out.println("RenderTask.CastRay(): HitObject == null");
+      // System.out.println("RenderTask.CastRay(): HitObject == null");
       // return SkyColor(r);
       return new ColorDbl();
     }
@@ -264,15 +264,7 @@ public class RenderTask extends Task<Void> {
     }
 
     //Cast the reflected ray
-    ColorDbl IndirectLight;
-    if(Bounce == 0){
-      IndirectLight = ColorDbl.avgCol(
-        CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1),
-        CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1)
-      );
-    }else{
-      IndirectLight = CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1);
-    }
+    ColorDbl IndirectLight = CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1);
     IndirectLight.multiply(objectcolor);
     ColorDbl output = ColorDbl.sumColors(DirectLight, IndirectLight);
     
