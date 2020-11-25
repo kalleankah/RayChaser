@@ -10,8 +10,8 @@ public class Ray{
   Vector3d start;
   Vector3d end;
   Vector3d direction; //Normalized direction of ray
-  Vector3d P_hit;
-  Vector3d P_Normal;
+  Vector3d surfacePoint;
+  Vector3d surfaceNormal;
   Ray(Vector3d s, Vector3d e){
     start = s;
     end = e;
@@ -19,11 +19,11 @@ public class Ray{
     direction.normalize();
   }
   //Calculate intersection point by traversing the intersection distance t
-  void calculatePhit(double t){
+  void calculateSurfacePoint(double t){
     //TODO the efficiency could be improved
-    P_hit = util.sub(end,start);
-    P_hit.scale(t);
-    P_hit = util.add(P_hit, start);
+    surfacePoint = util.sub(end,start);
+    surfacePoint.scale(t);
+    surfacePoint = util.add(surfacePoint, start);
   }
   //Get the length of the ray
   double length(){

@@ -79,7 +79,7 @@ public class Scene{
     //Vertex points, corners of the room
     double depth = 12.0;
     double width = 12.0;
-    double height = 10.1;
+    double height = 10.01;
     Vector3d CeilingLeftNear = new Vector3d(0.0,width/2.0,height/2.0);
     Vector3d CeilingRightNear = new Vector3d(0.0,-width/2.0,height/2.0);
     Vector3d CeilingLeftFar = new Vector3d(depth,width/2.0,height/2.0);
@@ -143,23 +143,6 @@ public class Scene{
     //   new Vector3d(7.5+halfside, -1.0, -3.0-halfside),
     //   emissive));
     // addObject(new Sphere(new Vector3d(6.5, 1.1, -4.0), 1.0, refractiveGlass));
-    // addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, diffuseWhite));
-    // addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, reflectiveBright));
-    // addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, glossyRed));
-    // addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, diffuseWhite));
-    // addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, reflectiveBright));
-    // addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
-
-
-    //Scene with only glossy spheres
-    // addObject(new Sphere(new Vector3d(depth/2.0, width/4.0, -1.0), 1.25, GlossyBlue));
-    // addObject(new Sphere(new Vector3d(depth/2.0, 0.0, -1.0), 1.25, GlossyBlue2));
-    // addObject(new Sphere(new Vector3d(depth/2.0, -width/4.0, -1.0), 1.25, GlossyBlue3));
-
-    //Scene with one big sphere
-    // addObject(new Sphere(new Vector3d(depth/2.0, 0.0, -0.5), 2.5, GlossyYellow));
-
-
   }
 
   //Add object to the lists

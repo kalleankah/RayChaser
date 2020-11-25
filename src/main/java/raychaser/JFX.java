@@ -380,6 +380,9 @@ public class JFX extends Application {
 
     //Save render to file
     savePNG(renderTime);
+
+    //Hint to perform garbage collection
+    System.gc();
   }
 
   //Write image to PNG

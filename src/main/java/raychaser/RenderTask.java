@@ -77,7 +77,7 @@ public class RenderTask extends Task<Void> {
       System.out.println("Depth exceeded!");
     }
     //Determine which object is hit
-    Object3D HitObject = triangleIntersect(r, Bounce);
+    Object3D HitObject = intersect(r, Bounce);
 
     /* TODO: - REPLACE ALL IF-STATEMENTS WITH CALL TO MATERIAL BRDF */
     //If the ray doesn't hit any object, return skybox color in that direction
@@ -89,7 +89,7 @@ public class RenderTask extends Task<Void> {
     //If the ray hits an emitter(BRDF)
     if(HitObject.mat instanceof Emissive){
       //If it hits front side of light source
-      if(util.dot(HitObject.CalculateNormal(r.P_hit),r.direction) < 0){
+      if(util.dot(HitObject.CalculateNormal(r.surfacePoint),r.direction) < 0){
         return HitObject.mat.getColor();
       }
       //If backside of light source, return black
@@ -99,8 +99,8 @@ public class RenderTask extends Task<Void> {
     //If the ray hits a reflective object (BRDF)
     if(HitObject.mat instanceof Reflective && Bounce < camera.MAX_DEPTH){
       //Cast new ray in the "perfect reflection-direction"
-      Vector3d reflectDir = reflect(r.direction, r.P_Normal);
-      ColorDbl c = CastRay(new Ray(r.P_hit,util.add(r.P_hit,reflectDir)), Bounce+1);
+      Vector3d reflectDir = reflect(r.direction, r.surfaceNormal);
+      ColorDbl c = CastRay(new Ray(r.surfacePoint,util.add(r.surfacePoint,reflectDir)), Bounce+1);
       c.multiply(HitObject.mat.getColor());
       return c;
     }
@@ -110,8 +110,8 @@ public class RenderTask extends Task<Void> {
       //Whether the object is intersected from the outside or inside
       // determines the order of the refraction indices.
       double n1, n2;
-      double costheta = Math.min(1.0, util.dot(r.direction, r.P_Normal));
-      Vector3d correctedNormal = r.P_Normal;
+      double costheta = Math.min(1.0, util.dot(r.direction, r.surfaceNormal));
+      Vector3d correctedNormal = r.surfaceNormal;
       if(costheta < 0.0){
         //Hitting the outside of the refractive object
         n1 = 1.0;
@@ -121,7 +121,7 @@ public class RenderTask extends Task<Void> {
         //Hitting the inside of the refractive object
         n1 = HitObject.mat.getRefractionIndex();
         n2 = 1.0;
-        correctedNormal = util.scale(r.P_Normal, -1.0);
+        correctedNormal = util.scale(r.surfaceNormal, -1.0);
       }
 
       // Schlick's approximation of the fresnel equation
@@ -147,13 +147,13 @@ public class RenderTask extends Task<Void> {
         // The ray is refracted
         Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(correctedNormal, n*costheta-Math.sqrt(c2)));
         // The ray is slightly pushed behind the surface to prevent self intersection
-        Vector3d correctedRayOrigin = util.add(r.P_hit, util.scale(correctedNormal, -0.001));
+        Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, -0.001));
         
         c = CastRay(new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir)), Bounce+1);
       }else{
         // The ray is reflected (TODO Use a a shared reflect function with Reflective material)
         // The ray is slightly pushed out to prevent self intersection
-        Vector3d correctedRayOrigin = util.add(r.P_hit, util.scale(correctedNormal, 0.001));
+        Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, 0.001));
         
         Vector3d newDir = reflect(r.direction, correctedNormal);
         c = CastRay(new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir)), Bounce+1);
@@ -172,10 +172,10 @@ public class RenderTask extends Task<Void> {
 
       if(glossy_or_diffuse.nextDouble() > HitObject.mat.getDiffuseFac()){
         //Calculate reflection, add roughness, reject samples > 180 deg
-        Vector3d reflection = util.sub(r.direction, util.scale(r.P_Normal,util.dot(r.direction,r.P_Normal)*2.0));
-        Vector3d endPoint = util.add(r.P_hit, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
+        Vector3d reflection = reflect(r.direction, r.surfaceNormal);
+        Vector3d endPoint = util.add(r.surfacePoint, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
 
-        glossycolor = CastRay(new Ray(r.P_hit,endPoint), Bounce+1);
+        glossycolor = CastRay(new Ray(r.surfacePoint,endPoint), Bounce+1);
         glossycolor.multiply(HitObject.mat.getColor());
         return glossycolor;
       }
@@ -186,7 +186,7 @@ public class RenderTask extends Task<Void> {
     //If the ray hits a textured object (BRDF)
     if(HitObject.mat.texture != null){
       //Determine texture coordinates
-      Vector3d diagonal = util.sub(r.P_hit,HitObject.getVertex(0));
+      Vector3d diagonal = util.sub(r.surfacePoint,HitObject.getVertex(0));
       //The u-coordinate is the length of the diagonal along edge 2 compared to the length of edge 2
       double u = util.dot(diagonal,util.normalize(HitObject.getEdge(2)))/util.norm(HitObject.getEdge(2));
       //The v-coordinate is the length of the diagonal along edge 1 compared to the length of edge 1
@@ -210,8 +210,8 @@ public class RenderTask extends Task<Void> {
       //Loop through all emitters in scene
       for(Object3D l : scene.lightList){
         //Send shadowray to random position on the surface of the emitter
-        Vector3d pointOnLight = l.SampleEmitter(r.P_hit);
-        Ray ShadowRay = new Ray(r.P_hit, pointOnLight);
+        Vector3d pointOnLight = l.SampleEmitter(r.surfacePoint);
+        Ray ShadowRay = new Ray(r.surfacePoint, pointOnLight);
         if(!Occluded(ShadowRay)){
           /*
           Brightness = b * dot(L, Ns) * -dot(L Nl) * 1/d
@@ -222,7 +222,7 @@ public class RenderTask extends Task<Void> {
           d = distance to emitter sample point (d is clamped to d >= 1.0)
           */
 
-          Brightness += Math.max(0.0, l.mat.getBrightness() * util.dot(ShadowRay.direction, r.P_Normal) * -util.dot(ShadowRay.direction, l.CalculateNormal(pointOnLight)) / Math.max(1.0,ShadowRay.length()));
+          Brightness += Math.max(0.0, l.mat.getBrightness() * util.dot(ShadowRay.direction, r.surfaceNormal) * -util.dot(ShadowRay.direction, l.CalculateNormal(pointOnLight)) / Math.max(1.0,ShadowRay.length()));
         }
       }
       //Average brightness over all emitters
@@ -239,19 +239,19 @@ public class RenderTask extends Task<Void> {
 
     // Calculate World2Local and Local2World transformation matrices
     Vector3d Nt, Nb;
-    if(Math.abs(r.P_Normal.x) > Math.abs(r.P_Normal.y)){
-      Nt = util.scale(new Vector3d(r.P_Normal.z, 0, -r.P_Normal.x), 1.0/Math.sqrt(r.P_Normal.x*r.P_Normal.x+r.P_Normal.z*r.P_Normal.z));
+    if(Math.abs(r.surfaceNormal.x) > Math.abs(r.surfaceNormal.y)){
+      Nt = util.scale(new Vector3d(r.surfaceNormal.z, 0, -r.surfaceNormal.x), 1.0/Math.sqrt(r.surfaceNormal.x*r.surfaceNormal.x+r.surfaceNormal.z*r.surfaceNormal.z));
     }
     else{
-      Nt = util.scale(new Vector3d(0, -r.P_Normal.z, r.P_Normal.y), 1.0/Math.sqrt(r.P_Normal.y*r.P_Normal.y+r.P_Normal.z*r.P_Normal.z));
+      Nt = util.scale(new Vector3d(0, -r.surfaceNormal.z, r.surfaceNormal.y), 1.0/Math.sqrt(r.surfaceNormal.y*r.surfaceNormal.y+r.surfaceNormal.z*r.surfaceNormal.z));
     }
-    Nb = util.cross(r.P_Normal,Nt);
+    Nb = util.cross(r.surfaceNormal,Nt);
 
     //Rotation matrices world <-> local coordinate systems
     Matrix3d world2local = new Matrix3d(
     Nt.x, Nt.y, Nt.z,
     Nb.x, Nb.y, Nb.z,
-    r.P_Normal.x, r.P_Normal.y, r.P_Normal.z);
+    r.surfaceNormal.x, r.surfaceNormal.y, r.surfaceNormal.z);
     Matrix3d local2world;
     //Matrix inversion is prone to errors, wrap in try-catch
     try{local2world = util.invertMat(world2local);}
@@ -267,10 +267,11 @@ public class RenderTask extends Task<Void> {
     ColorDbl IndirectLight;
     if(Bounce == 0){
       IndirectLight = ColorDbl.avgCol(
-        CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1),
-        CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1));
+        CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1),
+        CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1)
+      );
     }else{
-      IndirectLight = CastRay(new Ray(r.P_hit, util.add(r.P_hit, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1);
+      IndirectLight = CastRay(new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()))), Bounce+1);
     }
     IndirectLight.multiply(objectcolor);
     ColorDbl output = ColorDbl.sumColors(DirectLight, IndirectLight);
@@ -286,10 +287,10 @@ public class RenderTask extends Task<Void> {
   }
 
   // Calculate where the ray intersects the scene (if it does)
-  Object3D triangleIntersect(Ray r, int Bounce){
+  Object3D intersect(Ray r, int Bounce){
     double t = 0.0;
     double temp = Double.POSITIVE_INFINITY;
-    double NearClip = 0.0; // Clip extremely near intersections
+    double NearClip = 0.0; // Clip intersections behind camera
     Object3D hitObject = null;
     if(Bounce==0){
       //Clip objects near camera, when bounce == 0, don't clip for bounces
@@ -310,8 +311,8 @@ public class RenderTask extends Task<Void> {
     }
     if(hitObject != null){
       //Calculate the point of intersection
-      r.calculatePhit(temp);
-      r.P_Normal = hitObject.CalculateNormal(r.P_hit);
+      r.calculateSurfacePoint(temp);
+      r.surfaceNormal = hitObject.CalculateNormal(r.surfacePoint);
     }
 
     return hitObject;
