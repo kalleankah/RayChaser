@@ -13,7 +13,7 @@ public class Camera {
   int samples;
   int THREADS;
   int MAX_DEPTH;
-  int SHADOW_RAYS;
+  Boolean SHADOW_RAYS;
   double Brightness;
   double fov;
   double aspectRatio;
@@ -58,7 +58,7 @@ public class Camera {
     MAX_DEPTH = d;
   }
 
-  public void setShadowRays(int sr){
+  public void setShadowRays(Boolean sr){
     SHADOW_RAYS = sr;
   }
 

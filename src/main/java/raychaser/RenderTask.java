@@ -205,7 +205,7 @@ public class RenderTask extends Task<Void> {
 
     /* --------------------- LOCAL LIGHT MODEL BEGIN ---------------------*/
     ColorDbl DirectLight = new ColorDbl();
-    if(camera.SHADOW_RAYS > 0){
+    if(camera.SHADOW_RAYS){
       double Brightness = 0.0;
       //Loop through all emitters in scene
       for(Object3D l : scene.lightList){

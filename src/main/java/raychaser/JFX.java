@@ -1,10 +1,14 @@
 package raychaser;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,6 +80,15 @@ public class JFX extends Application {
   //GUI button to cancel rendering
   Button button_cancel;
 
+  //Configuration values
+  int xres, yres;
+  double fov;
+  int cameraHeight;
+  int brightness;
+  int samples;
+  int maxDepth;
+  Boolean shadowrays;
+
   //Default launch
   public static void main(String[] args){
     launch(args);
@@ -91,6 +104,9 @@ public class JFX extends Application {
 
   // Opens the window with settings for rendering
   public void openConfigUI(){
+    //Load user settings
+    loadUserConfig();
+
     //Name the windows appropriately
     stage.setTitle("Configure render options");
 
@@ -108,31 +124,30 @@ public class JFX extends Application {
     grid.add(scenetitle, 0, 0, 2, 1);
 
     //Fields to select resolution (arbitrary aspect ratio)
-    Label res = new Label("Resolution:");
-    grid.add(res, 0, 1);
-    GridPane.setHalignment(res, HPos.RIGHT);
-    TextField horizontalResField = new TextField("800");
+    Label resLabel = new Label("Resolution:");
+    grid.add(resLabel, 0, 1);
+    GridPane.setHalignment(resLabel, HPos.RIGHT);
+    TextField horizontalResField = new TextField(""+xres);
     grid.add(horizontalResField, 1, 1);
-    TextField verticalResField = new TextField("600");
+    TextField verticalResField = new TextField(""+yres);
     grid.add(verticalResField, 1, 2);
 
     //Add slider to adjust camera zoom level
-    Label fov = new Label("Zoom");
-    grid.add(fov, 0, 3);
-    GridPane.setHalignment(fov, HPos.RIGHT);
-    Slider fovSlider = new Slider(0.5, 2.0, 1);
+    Label fovLabel = new Label("Zoom");
+    grid.add(fovLabel, 0, 3);
+    GridPane.setHalignment(fovLabel, HPos.RIGHT);
+    Slider fovSlider = new Slider(0.5, 2.0, fov);
     fovSlider.setShowTickLabels(true);
     fovSlider.setMajorTickUnit(0.5);
-    // fovSlider.setBlockIncrement(0.1);
     fovSlider.valueProperty().addListener((obs, oldval, newVal) ->
       fovSlider.setValue(Math.round(newVal.doubleValue()*10.0)/10.0));
     grid.add(fovSlider, 1, 3);
 
-    //Add slider to change light source brightness
-    Label cameraHeight = new Label("Camera Height");
-    grid.add(cameraHeight, 0, 4);
-    GridPane.setHalignment(cameraHeight, HPos.RIGHT);
-    Slider cameraHeightSlider = new Slider(-5,5,0);
+    //Add slider to change the camera height
+    Label cameraHeightLabel = new Label("Camera Height");
+    grid.add(cameraHeightLabel, 0, 4);
+    GridPane.setHalignment(cameraHeightLabel, HPos.RIGHT);
+    Slider cameraHeightSlider = new Slider(-5,5,cameraHeight);
     cameraHeightSlider.setMajorTickUnit(1);
     cameraHeightSlider.setShowTickLabels(true);
     cameraHeightSlider.valueProperty().addListener((obs, oldval, newVal) ->
@@ -143,7 +158,7 @@ public class JFX extends Application {
     Label brightnessLabel = new Label("Brightness");
     grid.add(brightnessLabel, 0, 5);
     GridPane.setHalignment(brightnessLabel, HPos.RIGHT);
-    Slider brightnessSlider = new Slider(1,10,3);
+    Slider brightnessSlider = new Slider(1,10,brightness);
     brightnessSlider.setMajorTickUnit(1);
     brightnessSlider.setShowTickLabels(true);
     brightnessSlider.valueProperty().addListener((obs, oldval, newVal) ->
@@ -151,24 +166,24 @@ public class JFX extends Application {
     grid.add(brightnessSlider, 1, 5);
 
     //Slider to select number of samples
-    Label samples = new Label("Samples [1]");
-    grid.add(samples, 0, 6);
-    GridPane.setHalignment(samples, HPos.RIGHT);
-    Slider samplesSlider = new Slider(1,1000,1);
+    Label samplesLabel = new Label("Samples ["+samples+"]");
+    grid.add(samplesLabel, 0, 6);
+    GridPane.setHalignment(samplesLabel, HPos.RIGHT);
+    Slider samplesSlider = new Slider(1,1000,samples);
     //Round the value and update text when sliding
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
       samplesSlider.setValue(Math.round(newVal.doubleValue())));
     samplesSlider.valueProperty().addListener((obs, oldval, newVal) ->
-      samples.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()) + "]"));
+      samplesLabel.textProperty().setValue("Samples [" + Math.round(newVal.doubleValue()) + "]"));
     samplesSlider.setMajorTickUnit(100);
     samplesSlider.setShowTickLabels(true);
     grid.add(samplesSlider, 1, 6);
 
     //Add slider to select max depth (number of bounces)
-    Label depth = new Label("Max Depth");
-    grid.add(depth, 0, 7);
-    GridPane.setHalignment(depth, HPos.RIGHT);
-    Slider depthSlider = new Slider(0,100,10);
+    Label depthLabel = new Label("Max Depth");
+    grid.add(depthLabel, 0, 7);
+    GridPane.setHalignment(depthLabel, HPos.RIGHT);
+    Slider depthSlider = new Slider(0,100,maxDepth);
     depthSlider.setShowTickLabels(true);
     depthSlider.setMajorTickUnit(1);
     depthSlider.valueProperty().addListener((obs, oldval, newVal) ->
@@ -177,9 +192,9 @@ public class JFX extends Application {
 
 
     //Add slider to select number of CPU threads to Utilize
-    Label threads = new Label("CPU Threads:");
-    grid.add(threads, 0, 8);
-    GridPane.setHalignment(threads, HPos.RIGHT);
+    Label threadsLabel = new Label("CPU Threads:");
+    grid.add(threadsLabel, 0, 8);
+    GridPane.setHalignment(threadsLabel, HPos.RIGHT);
     //Default number of threads equal to number of logical processors detected
     Slider threadsSlider = new Slider(1,Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors());
     threadsSlider.setMajorTickUnit(1);
@@ -189,38 +204,48 @@ public class JFX extends Application {
     grid.add(threadsSlider, 1, 8);
 
     //Add checkbox for using shadow rays
-    Label shadowrays = new Label("Use Shadow Rays");
-    grid.add(shadowrays, 0, 9);
-    GridPane.setHalignment(shadowrays, HPos.RIGHT);
+    Label srLabel = new Label("Use Shadow Rays");
+    grid.add(srLabel, 0, 9);
+    GridPane.setHalignment(srLabel, HPos.RIGHT);
     //Use shadow rays by default
     CheckBox shadowrayBox = new CheckBox();
-    shadowrayBox.setSelected(true);
+    shadowrayBox.setSelected(shadowrays);
     grid.add(shadowrayBox, 1, 9);
 
+    //Create button to save config
+    Button makeDefaultConfigButton = new Button("Make default");
+    grid.add(makeDefaultConfigButton, 0, 10);
+    GridPane.setHalignment(makeDefaultConfigButton, HPos.LEFT);
+    makeDefaultConfigButton.setOnAction(new EventHandler<ActionEvent>(){
+      @Override
+      public void handle(ActionEvent event) {
+        saveDefaultConfig();
+      }
+    });
+
+    //Create button to load default config
+    Button defaultConfigButton = new Button("Load defaults");
+    grid.add(defaultConfigButton, 0, 11);
+    GridPane.setHalignment(defaultConfigButton, HPos.LEFT);
+    defaultConfigButton.setOnAction(new EventHandler<ActionEvent>(){
+      @Override
+      public void handle(ActionEvent event) {
+        resetConfig();
+      }
+    });
+
     //Create button to start render and open render preview
-    Button btn = new Button("Render");
-    HBox btnbox = new HBox(10);
-    btnbox.setAlignment(Pos.BOTTOM_RIGHT);
-    btnbox.getChildren().add(btn);
-    grid.add(btnbox, 1, 11);
+    Button renderButton = new Button("Render");
+    GridPane.setHalignment(renderButton, HPos.RIGHT);
+    grid.add(renderButton, 1, 11);
     //Define button behavior
-    btn.setOnAction(new EventHandler<ActionEvent>(){
+    renderButton.setOnAction(new EventHandler<ActionEvent>(){
       @Override
       public void handle(ActionEvent event){
         //Collect settings from fields/sliders into the camera object
-        camera.setSize(
-          Integer.parseInt(horizontalResField.getText()),
-          Integer.parseInt(verticalResField.getText())
-          );
-        image = new WritableImage(camera.Width, camera.Height);
-        camera.setImg(image);
-        camera.setSamples((int)samplesSlider.getValue());
-        camera.setDepth((int)depthSlider.getValue());
-        camera.setShadowRays(shadowrayBox.isSelected() ? 1:0);
-        camera.setThreads((int)threadsSlider.getValue());
-        camera.setBrightness((int)brightnessSlider.getValue());
-        camera.setEye(cameraHeightSlider.getValue());
-        camera.setFov(fovSlider.getValue());
+        applyConfigurationFromGUI();
+        saveUserConfig();
+        applyConfigurationToCamera();
         
         //Switch to the render preview window
         openRenderUI();
@@ -228,12 +253,36 @@ public class JFX extends Application {
         //Start the rendering
         startRenderingTasks(camera);
       }
+
+      private void applyConfigurationFromGUI() {
+        xres = Integer.parseInt(horizontalResField.getText());
+        yres = Integer.parseInt(verticalResField.getText());
+        samples = (int)samplesSlider.getValue();
+        maxDepth = (int)depthSlider.getValue();
+        shadowrays = shadowrayBox.isSelected();
+        brightness = (int)brightnessSlider.getValue();
+        cameraHeight = (int)cameraHeightSlider.getValue();
+        fov = fovSlider.getValue();
+      }
+
+      private void applyConfigurationToCamera() {
+        camera.setSize(xres, yres);
+        image = new WritableImage(xres, yres);
+        camera.setImg(image);
+        camera.setSamples(samples);
+        camera.setDepth(maxDepth);
+        camera.setShadowRays(shadowrays);
+        camera.setThreads((int)threadsSlider.getValue());
+        camera.setBrightness(brightness);
+        camera.setEye(cameraHeight);
+        camera.setFov(fov);
+      }
     });
 
     //Bind enter key to render button in first screen
     grid.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
       if (event.getCode() == KeyCode.ENTER) {
-        btn.fire();
+        renderButton.fire();
         event.consume();
       }
     });
@@ -260,7 +309,74 @@ public class JFX extends Application {
     stage.show();
   }
 
-  //Open render preview
+  private void loadUserConfig(){
+    loadConfig("user.properties");
+  }
+
+  private void loadDefaultConfig(){
+    loadConfig("default.properties");
+  }
+
+  private void resetConfig(){
+    //Loads the default config and saves it into the user config
+    loadDefaultConfig();
+    saveUserConfig();
+    //Reload config UI to show changes
+    openConfigUI();
+  }
+
+  //Loads the user- or default config depending on argument 
+  private void loadConfig(String defaultOrUserFilename) {
+    File configFile = new File("config/" + defaultOrUserFilename);
+    Properties props = new Properties();
+    try {
+      FileReader reader = new FileReader(configFile);
+      props.load(reader);
+    } catch (IOException e) {
+      System.out.println("Error reading " + defaultOrUserFilename);
+      e.printStackTrace();
+    }
+
+    xres = Integer.parseInt(props.getProperty("xres"));
+    yres = Integer.parseInt(props.getProperty("yres"));
+    fov = Double.parseDouble(props.getProperty("fov"));
+    cameraHeight = Integer.parseInt(props.getProperty("cameraHeight"));
+    brightness = Integer.parseInt(props.getProperty("brightness"));
+    samples = Integer.parseInt(props.getProperty("samples"));
+    maxDepth = Integer.parseInt(props.getProperty("maxDepth"));
+    shadowrays = Boolean.parseBoolean(props.getProperty("shadowrays"));
+  }
+
+  private void saveUserConfig(){
+    saveConfig("user.properties");
+  }
+
+  private void saveDefaultConfig(){
+    saveConfig("default.properties");
+  }
+
+  private void saveConfig(String defaultOrUserFilename){
+    File configFile = new File("config/" + defaultOrUserFilename);
+    Properties props = new Properties();
+    props.setProperty("xres", ""+xres);
+    props.setProperty("yres", ""+yres);
+    props.setProperty("fov", ""+fov);
+    props.setProperty("cameraHeight", ""+cameraHeight);
+    props.setProperty("brightness", ""+brightness);
+    props.setProperty("samples", ""+samples);
+    props.setProperty("maxDepth", ""+maxDepth);
+    props.setProperty("shadowrays", ""+shadowrays);
+    
+    try {
+      FileWriter writer = new FileWriter(configFile);
+      props.store(writer, "");
+    } catch (IOException e) {
+      System.out.println("Error reading " + defaultOrUserFilename);
+      e.printStackTrace();
+    }
+  }
+
+  // Open render preview
   void openRenderUI(){
     //Name the window appropriately
     stage.setTitle("Rendering...");
