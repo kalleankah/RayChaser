@@ -33,7 +33,7 @@ public class ColorDbl{
   void print(){
     System.out.println("Color: ("+R+", "+G+", "+B+" )");
   }
-  //Clamp color between 0-1
+  //Clamp color between [0,1]
   void clamp(){
     R = Math.max(0.0, Math.min(R, 1.0));
     G = Math.max(0.0, Math.min(G, 1.0));
@@ -139,5 +139,10 @@ public class ColorDbl{
 
   public double getMaxIntensity() {
     return Math.max(R, Math.max(G, B));
+  }
+  public void gammaCorrection() {
+    R = Math.sqrt(R);
+    G = Math.sqrt(G);
+    B = Math.sqrt(B);
   }
 }

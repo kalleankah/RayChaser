@@ -26,48 +26,6 @@ public class Sphere extends Object3D {
   //Checks for intersection between a ray and a sphere
   @Override
   double rayIntersection(Ray r){
-    // //Create a vector from ray origin to sphere center
-    // Vector3d L = util.sub(center, r.start);
-    // double tCenter = util.dot(r.direction, L);
-    // if(tCenter < 0.0){
-    //   //Sphere center is in behind the ray origin
-    //   return -1.0;
-    // }
-    // double d2 = L.dot(L) - (tCenter*tCenter);
-    // if(d2 > radius*radius){
-    //   // Ray doesn't intersect the sphere
-    //   return -1.0;
-    // }
-    // double tCenterToSurface = Math.sqrt(radius*radius - d2);
-    // double t0 = tCenter - tCenterToSurface;
-    // double t1 = tCenter + tCenterToSurface;
-
-    // if(t0 < t1){
-    //   if(t0 > 0.0){
-    //     //if t0 is in front of ray origin, both are, but t0 is closer
-    //     return t0;
-    //   }
-    //   if(t1 > 0.0){
-    //     //t0 is behind ray origin, but t1 is in front
-    //     return t1;
-    //   }
-    //   //Both t0 and t1 are behind the ray origin
-    //   return -1.0;
-    // }
-    // else{
-    //   //t1 < t0
-    //   if(t1 > 0.0){
-    //     //if t1 is in front of ray origin, both are, but t1 is closer
-    //     return t1;
-    //   }
-    //   if(t0 > 0.0){
-    //     //t1 is behind ray origin, but t0 is in front
-    //     return t0;
-    //   }
-    //   //Both t0 and t1 are behind the ray origin
-    //   return -1.0;
-    // }
-
     //Create a vector from sphere center to ray origin
     Vector3d L = util.sub(r.start, center);
     double b = 2.0 * r.direction.dot(L);

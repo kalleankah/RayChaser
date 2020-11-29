@@ -5,14 +5,21 @@ package raychaser;
 //the getRoughness() function.
 
 public class Refractive extends Material {
-  double refractionIndex;
-  Refractive(ColorDbl col, double refractionIndex){
-    super(col);
+  private double refractionIndex;
+  private ColorDbl color;
+
+  Refractive(ColorDbl c, double refractionIndex){
+    color = c;
     this.refractionIndex = refractionIndex;
   }
   //getRoughness() is specific for Glossy material
   @Override
   double getRefractionIndex(){
     return refractionIndex;
+  }
+
+  @Override
+  ColorDbl getColor() {
+    return color;
   }
 }

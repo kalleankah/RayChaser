@@ -8,10 +8,7 @@ import javax.vecmath.Vector3d;
 
 public class Object3D{
   Material mat;
-  //Default constructor (default material)
-  public Object3D(){
-    mat = new Material();
-  }
+  
   //Constructor from Material
   public Object3D(Material m){
     mat = m;

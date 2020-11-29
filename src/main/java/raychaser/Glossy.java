@@ -5,16 +5,25 @@ package raychaser;
 
 public class Glossy extends Material {
   double roughness, diffuseFac;
-  Glossy(ColorDbl col, double rough, double diffuse){
-    super(col);
+  ColorDbl color;
+
+  Glossy(ColorDbl c, double rough, double diffuse){
+    color = c;
     roughness = rough;
     diffuseFac = diffuse;
   }
+  
+  @Override
+  ColorDbl getColor() {
+    return color;
+  }
+
   //getRoughness() is specific for Glossy material
   @Override
   double getRoughness(){
     return roughness;
   }
+
   //getDiffuseFac is specific for Glossy material
   @Override
   double getDiffuseFac(){

@@ -4,8 +4,14 @@ package raychaser;
 //the member functions from Material.java
 
 public class Reflective extends Material{
+  private ColorDbl color;
+
   Reflective(ColorDbl c){
-    super(c);
+    color = c;
   }
-  //No Reflective-specific member functions have been added
+  
+  @Override
+  ColorDbl getColor() {
+    return color;
+  }
 }

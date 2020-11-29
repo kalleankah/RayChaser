@@ -4,7 +4,21 @@ package raychaser;
 //the member functions from Material.java
 
 public class Emissive extends Material{
-  Emissive(ColorDbl c){
-    super(c);
+  private final double brightness;
+  private final ColorDbl color;
+  
+  Emissive(ColorDbl c, double b){
+    color = c;
+    brightness = b;
+  }
+
+  @Override
+  ColorDbl getColor() {
+    return color;
+  }
+
+  @Override
+  double getBrightness() {
+    return brightness;
   }
 }

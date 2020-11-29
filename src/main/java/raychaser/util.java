@@ -84,10 +84,9 @@ public class util{
 
   //Russian roulette, used to terminate rays with increasing risk based on the
   //amount of bounces (the depth).
-  //d = risk of death; 0.0 cannot die, 1.0 will always die
-  static Boolean RussianBullet(double d){
+  static Boolean RussianBulletSurvivor(double d){
     Random r = new Random();
-    // Returns true if ray is terminated
+    // Returns true if ray survives
     return r.nextDouble() < d;
   }
 

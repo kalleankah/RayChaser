@@ -19,13 +19,6 @@ public class Triangle extends Object3D{
     normal = util.cross(edge1, edge2);
     normal.normalize();
   }
-  //Copy constructor
-  Triangle(Triangle T){
-    vertex0 = new Vector3d(T.vertex0);
-    vertex1 = new Vector3d(T.vertex1);
-    vertex2 = new Vector3d(T.vertex2);
-    normal = new Vector3d(T.normal);
-  }
   //Print vertices, edges and the normal
   void print(){
     System.out.println("vertex0: ( " +vertex0.x+", "+vertex0.y+", "+vertex0.z+" )");
@@ -34,7 +27,7 @@ public class Triangle extends Object3D{
     System.out.println("edge1: ( " +edge1.x+", "+edge1.y+", "+edge1.z+" )");
     System.out.println("edge2: ( " +edge2.x+", "+edge2.y+", "+edge2.z+" )");
     System.out.println("normal: ( " +normal.x+", "+normal.y+", "+normal.z+" )");
-    mat.color.print();
+    mat.getColor().print();
   }
   //Calculate ray-triangle intersection using the Möller-Trumbore algorithm
   @Override

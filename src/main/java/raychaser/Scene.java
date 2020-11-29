@@ -28,12 +28,12 @@ public class Scene{
     Image tile_img = textureList.get(5);
 
     //Textured materials
-    Material wood = new Material(wood_img);
-    Material block = new Material(block_img);
-    Material gradient = new Material(gradient_img);
-    Material wallpaper = new Material(wallpaper_img);
-    Material test = new Material(test_img);
-    Material tile = new Material(tile_img);
+    Material wood = new Textured(wood_img);
+    Material block = new Textured(block_img);
+    Material gradient = new Textured(gradient_img);
+    Material wallpaper = new Textured(wallpaper_img);
+    Material test = new Textured(test_img);
+    Material tile = new Textured(tile_img);
 
     //Colors
     ColorDbl white = new ColorDbl(0.95,0.95,0.95);
@@ -48,13 +48,13 @@ public class Scene{
     ColorDbl mirror = new ColorDbl(0.95,0.99,0.95);
 
     //Diffuse materials
-    Material diffuseWhite = new Material(white);
-    Material diffuseRed = new Material(red);
-    Material diffuseGreen = new Material(green);
-    Material diffuseBlue = new Material(blue);
-    Material diffuseYellow = new Material(yellow);
-    Material diffuseCyan = new Material(cyan);
-    Material diffuseMagenta = new Material(magenta);
+    Material diffuseWhite = new Diffuse(white);
+    Material diffuseRed = new Diffuse(red);
+    Material diffuseGreen = new Diffuse(green);
+    Material diffuseBlue = new Diffuse(blue);
+    Material diffuseYellow = new Diffuse(yellow);
+    Material diffuseCyan = new Diffuse(cyan);
+    Material diffuseMagenta = new Diffuse(magenta);
     
     //Reflective materials
     Material reflectiveBright = new Reflective(bright);
@@ -74,7 +74,7 @@ public class Scene{
     Material refractiveWater = new Refractive(bright, 1.3);
     
     //Emmissive materials
-    Material emissive = new Emissive(new ColorDbl(brightness, brightness, brightness));
+    Material emissive = new Emissive(new ColorDbl(1.0, 1.0, 1.0), brightness);
 
     //Vertex points, corners of the room
     double depth = 12.0;
@@ -95,17 +95,24 @@ public class Scene{
     Vector3d FloorRightFar2 = new Vector3d(depth,-width/2.0,-height/2.0 + 3.5);
 
     //Vertex points ceiling light
-    double lampSize = width/6;
-    Vector3d CLNR = new Vector3d(depth/2.0 - lampSize, -lampSize, height/2.0);
-    Vector3d CLFR = new Vector3d(depth/2.0 + lampSize, -lampSize, height/2.0);
-    Vector3d CLFL = new Vector3d(depth/2.0 + lampSize,  lampSize, height/2.0);
-    Vector3d CLNL = new Vector3d(depth/2.0 - lampSize,  lampSize, height/2.0);
+    double mediumLampSize = width/4;
+    Vector3d medium_CLNR = new Vector3d(depth/2.0 - mediumLampSize, -mediumLampSize, height/2.0);
+    Vector3d medium_CLFR = new Vector3d(depth/2.0 + mediumLampSize, -mediumLampSize, height/2.0);
+    Vector3d medium_CLFL = new Vector3d(depth/2.0 + mediumLampSize,  mediumLampSize, height/2.0);
+    Vector3d medium_CLNL = new Vector3d(depth/2.0 - mediumLampSize,  mediumLampSize, height/2.0);
+    double smallLampSize = width/6;
+    Vector3d small_CLNR = new Vector3d(depth/2.0 - smallLampSize, -smallLampSize, height/2.0);
+    Vector3d small_CLFR = new Vector3d(depth/2.0 + smallLampSize, -smallLampSize, height/2.0);
+    Vector3d small_CLFL = new Vector3d(depth/2.0 + smallLampSize,  smallLampSize, height/2.0);
+    Vector3d small_CLNL = new Vector3d(depth/2.0 - smallLampSize,  smallLampSize, height/2.0);
 
     // --- Lamps ---
     // Large
     // addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, emissive));
+    // Medium
+    addObject(new Plane(medium_CLNL, medium_CLFL, medium_CLFR, medium_CLNR, emissive));
     // Small
-    addObject(new Plane(CLNL, CLFL, CLFR, CLNR, emissive));
+    // addObject(new Plane(small_CLNL, small_CLFL, small_CLFR, small_CLNR, emissive));
     // Spherical
     // addObject(new Sphere(new Vector3d(8.0, 0.0, 3.0), 0.5, EMISSION));
 
@@ -113,7 +120,7 @@ public class Scene{
     // Ceiling
     addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, diffuseWhite));
     // Floor
-    addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, tile));
+    addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, wood));
     // addObject(new Plane(FloorLeftFar2,FloorLeftNear2,FloorRightNear2,FloorRightFar2, refractiveWater));
     // Left wall
     addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, diffuseGreen));
@@ -122,17 +129,17 @@ public class Scene{
     // Far wall
     addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, diffuseWhite));
     // Near wall
-    // addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseWhite));
+    addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseWhite));
 
     // Default items
     addBox(new Vector3d(11, -2.15, -3), 4, 4, 3, diffuseYellow);
-    // addObject(new Sphere(new Vector3d(4.5, -1.1, -1.0), 1.0, emissive));
-    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, refractiveGlass));
-    addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, refractiveGlass));
-    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, refractiveGlass));
-    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, refractiveGlass));
-    addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, refractiveGlass));
-    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, refractiveGlass));
+    addObject(new Sphere(new Vector3d(5.5, -1.1, -4.0), 1.0, refractiveGlass));
+    addObject(new Sphere(new Vector3d(7.5, 1.1, -4), 1.0, glossyYellow));
+    addObject(new Sphere(new Vector3d(6.1, -3, -4.5), 0.5, glossyRed));
+    addObject(new Sphere(new Vector3d(8.0, -4.1, -4.5), 0.5, glossyBlue));
+    addObject(new Sphere(new Vector3d(6.7, 3.6, -4.5), 0.5, glossyBlue2));
+    addObject(new Sphere(new Vector3d(9.4, 3.1, -4.5), 0.5, glossyBlue3));
+    addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, glossyWhite));
     addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
 
     // Scene for testing caustics
