@@ -34,13 +34,12 @@ public class Triangle extends Object3D{
   double rayIntersection(Ray r){
     Vector3d T = util.sub(r.start,vertex0);
     Vector3d Q = util.cross(T,edge1);
-    Vector3d D = util.sub(r.end,r.start);
-    Vector3d P = util.cross(D,edge2);
+    Vector3d P = util.cross(r.direction,edge2);
 
     double QE1 = util.dot(Q, edge2);
     double PE1 = util.dot(P, edge1);
     double PT = util.dot(P, T);
-    double QD = util.dot(Q, D);
+    double QD = util.dot(Q, r.direction);
     double t = QE1/PE1;
 
     double u = PT/PE1;

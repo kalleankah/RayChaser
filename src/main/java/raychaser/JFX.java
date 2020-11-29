@@ -308,79 +308,12 @@ public class JFX extends Application {
     stage.setScene(new javafx.scene.Scene(grid));
     stage.show();
   }
-
-  private void loadUserConfig(){
-    loadConfig("user.properties");
-  }
-
-  private void loadDefaultConfig(){
-    loadConfig("default.properties");
-  }
-
-  private void resetConfig(){
-    //Loads the default config and saves it into the user config
-    loadDefaultConfig();
-    saveUserConfig();
-    //Reload config UI to show changes
-    openConfigUI();
-  }
-
-  //Loads the user- or default config depending on argument 
-  private void loadConfig(String defaultOrUserFilename) {
-    File configFile = new File("config/" + defaultOrUserFilename);
-    Properties props = new Properties();
-    try {
-      FileReader reader = new FileReader(configFile);
-      props.load(reader);
-    } catch (IOException e) {
-      System.out.println("Error reading " + defaultOrUserFilename);
-      e.printStackTrace();
-    }
-
-    xres = Integer.parseInt(props.getProperty("xres"));
-    yres = Integer.parseInt(props.getProperty("yres"));
-    fov = Double.parseDouble(props.getProperty("fov"));
-    cameraHeight = Integer.parseInt(props.getProperty("cameraHeight"));
-    brightness = Integer.parseInt(props.getProperty("brightness"));
-    samples = Integer.parseInt(props.getProperty("samples"));
-    maxDepth = Integer.parseInt(props.getProperty("maxDepth"));
-    shadowrays = Boolean.parseBoolean(props.getProperty("shadowrays"));
-  }
-
-  private void saveUserConfig(){
-    saveConfig("user.properties");
-  }
-
-  private void saveDefaultConfig(){
-    saveConfig("default.properties");
-  }
-
-  private void saveConfig(String defaultOrUserFilename){
-    File configFile = new File("config/" + defaultOrUserFilename);
-    Properties props = new Properties();
-    props.setProperty("xres", ""+xres);
-    props.setProperty("yres", ""+yres);
-    props.setProperty("fov", ""+fov);
-    props.setProperty("cameraHeight", ""+cameraHeight);
-    props.setProperty("brightness", ""+brightness);
-    props.setProperty("samples", ""+samples);
-    props.setProperty("maxDepth", ""+maxDepth);
-    props.setProperty("shadowrays", ""+shadowrays);
-    
-    try {
-      FileWriter writer = new FileWriter(configFile);
-      props.store(writer, "");
-    } catch (IOException e) {
-      System.out.println("Error reading " + defaultOrUserFilename);
-      e.printStackTrace();
-    }
-  }
-
+  
   // Open render preview
   void openRenderUI(){
     //Name the window appropriately
     stage.setTitle("Rendering...");
-
+    
     //Create a progress menu_bar and text to put in a menu_bar
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.SOMETIMES);
@@ -392,7 +325,7 @@ public class JFX extends Application {
     progresstext.setFont(Font.font(16));
     Text progresstime = new Text("00:00:00");
     progresstime.setFont(Font.font(16));
-
+    
     // Create cancel Button
     button_cancel = new Button("Cancel");
     button_cancel.setOnAction(new EventHandler<ActionEvent>(){
@@ -404,20 +337,20 @@ public class JFX extends Application {
         openConfigUI();
       }
     });
-
+    
     //Place a bar at the top of the window, containing the progressbar, timer, cancel button etc.
     BorderPane border = new BorderPane();
     HBox menu_bar = new HBox(8, progressbar, progresstext, progresstime, spacer, button_cancel);
     menu_bar.setPadding(new Insets(4, 4, 4, 4));
     menu_bar.setFillHeight(true);
     border.setTop(menu_bar);
-
+    
     //Create a canvas and place the image (that's being rendered to) in it
-      // First, compensate for any scaling since we want the image 1:1
+    // First, compensate for any scaling since we want the image 1:1
     double scaling = Screen.getPrimary().getOutputScaleX();
     Canvas canvas = new Canvas(image.getWidth()/scaling, image.getHeight()/scaling);
     border.setCenter(canvas);
-
+    
     //updateWindow is responsible for refreshing the render preview window
     updateWindow = new AnimationTimer(){
       // lastUpdate contains time stamp of last update to control frame rate
@@ -425,7 +358,7 @@ public class JFX extends Application {
       // Calculate total number of lines to compare with current rendered lines
       int cols = ((int)image.getWidth())/range + 1;
       int tot_lines = ((int)image.getHeight())*cols;
-
+      
       @Override
       public void handle(long now) {
         //Update window every 100ms (in nanoseconds)
@@ -456,12 +389,12 @@ public class JFX extends Application {
         }
       }
     };
-
+    
     border.setOnMousePressed(new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
-          xOffset = event.getSceneX();
-          yOffset = event.getSceneY();
+        xOffset = event.getSceneX();
+        yOffset = event.getSceneY();
       }
     });
     
@@ -469,102 +402,169 @@ public class JFX extends Application {
     border.setOnMouseDragged(new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
+          stage.setX(event.getScreenX() - xOffset);
+          stage.setY(event.getScreenY() - yOffset);
         }
-    });
-
-    //Begin refreshing the window
-    updateWindow.start();
-
-    //Set the new scene
-    stage.setScene(new javafx.scene.Scene(border));
-    stage.show();
-  }
-
-  //Creates rendering tasks and executes them in parallell
-  public void startRenderingTasks(Camera camera){
-    //Start measuring render time
-    startTime = System.nanoTime();
-
-    //Load texture images into Vector<Image>
-    Vector<Image> textures = new Vector<>();
-    try {
-      textures.add(new Image(new FileInputStream("texture/block.png")));
-      textures.add(new Image(new FileInputStream("texture/wood.jpg")));
-      textures.add(new Image(new FileInputStream("texture/gradient.png")));
-      textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
-      textures.add(new Image(new FileInputStream("texture/test.png")));
-      textures.add(new Image(new FileInputStream("texture/tile.jpg")));
+      });
+      
+      //Begin refreshing the window
+      updateWindow.start();
+      
+      //Set the new scene
+      stage.setScene(new javafx.scene.Scene(border));
+      stage.show();
     }
-    catch(FileNotFoundException e){
-      System.out.println("Textures not found in folder \"texture/\"");
-      e.printStackTrace();
+    
+    //Creates rendering tasks and executes them in parallell
+    public void startRenderingTasks(Camera camera){
+      //Start measuring render time
+      startTime = System.nanoTime();
+      
+      //Load texture images into Vector<Image>
+      Vector<Image> textures = new Vector<>();
+      try {
+        textures.add(new Image(new FileInputStream("texture/block.png")));
+        textures.add(new Image(new FileInputStream("texture/wood.jpg")));
+        textures.add(new Image(new FileInputStream("texture/gradient.png")));
+        textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
+        textures.add(new Image(new FileInputStream("texture/test.png")));
+        textures.add(new Image(new FileInputStream("texture/tile.jpg")));
+      }
+      catch(FileNotFoundException e){
+        System.out.println("Textures not found in folder \"texture/\"");
+        e.printStackTrace();
+      }
+      
+      //Create and submit all tasks to Executor
+      executor = Executors.newFixedThreadPool(camera.THREADS);
+      for(int y=0; y<(camera.Height/range + 1); ++y){
+        for(int x=0; x<(camera.Width/range + 1); ++x){
+          //Important to create new scene for each task, otherwise each RenderTask
+          //has to wait for parallell threads to stop accessing that scene.
+          //This causes blocking and makes multithreading much slower
+          final Scene scene = new Scene(textures, camera.Brightness);
+          final int X = x;
+          final int Y = y;
+          RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
+          executor.execute(task);
+        }
+      }
+      //Shut executor down when done
+      executor.shutdown();
     }
-
-    //Create and submit all tasks to Executor
-    executor = Executors.newFixedThreadPool(camera.THREADS);
-    for(int y=0; y<(camera.Height/range + 1); ++y){
-      for(int x=0; x<(camera.Width/range + 1); ++x){
-        //Important to create new scene for each task, otherwise each RenderTask
-        //has to wait for parallell threads to stop accessing that scene.
-        //This causes blocking and makes multithreading much slower
-        final Scene scene = new Scene(textures, camera.Brightness);
-        final int X = x;
-        final int Y = y;
-        RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
-        executor.execute(task);
+  
+    private void loadUserConfig(){
+      loadConfig("user.properties");
+    }
+  
+    private void loadDefaultConfig(){
+      loadConfig("default.properties");
+    }
+  
+    private void resetConfig(){
+      //Loads the default config and saves it into the user config
+      loadDefaultConfig();
+      saveUserConfig();
+      //Reload config UI to show changes
+      openConfigUI();
+    }
+  
+    //Loads the user- or default config depending on argument 
+    private void loadConfig(String defaultOrUserFilename) {
+      File configFile = new File("config/" + defaultOrUserFilename);
+      Properties props = new Properties();
+      try {
+        FileReader reader = new FileReader(configFile);
+        props.load(reader);
+      } catch (IOException e) {
+        System.out.println("Error reading " + defaultOrUserFilename);
+        e.printStackTrace();
+      }
+  
+      xres = Integer.parseInt(props.getProperty("xres"));
+      yres = Integer.parseInt(props.getProperty("yres"));
+      fov = Double.parseDouble(props.getProperty("fov"));
+      cameraHeight = Integer.parseInt(props.getProperty("cameraHeight"));
+      brightness = Integer.parseInt(props.getProperty("brightness"));
+      samples = Integer.parseInt(props.getProperty("samples"));
+      maxDepth = Integer.parseInt(props.getProperty("maxDepth"));
+      shadowrays = Boolean.parseBoolean(props.getProperty("shadowrays"));
+    }
+  
+    private void saveUserConfig(){
+      saveConfig("user.properties");
+    }
+  
+    private void saveDefaultConfig(){
+      saveConfig("default.properties");
+    }
+  
+    private void saveConfig(String defaultOrUserFilename){
+      File configFile = new File("config/" + defaultOrUserFilename);
+      Properties props = new Properties();
+      props.setProperty("xres", ""+xres);
+      props.setProperty("yres", ""+yres);
+      props.setProperty("fov", ""+fov);
+      props.setProperty("cameraHeight", ""+cameraHeight);
+      props.setProperty("brightness", ""+brightness);
+      props.setProperty("samples", ""+samples);
+      props.setProperty("maxDepth", ""+maxDepth);
+      props.setProperty("shadowrays", ""+shadowrays);
+      
+      try {
+        FileWriter writer = new FileWriter(configFile);
+        props.store(writer, "");
+      } catch (IOException e) {
+        System.out.println("Error reading " + defaultOrUserFilename);
+        e.printStackTrace();
       }
     }
-    //Shut executor down when done
-    executor.shutdown();
-  }
-
-  //Tasks to perform when rendering is completed
-  void done(){
-    //Display render time measurement in window and console
-    long renderTime = System.nanoTime()-startTime;
-    String logFinish = "Render Finished in " + (int)((renderTime)/1_000_000_000.0) + "s";
-    stage.setTitle(logFinish);
-    System.out.println(logFinish);
-
-    //Update cancel button text (it still takes you to the same screen)
-    button_cancel.setText("New Render");
-
-    //Stop refreshing the window
-    updateWindow.stop();
-
-    //Save render to file
-    savePNG(renderTime);
-
-    //Hint to perform garbage collection
-    System.gc();
-  }
-
-  //Write image to PNG
-  void savePNG(long renderTime){
-    String filename =
-    "RES" + camera.Width + "x" + camera.Height +
-    "-SR" + camera.SHADOW_RAYS +
-    "-MD" + camera.MAX_DEPTH +
-    "-SPP"+ camera.samples +
-    "-" + (int)((renderTime)/1_000_000_000.0) + "sec";
-
-    try{
-      OutputStream out = new FileOutputStream("images/" + filename + ".png");
-      PNGEncoder encoder = new PNGEncoder(out);
-      encoder.encode(image);
+    
+    //Tasks to perform when rendering is completed
+    void done(){
+      //Display render time measurement in window and console
+      long renderTime = System.nanoTime()-startTime;
+      String logFinish = "Render Finished in " + (int)((renderTime)/1_000_000_000.0) + "s";
+      stage.setTitle(logFinish);
+      System.out.println(logFinish);
+      
+      //Update cancel button text (it still takes you to the same screen)
+      button_cancel.setText("New Render");
+      
+      //Stop refreshing the window
+      updateWindow.stop();
+      
+      //Save render to file
+      savePNG(renderTime);
+      
+      //Hint to perform garbage collection
+      System.gc();
     }
-    catch(IOException e){
-      System.out.println("Error when writing output image: " + e );
+    
+    //Write image to PNG
+    void savePNG(long renderTime){
+      String filename =
+      "RES" + camera.Width + "x" + camera.Height +
+      "-SR" + camera.SHADOW_RAYS +
+      "-MD" + camera.MAX_DEPTH +
+      "-SPP"+ camera.samples +
+      "-" + (int)((renderTime)/1_000_000_000.0) + "sec";
+      
+      try{
+        OutputStream out = new FileOutputStream("images/" + filename + ".png");
+        PNGEncoder encoder = new PNGEncoder(out);
+        encoder.encode(image);
+      }
+      catch(IOException e){
+        System.out.println("Error when writing output image: " + e );
+      }
+      System.out.println("Saved image as " + "\"" + filename + ".png\"");
     }
-    System.out.println("Saved image as " + "\"" + filename + ".png\"");
-  }
-
-  //Window close method terminates the ExecutorService if it's initiated
-  @Override
-  public void stop(){
-    if(executor != null){
+    
+    //Window close method terminates the ExecutorService if it's initiated
+    @Override
+    public void stop(){
+      if(executor != null){
       executor.shutdownNow();
     }
     Platform.exit();

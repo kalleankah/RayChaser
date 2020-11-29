@@ -38,12 +38,11 @@ public class Plane extends Object3D{
   @Override
   double rayIntersection(Ray r){
     // Calculate the distance to the intersection point on the infinite plane
-    Vector3d dR = util.sub(r.end, r.start);
     Vector3d dP = util.sub(vertex0, r.start);
-    double t = util.dot(dP, normal)/util.dot(dR, normal);
+    double t = util.dot(dP, normal)/util.dot(r.direction, normal);
 
     // M = the intersection point on the surface of the infinite plane
-    Vector3d M = util.add(r.start, util.scale(dR,t));
+    Vector3d M = util.add(r.start, util.scale(r.direction,t));
 
     // Check if the point M is within the limited plane
     Vector3d dMV0 = util.sub(M,vertex0);

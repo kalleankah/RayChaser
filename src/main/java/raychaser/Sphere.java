@@ -59,7 +59,7 @@ public class Sphere extends Object3D {
     }
     
     //t0 is the closest non-negative intersection
-    return t0/r.length();
+    return t0;
   }
   //Unlike planes and triangles, the normal to the sphere depends on the
   //position on the sphere.

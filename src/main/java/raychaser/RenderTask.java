@@ -50,8 +50,8 @@ public class RenderTask extends Task<Void> {
           temp.sumColor(
             Trace(
               new Ray(camera.eye,
-              new Vector3d(cameraPlaneXaxis, eye_y - (x + globalRandom.nextDouble())*PixelSize, eye_z - (y + globalRandom.nextDouble())*PixelSize))
-          ));
+                util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x + globalRandom.nextDouble())*PixelSize, eye_z - (y + globalRandom.nextDouble())*PixelSize), camera.eye) 
+          )));
         }
         temp.multiply(subPixelFactor);
         //Correct gamma for display
@@ -170,14 +170,13 @@ public class RenderTask extends Task<Void> {
         // The ray is slightly pushed behind the surface to prevent self intersection
         Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, -0.001));
         
-        r = new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir));
+        r = new Ray(correctedRayOrigin, newDir);
       }else{
-        // The ray is reflected (TODO Use a a shared reflect function with Reflective material)
         // The ray is slightly pushed out to prevent self intersection
         Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, 0.001));
         
         Vector3d newDir = reflect(r.direction, correctedNormal);
-        r = new Ray(correctedRayOrigin,util.add(correctedRayOrigin,newDir));
+        r = new Ray(correctedRayOrigin, newDir);
       }
     }
 
@@ -185,7 +184,7 @@ public class RenderTask extends Task<Void> {
       if(HitObject.mat instanceof Reflective){
         //Cast new ray in the "perfect reflection-direction"
         Vector3d reflectDir = reflect(r.direction, r.surfaceNormal);
-        r = new Ray(r.surfacePoint,util.add(r.surfacePoint,reflectDir));
+        r = new Ray(r.surfacePoint, reflectDir);
       }
 
       //If the ray hits a glossy object (BRDF)
@@ -194,9 +193,9 @@ public class RenderTask extends Task<Void> {
           //Calculate reflection, add roughness
           //Some samples could be > 180 deg but this is ignored for this case
           Vector3d reflection = reflect(r.direction, r.surfaceNormal);
-          Vector3d endPoint = util.add(r.surfacePoint, util.add(reflection, util.random_unit_vec(HitObject.mat.getRoughness())));
+          reflection.add(util.random_unit_vec(HitObject.mat.getRoughness()));
 
-          r = new Ray(r.surfacePoint,endPoint);
+          r = new Ray(r.surfacePoint, reflection);
         }
         else{
           r = diffuseBRDF(r);
@@ -217,8 +216,8 @@ public class RenderTask extends Task<Void> {
     double NearClip = 0.0; // Clip intersections behind camera
     Object3D hitObject = null;
     if(Bounce==0){
-      //Clip objects near camera, when bounce == 0, don't clip for bounces
-      NearClip = 1.0;
+      //Clip objects near camera before first bounce
+      NearClip = camera.fov;
     }
     //Loop through all objects in the scene (including emitters)
     for (Object3D obj : scene.object3DList){
@@ -268,7 +267,6 @@ public class RenderTask extends Task<Void> {
 
   //Diffuse BRDF
   Ray diffuseBRDF(Ray r){
-    //TODO Remove repeated code for diffuse BRDF
     //Use the diffuse BRDF
     //Choose a new ray direction
     Vector3d Nt, Nb;
@@ -281,22 +279,13 @@ public class RenderTask extends Task<Void> {
     Nb = util.cross(r.surfaceNormal,Nt);
 
     //Rotation matrices world <-> local coordinate systems
-    Matrix3d world2local = new Matrix3d(
+    Matrix3d local2world = new Matrix3d(
     Nt.x, Nt.y, Nt.z,
     Nb.x, Nb.y, Nb.z,
     r.surfaceNormal.x, r.surfaceNormal.y, r.surfaceNormal.z);
-    Matrix3d local2world;
-    //Matrix inversion is prone to errors, wrap in try-catch
-    try{local2world = util.invertMat(world2local);}
-    catch(Exception e){
-      //Print error, the render is to be declared a failiure
-      System.out.println("RenderTask.CastRay(): matrix could not be inverted.");
-      /* To prevent a crash if a matrix inversion for some reason fails, ignore
-      inverting and use world2local. */
-      local2world = world2local;
-    }
+    local2world.invert();
 
     //Assign new ray direction
-    return new Ray(r.surfacePoint, util.add(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere())));
+    return new Ray(r.surfacePoint, util.mulMatVec(local2world, util.sampleHemisphere()));
   }
 }
