@@ -420,25 +420,8 @@ public class JFX extends Application {
       //Start measuring render time
       startTime = System.nanoTime();
       
-      //Load textures
-      //It is of great importance not to use Vector<> since Vector<> is
-      // synchronized, which in this case would cause MAJOR thread blocking
-      ArrayList<Image> textures = new ArrayList<>();
-      try {
-        textures.add(new Image(new FileInputStream("texture/block.png")));
-        textures.add(new Image(new FileInputStream("texture/wood.jpg")));
-        textures.add(new Image(new FileInputStream("texture/gradient.png")));
-        textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
-        textures.add(new Image(new FileInputStream("texture/test.png")));
-        textures.add(new Image(new FileInputStream("texture/tile.jpg")));
-      }
-      catch(FileNotFoundException e){
-        System.out.println("Textures not found in folder \"texture/\"");
-        e.printStackTrace();
-      }
-      
       //Create and submit all tasks to Executor
-      final Scene scene = new Scene(textures, camera.Brightness);
+      final Scene scene = new Scene(camera.Brightness);
       executor = Executors.newFixedThreadPool(camera.THREADS);
       for(int y=0; y<(camera.Height/range + 1); ++y){
         for(int x=0; x<(camera.Width/range + 1); ++x){

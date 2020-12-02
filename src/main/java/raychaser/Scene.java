@@ -1,5 +1,7 @@
 package raychaser;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
@@ -11,33 +13,34 @@ import javafx.scene.image.Image;
 // Directions are: x = forward, y = left, z = up
 
 public class Scene{
+  
   // IT IS OF GRAVE IMPORTANCE TO USE A CONTAINER WITH ASYNCHRONOUS ACCESS
   // SUCH AS ARRAYLIST<>. USING A SYNCHRONIZED CONTAINER LIKE VECTOR<>
   // CAUSES DEVASTATING THREAD BLOCKING!!!
-
-  //List containing all objects (Including emissive objects)
+  
+  //All objects (Including emissive)
   ArrayList<Object3D> object3DList = new ArrayList<Object3D>();
-  //List containing only emissive objects (light sources)
+  //Only emissive objects (light sources)
   ArrayList<Object3D> lightList = new ArrayList<Object3D>();
-  ArrayList<Image> textureList;
 
   //Construct Scene object (in-argument is a list of textures)
-  Scene(ArrayList<Image> t_List, double brightness){
-    textureList = t_List;
-    Image block_img = textureList.get(0);
-    Image wood_img = textureList.get(1);
-    Image gradient_img = textureList.get(2);
-    Image wallpaper_img = textureList.get(3);
-    Image test_img = textureList.get(4);
-    Image tile_img = textureList.get(5);
+  Scene(double brightness){
+    ArrayList<Image> textures = loadTextures();
+      
+    Image block_img = textures.get(0);
+    Image wood_img = textures.get(1);
+    Image gradient_img = textures.get(2);
+    Image wallpaper_img = textures.get(3);
+    Image test_img = textures.get(4);
+    Image tile_img = textures.get(5);
 
     //Textured materials
-    Material wood = new Textured(wood_img);
-    Material block = new Textured(block_img);
-    Material gradient = new Textured(gradient_img);
-    Material wallpaper = new Textured(wallpaper_img);
-    Material test = new Textured(test_img);
-    Material tile = new Textured(tile_img);
+    Textured wood = new Textured(wood_img);
+    Textured block = new Textured(block_img);
+    Textured gradient = new Textured(gradient_img);
+    Textured wallpaper = new Textured(wallpaper_img);
+    Textured test = new Textured(test_img);
+    Textured tile = new Textured(tile_img);
 
     //Colors
     ColorDbl white = new ColorDbl(0.95,0.95,0.95);
@@ -52,33 +55,33 @@ public class Scene{
     ColorDbl mirror = new ColorDbl(0.95,0.99,0.95);
 
     //Diffuse materials
-    Material diffuseWhite = new Diffuse(white);
-    Material diffuseRed = new Diffuse(red);
-    Material diffuseGreen = new Diffuse(green);
-    Material diffuseBlue = new Diffuse(blue);
-    Material diffuseYellow = new Diffuse(yellow);
-    Material diffuseCyan = new Diffuse(cyan);
-    Material diffuseMagenta = new Diffuse(magenta);
+    Diffuse diffuseWhite = new Diffuse(white);
+    Diffuse diffuseRed = new Diffuse(red);
+    Diffuse diffuseGreen = new Diffuse(green);
+    Diffuse diffuseBlue = new Diffuse(blue);
+    Diffuse diffuseYellow = new Diffuse(yellow);
+    Diffuse diffuseCyan = new Diffuse(cyan);
+    Diffuse diffuseMagenta = new Diffuse(magenta);
     
     //Reflective materials
-    Material reflectiveBright = new Reflective(bright);
-    Material reflectiveMirror = new Reflective(mirror);
+    Reflective reflectiveBright = new Reflective(bright);
+    Reflective reflectiveMirror = new Reflective(mirror);
 
     //Glossy materials
-    Material glossyWhite = new Glossy(white, 0.05, 0.1);
-    Material glossyBlue = new Glossy(blue, 0.05, 0.0);
-    Material glossyBlue2 = new Glossy(blue, 0.05, 0.25);
-    Material glossyBlue3 = new Glossy(blue, 0.05, 0.5);
-    Material glossyYellow = new Glossy(yellow, 0.1, 0.4);
-    Material glossyRed = new Glossy(red, 0.05, 0.5);
+    Glossy glossyWhite = new Glossy(white, 0.05, 0.1);
+    Glossy glossyBlue = new Glossy(blue, 0.05, 0.0);
+    Glossy glossyBlue2 = new Glossy(blue, 0.05, 0.25);
+    Glossy glossyBlue3 = new Glossy(blue, 0.05, 0.5);
+    Glossy glossyYellow = new Glossy(yellow, 0.1, 0.4);
+    Glossy glossyRed = new Glossy(red, 0.05, 0.5);
 
     //Refractive materials
-    Material refractiveGlassCyan = new Refractive(cyan, 1.5);
-    Material refractiveGlass = new Refractive(bright, 1.5);
-    Material refractiveWater = new Refractive(bright, 1.3);
+    Refractive refractiveGlassCyan = new Refractive(cyan, 1.5);
+    Refractive refractiveGlass = new Refractive(bright, 1.5);
+    Refractive refractiveWater = new Refractive(bright, 1.3);
     
     //Emmissive materials
-    Material emissive = new Emissive(new ColorDbl(1.0, 1.0, 1.0), brightness);
+    Emissive emissive = new Emissive(new ColorDbl(1.0, 1.0, 1.0), brightness);
 
     //Vertex points, corners of the room
     double depth = 12.0;
@@ -155,8 +158,8 @@ public class Scene{
     //   emissive));
     // addObject(new Sphere(new Vector3d(6.5, 1.1, -4.0), 1.0, refractiveGlass));
   }
-
-  //Add object to the lists
+  
+  // Add object to the lists
   private void addObject(Object3D o){
     //Add all objects to "object3DList"
     object3DList.add(o);
@@ -175,7 +178,7 @@ public class Scene{
     Vector3d BBR = util.add(origin,new Vector3d(depth/2,-width/2,-height/2));
     Vector3d BTL = util.add(origin,new Vector3d(depth/2,width/2,height/2));
     Vector3d BTR = util.add(origin,new Vector3d(depth/2,-width/2,height/2));
-
+    
     addObject(new Plane(FTL,FBL,FBR,FTR,m)); //Front
     addObject(new Plane(BTR,BBR,BBL,BTL,m)); //Back
     addObject(new Plane(BTL,FTL,FTR,BTR,m)); //Top
@@ -184,4 +187,21 @@ public class Scene{
     addObject(new Plane(FTR,FBR,BBR,BTR,m)); //Right
   }
 
+  private ArrayList<Image> loadTextures() {
+    ArrayList<Image> textures = new ArrayList<>();
+    try {
+      textures.add(new Image(new FileInputStream("texture/block.png")));
+      textures.add(new Image(new FileInputStream("texture/wood.jpg")));
+      textures.add(new Image(new FileInputStream("texture/gradient.png")));
+      textures.add(new Image(new FileInputStream("texture/wallpaper3k.png")));
+      textures.add(new Image(new FileInputStream("texture/test.png")));
+      textures.add(new Image(new FileInputStream("texture/tile.jpg")));
+    }
+    catch(FileNotFoundException e){
+      System.out.println("Textures not found in folder \"texture/\"");
+      e.printStackTrace();
+    }
+    return textures;
+  }
+  
 }//Scene ends
