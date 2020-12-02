@@ -1,6 +1,6 @@
 package raychaser;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
@@ -11,14 +11,18 @@ import javafx.scene.image.Image;
 // Directions are: x = forward, y = left, z = up
 
 public class Scene{
+  // IT IS OF GRAVE IMPORTANCE TO USE A CONTAINER WITH ASYNCHRONOUS ACCESS
+  // SUCH AS ARRAYLIST<>. USING A SYNCHRONIZED CONTAINER LIKE VECTOR<>
+  // CAUSES DEVASTATING THREAD BLOCKING!!!
+
   //List containing all objects (Including emissive objects)
-  Vector<Object3D> object3DList = new Vector<Object3D>();
+  ArrayList<Object3D> object3DList = new ArrayList<Object3D>();
   //List containing only emissive objects (light sources)
-  Vector<Object3D> lightList = new Vector<Object3D>();
-  Vector<Image> textureList;
+  ArrayList<Object3D> lightList = new ArrayList<Object3D>();
+  ArrayList<Image> textureList;
 
   //Construct Scene object (in-argument is a list of textures)
-  Scene(Vector<Image> t_List, double brightness){
+  Scene(ArrayList<Image> t_List, double brightness){
     textureList = t_List;
     Image block_img = textureList.get(0);
     Image wood_img = textureList.get(1);
@@ -153,7 +157,7 @@ public class Scene{
   }
 
   //Add object to the lists
-  void addObject(Object3D o){
+  private void addObject(Object3D o){
     //Add all objects to "object3DList"
     object3DList.add(o);
     //Additionally, if the object is a light source (emissive), add it to "lightList".
@@ -162,7 +166,7 @@ public class Scene{
     }
   }
   //Add box to the scene
-  void addBox(Vector3d origin, double width, double height, double depth, Material m){
+  private void addBox(Vector3d origin, double width, double height, double depth, Material m){
     Vector3d FBL = util.add(origin,new Vector3d(-depth/2,width/2,-height/2));
     Vector3d FBR = util.add(origin,new Vector3d(-depth/2,-width/2,-height/2));
     Vector3d FTL = util.add(origin,new Vector3d(-depth/2,width/2,height/2));

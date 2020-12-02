@@ -8,8 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -406,8 +406,8 @@ public class JFX extends Application {
           stage.setY(event.getScreenY() - yOffset);
         }
       });
-      
-      //Begin refreshing the window
+
+//Begin refreshing the window
       updateWindow.start();
       
       //Set the new scene
@@ -420,8 +420,10 @@ public class JFX extends Application {
       //Start measuring render time
       startTime = System.nanoTime();
       
-      //Load texture images into Vector<Image>
-      Vector<Image> textures = new Vector<>();
+      //Load textures
+      //It is of great importance not to use Vector<> since Vector<> is
+      // synchronized, which in this case would cause MAJOR thread blocking
+      ArrayList<Image> textures = new ArrayList<>();
       try {
         textures.add(new Image(new FileInputStream("texture/block.png")));
         textures.add(new Image(new FileInputStream("texture/wood.jpg")));
@@ -436,16 +438,11 @@ public class JFX extends Application {
       }
       
       //Create and submit all tasks to Executor
+      final Scene scene = new Scene(textures, camera.Brightness);
       executor = Executors.newFixedThreadPool(camera.THREADS);
       for(int y=0; y<(camera.Height/range + 1); ++y){
         for(int x=0; x<(camera.Width/range + 1); ++x){
-          //Important to create a thread local scene for each task, otherwise each RenderTask
-          //has to wait for parallell threads to stop accessing that scene.
-          //This causes blocking and makes multithreading much slower
-          final Scene scene = new Scene(textures, camera.Brightness);
-          final int X = x;
-          final int Y = y;
-          RenderTask task = new RenderTask(scene, camera, X*range, Y*range, range, progress);
+          RenderTask task = new RenderTask(scene, camera, x*range, y*range, range, progress);
           executor.execute(task);
         }
       }
