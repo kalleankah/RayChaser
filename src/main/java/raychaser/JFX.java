@@ -439,7 +439,7 @@ public class JFX extends Application {
       executor = Executors.newFixedThreadPool(camera.THREADS);
       for(int y=0; y<(camera.Height/range + 1); ++y){
         for(int x=0; x<(camera.Width/range + 1); ++x){
-          //Important to create new scene for each task, otherwise each RenderTask
+          //Important to create a thread local scene for each task, otherwise each RenderTask
           //has to wait for parallell threads to stop accessing that scene.
           //This causes blocking and makes multithreading much slower
           final Scene scene = new Scene(textures, camera.Brightness);

@@ -1,6 +1,6 @@
 package raychaser;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.vecmath.Vector3d;
 
@@ -64,7 +64,7 @@ public class Triangle extends Object3D{
   //Sample the trinagle uniformly for shadow rays to be cast
   @Override
   Vector3d SampleEmitter(Vector3d rayOrigin){
-    Random R = new Random();
+    ThreadLocalRandom R = ThreadLocalRandom.current();
     Vector3d temp;
     temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
     temp = util.add(temp, util.scale(util.sub(vertex2, temp), R.nextDouble()));

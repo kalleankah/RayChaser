@@ -1,6 +1,7 @@
 package raychaser;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 import javax.vecmath.*;
 
 //The Utilities class holds multiple useful static functions. Many of these
@@ -85,27 +86,27 @@ public class util{
   //Russian roulette, used to terminate rays with increasing risk based on the
   //amount of bounces (the depth).
   static Boolean RussianBulletSurvivor(double d){
-    Random r = new Random();
+    ThreadLocalRandom R = ThreadLocalRandom.current();
     // Returns true if ray survives
-    return r.nextDouble() < d;
+    return R.nextDouble() < d;
   }
 
   //random vector inside unit sphere using rejection sampling
   public static Vector3d random_unit_vec(double radius){
-    Random r = new Random();
+    ThreadLocalRandom R = ThreadLocalRandom.current();
     Vector3d v;
     do{
-      v = new Vector3d(r.nextDouble()*2.0*radius-radius, r.nextDouble()*2.0*radius-radius, r.nextDouble()*2.0*radius-radius);
+      v = new Vector3d(R.nextDouble()*2.0*radius-radius, R.nextDouble()*2.0*radius-radius, R.nextDouble()*2.0*radius-radius);
     }while(v.x*v.x+v.y*v.y+v.z*v.z >= radius);
     return v;
   }
 
   //Sample hemisphere uniformly using cosine weighted hemisphere sampling
   public static Vector3d sampleHemisphere(){
-    Random random = new Random();
-    double u = random.nextDouble();
+    ThreadLocalRandom R = ThreadLocalRandom.current();
+    double u = R.nextDouble();
     double sintheta = Math.sqrt(-u*(u-2));
-    double phi = random.nextDouble() * 2 * Math.PI;
+    double phi = R.nextDouble() * 2 * Math.PI;
     double x = sintheta * Math.cos(phi);
     double y = sintheta * Math.sin(phi);
     return new Vector3d(x, y, Math.sqrt(1-x*x-y*y));
@@ -153,13 +154,13 @@ public class util{
   // }
 
   static void progressiveTest(int n){
-    Random rand = new Random();
+    ThreadLocalRandom R = ThreadLocalRandom.current();
     double average = 0;
     double progressiveAverage = 0;
 
     double sample;
     for(int i = 1; i<=n; ++i){
-      sample = rand.nextDouble();
+      sample = R.nextDouble();
       average += sample/n;
       progressiveAverage = ((i-1)*progressiveAverage)/i + sample/i;
     }

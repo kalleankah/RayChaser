@@ -102,9 +102,9 @@ public class ColorDbl{
 
   //Format color data to RGB
   int ARGBForImage(){
-    int r = (int)(R*255);
-    int g =(int)( G*255);
-    int b = (int)(B*255);
+    int r = (int)(R*255.999);
+    int g = (int)(G*255.999);
+    int b = (int)(B*255.999);
     int a = 255;
     return (((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff));
   }

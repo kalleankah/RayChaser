@@ -1,6 +1,6 @@
 package raychaser;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.vecmath.Matrix3d;
@@ -15,7 +15,7 @@ public class RenderTask extends Task<Void> {
   int startY;
   int range;
   AtomicInteger progress;
-  Random globalRandom = new Random();
+  ThreadLocalRandom R;
 
   RenderTask(Scene s, Camera c, int sx, int sy, int r, AtomicInteger p){
     scene = s;
@@ -24,6 +24,7 @@ public class RenderTask extends Task<Void> {
     startY = sy;
     range = r;
     progress = p;
+    R = ThreadLocalRandom.current();
   }
 
   @Override
@@ -50,7 +51,7 @@ public class RenderTask extends Task<Void> {
           temp.sumColor(
             Trace(
               new Ray(camera.eye,
-                util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x + globalRandom.nextDouble())*PixelSize, eye_z - (y + globalRandom.nextDouble())*PixelSize), camera.eye) 
+                util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x + R.nextDouble())*PixelSize, eye_z - (y + R.nextDouble())*PixelSize), camera.eye) 
           )));
         }
         temp.multiply(subPixelFactor);
@@ -102,7 +103,7 @@ public class RenderTask extends Task<Void> {
         attenuation.multiply(HitObject.mat.getColor());
       }
 
-      // Perform russian roulette more on paths like to contribute less
+      // Perform russian roulette more on paths likely to contribute less
       double probability = Math.min(1.0, attenuation.getMaxIntensity());
       if(util.RussianBulletSurvivor(probability)){
         // Compensate for the other rays that are terminated
@@ -164,7 +165,7 @@ public class RenderTask extends Task<Void> {
       }
       
       // The total reflectivity represents a statistical probability that a ray is reflected rather than refracted
-      if(globalRandom.nextDouble() > probabilityOfReflection){
+      if(R.nextDouble() > probabilityOfReflection){
         // The ray is refracted
         Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(correctedNormal, n*costheta-Math.sqrt(c2)));
         // The ray is slightly pushed behind the surface to prevent self intersection
@@ -189,7 +190,7 @@ public class RenderTask extends Task<Void> {
 
       //If the ray hits a glossy object (BRDF)
       if(HitObject.mat instanceof Glossy && Bounce < camera.MAX_DEPTH){
-        if(globalRandom.nextDouble() > HitObject.mat.getDiffuseFac()){
+        if(R.nextDouble() > HitObject.mat.getDiffuseFac()){
           //Calculate reflection, add roughness
           //Some samples could be > 180 deg but this is ignored for this case
           Vector3d reflection = reflect(r.direction, r.surfaceNormal);

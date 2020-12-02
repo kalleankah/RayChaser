@@ -1,6 +1,6 @@
 package raychaser;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.vecmath.Vector3d;
 
@@ -77,6 +77,7 @@ public class Sphere extends Object3D {
   //Sample sphere emitter surface uniformly
   @Override
   Vector3d SampleEmitter(Vector3d rayOrigin){
+    ThreadLocalRandom R = ThreadLocalRandom.current();
     
     //Create  vector from ray origin to the center of the light
     Vector3d fromCenter = util.sub(rayOrigin, center);
@@ -88,11 +89,10 @@ public class Sphere extends Object3D {
     // System.out.println("Orthovec1 dot: " + util.dot(fromCenter, orthovec1));
     // System.out.println("Orthovec2 dot: " + util.dot(fromCenter, orthovec2));
 
-    Random rand = new Random();
     double d1,d2,generatedRadius;
     do{
-      d1 = (-1 + 2 * rand.nextDouble()) * radius;
-      d2 = (-1 + 2 * rand.nextDouble()) * radius;
+      d1 = (-1 + 2 * R.nextDouble()) * radius;
+      d2 = (-1 + 2 * R.nextDouble()) * radius;
       generatedRadius = Math.sqrt(d1*d1+d2*d2);
     }
     //Reject samples on the square, outside the disk
