@@ -8,10 +8,6 @@ import javax.vecmath.*;
 //functions work like operators for vectors and matrices.
 
 public class util{
-  //Dot product
-  static double dot(Vector3d a, Vector3d b){
-    return (a.x*b.x + a.y*b.y + a.z*b.z);
-  }
   //Cross product
   static Vector3d cross(Vector3d vec1, Vector3d vec2){
     Vector3d copy = new Vector3d();
@@ -42,14 +38,6 @@ public class util{
       vec1.z + vec2.z + vec3.z);
     return copy;
   }
-  // Add double to vector
-  static Vector3d add(Vector3d vec1, double d){
-    Vector3d copy = new Vector3d(vec1);
-    copy.x += d;
-    copy.y += d;
-    copy.z += d;
-    return copy;
-  }
   //Subtract a vector from a vector
   static Vector3d sub(Vector3d vec1, Vector3d vec2){
     Vector3d copy = new Vector3d(vec1);
@@ -57,10 +45,6 @@ public class util{
     copy.y -= vec2.y;
     copy.z -= vec2.z;
     return copy;
-  }
-  // Calculate norm of a vector
-  static double norm(Vector3d vec){
-    return Math.sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
   }
   // Normalize vector
   static Vector3d normalize(Vector3d vec){
@@ -144,32 +128,5 @@ public class util{
   //Print vector vertices
   static void print(Vector3d v){
     System.out.println("("+v.x+","+v.y+","+v.z+")");
-  }
-
-  // Check if string is numeric
-  // static Boolean isNumeric(String s){
-  //   try{Integer.parseInt(s);}
-  //   catch(NumberFormatException nfe){return false;}
-  //   return true;
-  // }
-
-  static void progressiveTest(int n){
-    ThreadLocalRandom R = ThreadLocalRandom.current();
-    double average = 0;
-    double progressiveAverage = 0;
-
-    double sample;
-    for(int i = 1; i<=n; ++i){
-      sample = R.nextDouble();
-      average += sample/n;
-      progressiveAverage = ((i-1)*progressiveAverage)/i + sample/i;
-    }
-
-    System.out.println("Real average = " + average);
-    System.out.println("Progressive average = " + progressiveAverage);
-  }
-
-  public static void main(String[] args) {
-    progressiveTest(10);
   }
 }

@@ -85,9 +85,7 @@ public class Sphere extends Object3D {
 
     //Create normalized vectors spanning a unit square plane orthogonal to "fromCenter"
     Vector3d orthovec1 = util.findOrthogonalVector(fromCenter);
-    Vector3d orthovec2 = util.normalize(util.cross(fromCenter, orthovec1));
-    // System.out.println("Orthovec1 dot: " + util.dot(fromCenter, orthovec1));
-    // System.out.println("Orthovec2 dot: " + util.dot(fromCenter, orthovec2));
+    Vector3d orthovec2 = util.cross(fromCenter, orthovec1);
 
     double d1,d2,generatedRadius;
     do{
@@ -102,11 +100,8 @@ public class Sphere extends Object3D {
     double height = radius * Math.sqrt(Math.sin(Math.PI/2 * (1 - generatedRadius/radius) ));
     Vector3d toSphereSurface = util.add(util.scale(orthovec1, d1), util.scale(orthovec2, d2), util.scale(fromCenter, height));
     //Ensure the point is not inside the sphere
-    double epsilon = 0.001;
-    toSphereSurface = util.scale(toSphereSurface, (radius+epsilon)/util.norm(toSphereSurface));
+    toSphereSurface.scale((radius+0.001)/toSphereSurface.length());
     Vector3d pointOnSphere = util.add(center, toSphereSurface);
-
-    // util.print(pointOnSphere);
 
     return pointOnSphere;
   }

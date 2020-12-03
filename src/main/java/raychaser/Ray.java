@@ -20,7 +20,9 @@ public class Ray{
 
   //Calculate intersection point by traversing the intersection distance t
   void calculateSurfacePoint(double t){
-    surfacePoint = util.add(util.scale(direction, t), start);
+    // surfacePoint = util.add(util.scale(direction, t), start);
+    surfacePoint = new Vector3d(direction);
+    surfacePoint.scaleAdd(t, start);
   }
 
   //Print information about the ray

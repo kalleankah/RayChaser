@@ -20,7 +20,8 @@ public class Plane extends Object3D{
     vertex3 = v3;
     edge1 = util.sub(vertex1,vertex0);
     edge2 = util.sub(vertex2,vertex1);
-    normal = util.normalize(util.cross(edge1, edge2));
+    normal = util.cross(edge1, edge2);
+    normal.normalize();
   }
   //Constructor from 3 corners
   Plane(Vector3d v0, Vector3d v1, Vector3d v2, Material m){
@@ -31,7 +32,8 @@ public class Plane extends Object3D{
     edge1 = util.sub(vertex1,vertex0);
     edge2 = util.sub(vertex2,vertex1);
     vertex3 = util.add(v0, edge2);
-    normal = util.normalize(util.cross(edge1, edge2));
+    normal = util.cross(edge1, edge2);
+    normal.normalize();
   }
 
   //Intersection between ray and plane
@@ -39,19 +41,27 @@ public class Plane extends Object3D{
   double rayIntersection(Ray r){
     // Calculate the distance to the intersection point on the infinite plane
     Vector3d dP = util.sub(vertex0, r.start);
-    double t = util.dot(dP, normal)/util.dot(r.direction, normal);
+    // double t = util.dot(dP, normal)/util.dot(r.direction, normal);
+    double t = dP.dot(normal)/r.direction.dot(normal);
 
     // M = the intersection point on the surface of the infinite plane
-    Vector3d M = util.add(r.start, util.scale(r.direction,t));
+    // Vector3d M = util.add(r.start, util.scale(r.direction,t));
+    Vector3d M = new Vector3d(r.direction);
+    M.scaleAdd(t, r.start);
 
     // Check if the point M is within the limited plane
-    Vector3d dMV0 = util.sub(M,vertex0);
-    double u = util.dot(dMV0, edge1);
-    double v = util.dot(dMV0, edge2);
+    // Vector3d dMV0 = util.sub(M,vertex0);
+    // double u = util.dot(dMV0, edge1);
+    // double v = util.dot(dMV0, edge2);
+
+    // Check if the point M is within the limited plane
+    M.sub(vertex0);
+    double u = M.dot(edge1);
+    double v = M.dot(edge2);
 
     // Margins 0.00001 prevent rays from going between adjacent planes
-    if(u >= -0.001 && u <= util.dot(edge1,edge1) + 0.001
-    && v >= -0.001 && v <= util.dot(edge2,edge2) + 0.001){
+    if(u >= -0.001 && u <= edge1.dot(edge1) + 0.001
+    && v >= -0.001 && v <= edge2.dot(edge2) + 0.001){
       return t;
     }
     return Double.POSITIVE_INFINITY;
@@ -71,11 +81,18 @@ public class Plane extends Object3D{
   @Override
   Vector3d SampleEmitter(Vector3d rayOrigin){
     ThreadLocalRandom R = ThreadLocalRandom.current();
-    Vector3d temp;
+    
     //Distribute points equally all over the plane
-    temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
-    temp = util.add(temp, util.scale(edge2, R.nextDouble()));
-    return temp;
+    // Vector3d temp = new Vector3d();
+    // temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
+    // temp = util.add(temp, util.scale(edge2, R.nextDouble()));
+    
+    Vector3d temp1 = new Vector3d(edge1);
+    temp1.scaleAdd(R.nextDouble(), vertex0);
+    Vector3d temp2 = new Vector3d(edge2);
+    temp2.scaleAdd(R.nextDouble(), temp1);
+    
+    return temp2;
   }
   //Returns edge i of the plane (used for calculating texture coordinates)
   @Override

@@ -36,17 +36,17 @@ public class Triangle extends Object3D{
     Vector3d Q = util.cross(T,edge1);
     Vector3d P = util.cross(r.direction,edge2);
 
-    double QE1 = util.dot(Q, edge2);
-    double PE1 = util.dot(P, edge1);
-    double PT = util.dot(P, T);
-    double QD = util.dot(Q, r.direction);
+    double QE1 = Q.dot(edge2);
+    double PE1 = P.dot(edge1);
+    double PT = P.dot(T);
+    double QD = Q.dot(r.direction);
     double t = QE1/PE1;
 
     double u = PT/PE1;
     double v = QD/PE1;
 
     //Using margins to prevent rays from going between adjacent triangles
-    if(u < -0.001 || v < -0.001|| u+v > 1.001){
+    if(u < -0.001 || v < -0.001 || u+v > 1.001){
       t = Double.POSITIVE_INFINITY;
     }
     //Return distance to intersection, t.
@@ -65,9 +65,15 @@ public class Triangle extends Object3D{
   @Override
   Vector3d SampleEmitter(Vector3d rayOrigin){
     ThreadLocalRandom R = ThreadLocalRandom.current();
-    Vector3d temp;
-    temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
-    temp = util.add(temp, util.scale(util.sub(vertex2, temp), R.nextDouble()));
-    return temp;
+    // temp1 = vertex0 + edge1*Rand
+    // temp2 = temp1 + (vertex2-temp1)*Rand
+    // Vector3d temp = util.add(vertex0, util.scale(edge1, R.nextDouble()));
+    // temp = util.add(temp, util.scale(util.sub(vertex2, temp), R.nextDouble()));
+    
+    Vector3d temp1 = new Vector3d();
+    temp1.scaleAdd(R.nextDouble(), edge1, vertex0);
+    Vector3d temp2 = new Vector3d();
+    temp2.scaleAdd(R.nextDouble(), util.sub(vertex2, temp1), temp1);
+    return temp2;
   }
 }

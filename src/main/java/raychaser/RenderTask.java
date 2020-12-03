@@ -87,9 +87,10 @@ public class RenderTask extends Task<Void> {
         //Determine texture coordinates
         Vector3d diagonal = util.sub(r.surfacePoint,HitObject.getVertex(0));
         //The u-coordinate is the length of the diagonal along edge 2 compared to the length of edge 2
-        double u = util.dot(diagonal,util.normalize(HitObject.getEdge(2)))/util.norm(HitObject.getEdge(2));
+        // double u = util.dot(diagonal,util.normalize(HitObject.getEdge(2)))/util.norm(HitObject.getEdge(2));
+        double u = diagonal.dot(util.normalize(HitObject.getEdge(2)))/HitObject.getEdge(2).length();
         //The v-coordinate is the length of the diagonal along edge 1 compared to the length of edge 1
-        double v = util.dot(diagonal,util.normalize(HitObject.getEdge(1)))/util.norm(HitObject.getEdge(1));
+        double v = diagonal.dot(util.normalize(HitObject.getEdge(1)))/HitObject.getEdge(1).length();
 
         //Clamp uv coordinates
         u = Math.max(0.0,Math.min(1.0,u));
@@ -117,7 +118,7 @@ public class RenderTask extends Task<Void> {
       //If the ray hits an emitter(BRDF)
       if(HitObject.mat instanceof Emissive){
         //If it hits front side of light source
-        if(util.dot(HitObject.CalculateNormal(r.surfacePoint),r.direction) < 0){
+        if(r.direction.dot(HitObject.CalculateNormal(r.surfacePoint)) < 0){
           clr.sumColor(ColorDbl.multiply(attenuation, HitObject.mat.getBrightness()));
         }
         //Tracing ends at light source
@@ -134,7 +135,7 @@ public class RenderTask extends Task<Void> {
       //Whether the object is intersected from the outside or inside
       // determines the order of the refraction indices.
       double n1, n2;
-      double costheta = Math.min(1.0, util.dot(r.direction, r.surfaceNormal));
+      double costheta = Math.min(1.0, r.direction.dot(r.surfaceNormal));
       Vector3d correctedNormal = r.surfaceNormal;
       if(costheta < 0.0){
         //Hitting the outside of the refractive object
@@ -167,14 +168,21 @@ public class RenderTask extends Task<Void> {
       // The total reflectivity represents a statistical probability that a ray is reflected rather than refracted
       if(R.nextDouble() > probabilityOfReflection){
         // The ray is refracted
-        Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(correctedNormal, n*costheta-Math.sqrt(c2)));
-        // The ray is slightly pushed behind the surface to prevent self intersection
-        Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, -0.001));
+        // Vector3d newDir = util.add(util.scale(r.direction, n), util.scale(correctedNormal, n*costheta-Math.sqrt(c2)));
+        Vector3d newDir = util.scale(r.direction, n);
+        newDir.scaleAdd(n*costheta-Math.sqrt(c2), correctedNormal, newDir);
         
+        // The ray is slightly pushed behind the surface to prevent self intersection
+        // Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, -0.001));
+        Vector3d correctedRayOrigin = new Vector3d();
+        correctedRayOrigin.scaleAdd(-0.001, correctedNormal, r.surfacePoint);
+
         r = new Ray(correctedRayOrigin, newDir);
       }else{
         // The ray is slightly pushed out to prevent self intersection
-        Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, 0.001));
+        // Vector3d correctedRayOrigin = util.add(r.surfacePoint, util.scale(correctedNormal, 0.001));
+        Vector3d correctedRayOrigin = new Vector3d();
+        correctedRayOrigin.scaleAdd(0.001, correctedNormal, r.surfacePoint);
         
         Vector3d newDir = reflect(r.direction, correctedNormal);
         r = new Ray(correctedRayOrigin, newDir);
@@ -207,7 +215,11 @@ public class RenderTask extends Task<Void> {
   } //CastRay()
 
   Vector3d reflect(Vector3d direction, Vector3d normal) {
-    return util.sub(direction, util.scale(normal, 2*util.dot(direction,normal)));
+    Vector3d temp = new Vector3d(normal);
+    temp.scale(2*direction.dot(normal));
+    temp.sub(direction, temp);
+    // return util.sub(direction, util.scale(normal, 2*direction.dot(normal)));
+    return temp;
   }
 
   // Calculate where the ray intersects the scene (if it does)
@@ -258,10 +270,10 @@ public class RenderTask extends Task<Void> {
 
   //If no object is hit, there is a procedural light box to light the scene
   ColorDbl SkyColor(Ray ray){
-    double b_sun = Math.max(0, util.dot(new Vector3d(1,-1,1), ray.direction));
+    double b_sun = Math.max(0, ray.direction.dot(new Vector3d(1,-1,1)));
     ColorDbl sun = new ColorDbl(1, 0.9, 0.6);
     sun.multiply(b_sun);
-    double b_sky = Math.max(0, util.dot(new Vector3d(0,0,1), ray.direction));
+    double b_sky = Math.max(0, ray.direction.dot(new Vector3d(0,0,1)));
     ColorDbl sky = new ColorDbl(1-(0.3*b_sky), 0.8, 0.5+(0.3*b_sky));
     return ColorDbl.avgCol(sun, sky);
   }
