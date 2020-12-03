@@ -67,14 +67,6 @@ public class util{
     return result;
   }
 
-  //Russian roulette, used to terminate rays with increasing risk based on the
-  //amount of bounces (the depth).
-  static Boolean RussianBulletSurvivor(double d){
-    ThreadLocalRandom R = ThreadLocalRandom.current();
-    // Returns true if ray survives
-    return R.nextDouble() < d;
-  }
-
   //random vector inside unit sphere using rejection sampling
   public static Vector3d random_unit_vec(double radius){
     ThreadLocalRandom R = ThreadLocalRandom.current();

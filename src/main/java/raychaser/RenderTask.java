@@ -106,7 +106,7 @@ public class RenderTask extends Task<Void> {
 
       // Perform russian roulette more on paths likely to contribute less
       double probability = Math.min(1.0, attenuation.getMaxIntensity());
-      if(util.RussianBulletSurvivor(probability)){
+      if(R.nextDouble() < probability){
         // Compensate for the other rays that are terminated
         attenuation.divide(probability);
       }
