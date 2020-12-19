@@ -329,6 +329,7 @@ public class JFX extends Application {
       public void handle(ActionEvent event){
         executor.shutdownNow();
         updateWindow.stop();
+        image = null;
         progress = new AtomicInteger(0);
         openConfigUI();
       }

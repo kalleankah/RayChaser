@@ -44,6 +44,7 @@ public class Scene{
 
     //Colors
     ColorDbl white = new ColorDbl(0.95,0.95,0.95);
+    ColorDbl gray = new ColorDbl(0.5,0.5,0.5);
     ColorDbl red = new ColorDbl(0.85,0.3,0.3);
     ColorDbl green = new ColorDbl(0.3,0.85,0.3);
     ColorDbl blue = new ColorDbl(0.3,0.3,0.85);
@@ -56,6 +57,7 @@ public class Scene{
 
     //Diffuse materials
     Diffuse diffuseWhite = new Diffuse(white);
+    Diffuse diffuseGray = new Diffuse(gray);
     Diffuse diffuseRed = new Diffuse(red);
     Diffuse diffuseGreen = new Diffuse(green);
     Diffuse diffuseBlue = new Diffuse(blue);
@@ -68,7 +70,7 @@ public class Scene{
     Reflective reflectiveMirror = new Reflective(mirror);
 
     //Glossy materials
-    Glossy glossyWhite = new Glossy(white, 0.05, 0.1);
+    Glossy glossyWhite = new Glossy(white, 0.05, 0.0);
     Glossy glossyBlue = new Glossy(blue, 0.05, 0.0);
     Glossy glossyBlue2 = new Glossy(blue, 0.05, 0.25);
     Glossy glossyBlue3 = new Glossy(blue, 0.05, 0.5);
@@ -124,7 +126,7 @@ public class Scene{
     // Spherical
     // addObject(new Sphere(new Vector3d(8.0, 0.0, 3.0), 0.5, emissive));
 
-    // --- Room ---
+    // // --- Room ---
     // Ceiling
     addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, diffuseWhite));
     // Floor
@@ -149,6 +151,29 @@ public class Scene{
     addObject(new Sphere(new Vector3d(7.2, 3.0, -4.5), 0.5, glossyBlue3));
     addObject(new Sphere(new Vector3d(8.3, 4.7, -4.5), 0.5, glossyWhite));
     addObject(new Triangle(new Vector3d(9,5,3),new Vector3d(9.7,5.9,-5),new Vector3d(11.9,0.25,-5), reflectiveMirror));
+
+    // Scene for comparison of BRDF sampling vs light source sampling
+    // // Ceiling
+    // addObject(new Plane(CeilingLeftNear, CeilingLeftFar, CeilingRightFar, CeilingRightNear, diffuseGray));
+    // // Floor
+    // addObject(new Plane(FloorLeftFar,FloorLeftNear,FloorRightNear,FloorRightFar, diffuseGray));
+    // // Left wall
+    // addObject(new Plane(CeilingLeftNear, FloorLeftNear, FloorLeftFar, CeilingLeftFar, diffuseGray));
+    // // Right wall
+    // addObject(new Plane(CeilingRightFar, FloorRightFar, FloorRightNear, CeilingRightNear, diffuseGray));
+    // // Far wall
+    // addObject(new Plane(CeilingLeftFar,FloorLeftFar,FloorRightFar,CeilingRightFar, diffuseGray));
+    // // Near wall
+    // addObject(new Plane(CeilingRightNear,FloorRightNear,FloorLeftNear,CeilingLeftNear, diffuseGray));
+    
+    // // Lamps
+    // addObject(new Sphere(new Vector3d(8, 3, 0), 0.05, emissive));
+    // addObject(new Sphere(new Vector3d(8, 1, 0), 0.25, emissive));
+    // addObject(new Sphere(new Vector3d(8, -1, 0), 0.5, emissive));
+    // addObject(new Sphere(new Vector3d(8, -3, 0), 0.75, emissive));
+
+    // // Glossy surfaces
+    // addObject(new Plane(new Vector3d(7.6, 4, -3), new Vector3d(6, 4, -3.9), new Vector3d(6, -4, -3.9), glossyWhite));
   }
   
   // Add object to the lists
@@ -160,6 +185,7 @@ public class Scene{
       lightList.add(o);
     }
   }
+
   //Add box to the scene
   private void addBox(Vector3d origin, double width, double height, double depth, Material m){
     Vector3d FBL = util.add(origin,new Vector3d(-depth/2,width/2,-height/2));

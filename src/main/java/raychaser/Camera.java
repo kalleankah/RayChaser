@@ -47,7 +47,7 @@ public class Camera {
   }
 
   public void setEye(double z){
-    eye = new Vector3d(-0.9, 0.0, z);
+    eye = new Vector3d(-0.5, 0.0, z);
   }
 
   public void setSamples(int s){

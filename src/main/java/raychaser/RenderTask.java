@@ -39,22 +39,52 @@ public class RenderTask extends Task<Void> {
     double eye_y = camera.eye.y + camera.shift_H + 1.0;
     double eye_z = camera.eye.z + camera.shift_V + 1.0;
 
+    // //Render the box [startX->endX, startY->endY]
+    // // The xy-loop is a loop over all pixels x*y
+    // for(int y = startY; y < endY; ++y){
+    //   for(int x = startX; x < endX; ++x){
+    //     temp.R = temp.G = temp.B = 0.0;
+    //     // Loop over all subpixels (samples) on each pixel
+    //     for(int i = 0; i<camera.samples; ++i){
+    //       // Positive Y in space is equal to negative X in the image plane
+    //       // Positive Z in space is equal to negative Y in the image plane
+    //       temp.sumColor(
+    //         Trace(
+    //           new Ray(camera.eye,
+    //             util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x + R.nextDouble())*PixelSize, eye_z - (y + R.nextDouble())*PixelSize), camera.eye) 
+    //       )));
+    //     }
+    //     temp.multiply(subPixelFactor);
+    //     //Correct gamma for display
+    //     // temp.gammaCorrection();
+    //     temp.clamp();
+    //     //Write color to the current pixel in the image
+    //     camera.image.getPixelWriter().setArgb(x,y,temp.ARGBForImage());
+    //   }
+      
+    //   //Increment the atomic integer to report progress from this thread
+    //   progress.incrementAndGet();
+    // }
+
+    // -------------- ORDERED GRID SAMPLING ---------------
     //Render the box [startX->endX, startY->endY]
     // The xy-loop is a loop over all pixels x*y
+    double subPixelFactorSquared = subPixelFactor*subPixelFactor;
+    double subPixelSize = PixelSize/camera.samples;
     for(int y = startY; y < endY; ++y){
       for(int x = startX; x < endX; ++x){
         temp.R = temp.G = temp.B = 0.0;
         // Loop over all subpixels (samples) on each pixel
         for(int i = 0; i<camera.samples; ++i){
-          // Positive Y in space is equal to negative X in the image plane
-          // Positive Z in space is equal to negative Y in the image plane
-          temp.sumColor(
-            Trace(
-              new Ray(camera.eye,
-                util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x + R.nextDouble())*PixelSize, eye_z - (y + R.nextDouble())*PixelSize), camera.eye) 
-          )));
+          for(int j = 0; j<camera.samples; ++j){
+            temp.sumColor(
+              Trace(
+                new Ray(camera.eye,
+                  util.sub(new Vector3d(cameraPlaneXaxis, eye_y - (x*PixelSize + i*subPixelSize), eye_z - (y*PixelSize + j*subPixelSize)), camera.eye) 
+            )));
+          }
         }
-        temp.multiply(subPixelFactor);
+        temp.multiply(subPixelFactorSquared);
         //Correct gamma for display
         // temp.gammaCorrection();
         temp.clamp();
@@ -78,7 +108,7 @@ public class RenderTask extends Task<Void> {
       //Determine which object is hit
       Object3D HitObject = intersect(r, Bounce);
       if(HitObject == null){
-        // clr.sumColor(ColorDbl.multiply(attenuation, SkyColor(r)));
+        clr.sumColor(ColorDbl.multiply(attenuation, SkyColor(r)));
         break;
       }
 
@@ -200,9 +230,13 @@ public class RenderTask extends Task<Void> {
       if(HitObject.mat instanceof Glossy && Bounce < camera.MAX_DEPTH){
         if(R.nextDouble() > HitObject.mat.getDiffuseFac()){
           //Calculate reflection, add roughness
-          //Some samples could be > 180 deg but this is ignored for this case
-          Vector3d reflection = reflect(r.direction, r.surfaceNormal);
-          reflection.add(util.random_unit_vec(HitObject.mat.getRoughness()));
+          //Some samples could be > 180 deg 
+          Vector3d reflection;
+          do{
+            reflection = reflect(r.direction, r.surfaceNormal);
+            reflection.add(util.random_unit_vec(HitObject.mat.getRoughness()));
+          }
+          while(util.vecFacing(r.surfaceNormal, reflection));
 
           r = new Ray(r.surfacePoint, reflection);
         }
